@@ -32,7 +32,6 @@ export function useCakeGame() {
                         changed = true;
                     } else if(!sensors.leds.every(val => val === false) && changed) {
                         changed = false;
-                        console.log([...final_cake, sensors.leds]);
                         setFinalCake([
                             ...final_cake, 
                             sensors.leds
