@@ -7,7 +7,7 @@ import threading
 app = Flask(__name__)
 CORS(app)  # Enable CORS
 
-states = ["initial", "preparacao", "escolha_minigame", "state3", "state4", "state5"]
+states = ["initial", "preparacao", "escolha_minigame", "mostra_bolo", "espera_jogada", "compara_jogada", "proxima_jogada"]
 minigames = ["cakegame", "clothesgame", "memorygame"]
 
 sensors = {
@@ -55,6 +55,8 @@ def handle_pygame_events():
                 sensors["state"] = states[4]
             elif event.key == pygame.K_y:
                 sensors["state"] = states[5]
+            elif event.key == pygame.K_u:
+                sensors["state"] = states[6]
     
 @app.route('/api/sensors')
 def get_sensors():
