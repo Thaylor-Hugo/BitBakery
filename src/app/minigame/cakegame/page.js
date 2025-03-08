@@ -1,14 +1,15 @@
 'use client'
 
 import { useCakeGame } from "../../../hooks/cakegame";
-import Canvas from "./canvas";
+import Canvas from "../../../components/canvas";
+import Header from "../../../components/basic";
 
 function Cobertura({color, dark_color}) {
     const draw = (ctx, frameCount) => {
         const startX = 0;        // Left starting position
         const startY = 0;        // Top position
         const baseHeight = ctx.canvas.height / 5;     // Base height before drips
-        const dripIntensity = 30;  // How far drips hang down
+        const dripIntensity = 100;  // How far drips hang down
         // Start at top-left
         ctx.moveTo(startX, startY);
         // Draw left side
@@ -52,7 +53,7 @@ function Cobertura({color, dark_color}) {
         
     }
     return (
-        <Canvas class="w-35 h-20" draw={draw} /> 
+        <Canvas class="w-30 h-10" draw={draw} /> 
     );
 }
 
@@ -65,7 +66,7 @@ function Massa({color}) {
         ctx.fill()
     }
     return (
-        <Canvas class="w-35 h-20" draw={draw} />
+        <Canvas class="w-30 h-10" draw={draw} />
     );
 }
 
@@ -104,11 +105,24 @@ export default function CakeGame() {
     const {final_cake, user_cake} = useCakeGame();
 
     return (
-        <div>
-            <h1>Cake MiniGame</h1>
-            <p>You choose the cake game!</p>
-            <CakePreview title="Gabarito" cake={final_cake} />
-            <CakePreview title="Entrada Usuario" cake={user_cake} />
+        <div class="h-screen flex flex-col">
+            <div class="bg-black">
+                <Header title="Cake MiniGame" />
+            </div>
+            <div class="bg-amber-600 h-1/4">
+
+            </div>
+            <div class="flex flex-grow">
+                <div class="bg-gray-200 w-1/5 flex items-end justify-center">
+                    <CakePreview title="Gabarito" cake={final_cake} />
+                </div>
+                <div class="bg-amber-400 flex-grow">
+                    <CakePreview title="Entrada Usuario" cake={user_cake} />
+                </div>
+            </div>
+            <div class="bg-amber-200 h-1/10">
+
+            </div>
         </div>
     );
 }
