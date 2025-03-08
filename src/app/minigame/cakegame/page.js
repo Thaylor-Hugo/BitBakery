@@ -1,42 +1,111 @@
 'use client'
 
 import { useCakeGame } from "../../../hooks/cakegame";
+import Canvas from "./canvas";
 
-function Camada({camada}) {
-    const colors = ["bg-red-900", "bg-green-900", "bg-blue-900", "bg-yellow-900", "bg-purple-900"];
+function Cobertura({color, dark_color}) {
+    const draw = (ctx, frameCount) => {
+        const startX = 0;        // Left starting position
+        const startY = 0;        // Top position
+        const baseHeight = ctx.canvas.height / 5;     // Base height before drips
+        const dripIntensity = 30;  // How far drips hang down
+        // Start at top-left
+        ctx.moveTo(startX, startY);
+        // Draw left side
+        ctx.lineTo(startX, startY + baseHeight);
+        // Create dripping bottom edge
+        let x = startX;
+        const segments = 5; // Number of drip points
+        
+        for(let i = 0; i <= segments; i++) {
+            const segmentWidth = ctx.canvas.width/segments;
+            const nextX = x + segmentWidth;
+            
+            // Randomize drip parameters
+            const dripHeight = baseHeight + Math.random() * dripIntensity;
+            const controlY = startY + dripHeight + 15;
+            const controlX = x + segmentWidth/2;
+            
+            // Create quadratic curve for drip
+            ctx.quadraticCurveTo(
+                controlX,  // Control point X
+                controlY,  // Control point Y (creates the drip)
+                nextX,     // End point X
+                startY + baseHeight + (Math.random() * 5) // End point Y
+            );
+            
+            x = nextX;
+        }
+        
+        // Close the path back to top-right
+        ctx.lineTo(startX + ctx.canvas.width, startY);
+        ctx.closePath();
+        
+        // Create gradient fill
+        const gradient = ctx.createLinearGradient(startX, startY, startX, startY + baseHeight + dripIntensity);
+        gradient.addColorStop(0, color); // Light color
+        gradient.addColorStop(1, dark_color); // Darker color
+        
+        // Draw shape
+        ctx.fillStyle = gradient;
+        ctx.fill();
+        
+    }
+    return (
+        <Canvas class="w-35 h-20" draw={draw} /> 
+    );
+}
+
+function Massa({color}) {
+    const draw = (ctx, frameCount) => {
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+        ctx.fillStyle = color
+        ctx.beginPath()
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+        ctx.fill()
+    }
+    return (
+        <Canvas class="w-35 h-20" draw={draw} />
+    );
+}
+
+function Camada({camada, cobertura}) {
+    const colors = ["Crimson", "HotPink", "OrangeRed", "Khaki", "SkyBlue"];
+    const dark_colors = ["FireBrick", "MediumVioletRed", "DarkOrange", "DarkKhaki", "DeepSkyBlue"];
     for (let i = 0; i < camada.length; i++) {
         if (camada[i] === true) {
-            return (
-                <div class={colors[i]}>
-                    <span class="text-1xl">True</span>
-                </div>
-            );
+            if (cobertura) {
+                return (
+                    <Cobertura color={colors[i]} dark_color={dark_colors[i]} />
+                );
+            } else {
+                return (
+                    <Massa color={colors[i]} />
+                );
+            }
         }
     }
 }
 
 function CakePreview( {title, cake} ) {
     return (
-        <div>
-            <h2 class="text-2xl">Cake {title}</h2>
-            <p>Here is your cake:</p>
-
-            <ul>
-                {cake ? cake.map((row, rowIndex) => (
-                    <li key={rowIndex}>
-                        <Camada camada={row} />
-                    </li>
-                )) : "No cake available"}
-            </ul>
+        <div class="relative">
+            {cake.slice().reverse().map((row, rowIndex) => (
+                // rowIndex + cake.length is used cause the cake is reversed and the first row (always Massa) is now the last one
+                <div key={rowIndex} class={(rowIndex + cake.length) % 2 === 0 ? "absolute z-2" : "relative z-1"}>
+                    <Camada camada={row} cobertura={(rowIndex + cake.length) % 2 === 0} />
+                </div>
+            ))}
         </div>
     );
 }
 
 export default function CakeGame() {
     const {final_cake, user_cake} = useCakeGame();
+
     return (
         <div>
-            <h1 class="text-9xl text-center">Cake MiniGame</h1>
+            <h1>Cake MiniGame</h1>
             <p>You choose the cake game!</p>
             <CakePreview title="Gabarito" cake={final_cake} />
             <CakePreview title="Entrada Usuario" cake={user_cake} />
