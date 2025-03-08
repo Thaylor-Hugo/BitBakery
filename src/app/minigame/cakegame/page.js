@@ -102,25 +102,29 @@ function CakePreview( {title, cake} ) {
 }
 
 export default function CakeGame() {
-    const {final_cake, user_cake} = useCakeGame();
+    const {final_cake, user_cake, jogada} = useCakeGame();
 
+    const possible_positions = ["left-5", "left-40", "left-75", "left-110", "left-145", "left-180", "left-215", "left-250", "left-285", "left-320", "left-355", "left-390", "left-425", "left-460", "left-495", "left-530"];
+    const user_cake_class = "absolute bottom-0 transition-position ".concat(possible_positions[jogada]);
     return (
         <div class="h-screen flex flex-col">
-            <div class="bg-black">
+            <div>
                 <Header title="Cake MiniGame" />
             </div>
             <div class="bg-amber-600 h-1/4">
 
             </div>
             <div class="flex flex-grow">
-                <div class="bg-gray-200 w-1/5 flex items-end justify-center">
+                <div class="bg-stone-400 w-1/8 flex items-end justify-center">
                     <CakePreview title="Gabarito" cake={final_cake} />
                 </div>
-                <div class="bg-amber-400 flex-grow">
-                    <CakePreview title="Entrada Usuario" cake={user_cake} />
+                <div class="bg-stone-500 relative w-full">
+                    <div class={user_cake_class}>
+                        <CakePreview title="Entrada Usuario" cake={user_cake} />
+                    </div>
                 </div>
             </div>
-            <div class="bg-amber-200 h-1/10">
+            <div class="bg-amber-200 h-1/8">
 
             </div>
         </div>

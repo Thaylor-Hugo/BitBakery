@@ -1,1 +1,5 @@
 @import "tailwindcss";
+
+.transition-position {
+    transition: left 0.5s ease-in-out;
+}
