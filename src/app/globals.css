@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
-.transition-position {
-    transition: left 0.5s ease-in-out;
+@keyframes fall {
+    0% {
+        top: var(--fall-start, -100px);
+    }
+    100% {
+        top: var(--fall-end, 0);
+    }
+}
+
+.fall-animation {
+    animation: fall 1s ease-in-out forwards;
 }

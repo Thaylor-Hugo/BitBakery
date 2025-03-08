@@ -77,7 +77,9 @@ function Camada({camada, cobertura}) {
         if (camada[i] === true) {
             if (cobertura) {
                 return (
-                    <Cobertura color={colors[i]} dark_color={dark_colors[i]} />
+                    <div class="absolute">
+                        <Cobertura color={colors[i]} dark_color={dark_colors[i]} />
+                    </div>
                 );
             } else {
                 return (
@@ -90,13 +92,20 @@ function Camada({camada, cobertura}) {
 
 function CakePreview( {title, cake} ) {
     return (
-        <div class="relative">
-            {cake.slice().reverse().map((row, rowIndex) => (
-                // rowIndex + cake.length is used cause the cake is reversed and the first row (always Massa) is now the last one
-                <div key={rowIndex} class={(rowIndex + cake.length) % 2 === 0 ? "absolute z-2" : "relative z-1"}>
-                    <Camada camada={row} cobertura={(rowIndex + cake.length) % 2 === 0} />
+        <div id="cake_div" class="relative h-full flex flex-col-reverse">
+            {cake.slice().map((row, rowIndex) => {
+                let camada_class = (rowIndex) % 2 !== 0 ? "relative z-2" : "relative z-1";
+                let fall_start = "";
+                var clientHeight = document.getElementById('cake_div').clientHeight;
+                if (rowIndex === cake.length - 1) {
+                    camada_class += " fall-animation";
+                    fall_start = "-" + (clientHeight - (rowIndex*20)) + "px";
+                    console.log(fall_start);
+                }
+                return <div key={rowIndex} class={camada_class} style={{"--fall-start": fall_start}}>
+                    <Camada camada={row} cobertura={(rowIndex) % 2 !== 0} />
                 </div>
-            ))}
+            })}
         </div>
     );
 }
@@ -105,14 +114,14 @@ export default function CakeGame() {
     const {final_cake, user_cake, jogada} = useCakeGame();
 
     const possible_positions = ["left-5", "left-40", "left-75", "left-110", "left-145", "left-180", "left-215", "left-250", "left-285", "left-320", "left-355", "left-390", "left-425", "left-460", "left-495", "left-530"];
-    const user_cake_class = "absolute bottom-0 transition-position ".concat(possible_positions[jogada]);
+    const user_cake_class = "h-full absolute bottom-0 left-0 transition-all duration-500 ease-in-out".concat(" ", possible_positions[jogada]);
     return (
         <div class="h-screen flex flex-col">
             <div>
                 <Header title="Cake MiniGame" />
             </div>
             <div class="bg-amber-600 h-1/4">
-
+            
             </div>
             <div class="flex flex-grow">
                 <div class="bg-stone-400 w-1/8 flex items-end justify-center">
