@@ -14,7 +14,8 @@ const useCanvas = draw => {
     const render = () => {
       frameCount++
       draw(context, frameCount)
-      animationFrameId = window.requestAnimationFrame(render)
+    // Temporary fix for bad performance
+    //   animationFrameId = window.requestAnimationFrame(render)
     }
     render()
     
