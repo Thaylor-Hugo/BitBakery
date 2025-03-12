@@ -3,18 +3,9 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 import pygame
 import threading
-
+from analog_service import analog_loop, sensors, states, minigames
 app = Flask(__name__)
 CORS(app)  # Enable CORS
-
-states = ["initial", "preparacao", "escolha_minigame", "state3", "state4", "state5"]
-minigames = ["cakegame", "clothesgame", "memorygame"]
-
-sensors = {
-    "state": "initial",
-    "minigame": "cakegame",
-    "leds": [False, False, False, False, False],
-}
 
 def pygame_loop():
     pygame.init()
@@ -55,15 +46,18 @@ def handle_pygame_events():
                 sensors["state"] = states[4]
             elif event.key == pygame.K_y:
                 sensors["state"] = states[5]
-    
+
 @app.route('/api/sensors')
 def get_sensors():
     return jsonify({"sensors": sensors})
 
 if __name__ == '__main__':
     # Mock sensors values
-    pygame_thread = threading.Thread(target=pygame_loop, daemon=True)
-    pygame_thread.start()
+    # pygame_thread = threading.Thread(target=pygame_loop, daemon=True)
+    # pygame_thread.start()
+
+    analog_thread = threading.Thread(target=analog_loop, daemon=True)
+    analog_thread.start()
 
     # Start Flask server
     app.run(port=5328)
