@@ -1,151 +1,145 @@
 //------------------------------------------------------------------
-// Arquivo   : circuito_exp5.v
-// Projeto   : Experiencia 5 - Projeto de um Sistema Digital 
+// Arquivo   : bitbakery.v
+// Projeto   : BitBakery
 //------------------------------------------------------------------
-// Descricao : Modulo principal da experiencia
-//             
+// Descricao : BitBakery Top Module
+//
 //------------------------------------------------------------------
 // Revisoes  :
-//     Data        Versao  Autor            Descricao
-//     18/01/2025  1.0     T5BB5            versao inicial
+//     Data        Versao  Autor             Descricao
+//     14/03/2025  1.0     T5BB5             versao inicial
 //------------------------------------------------------------------
 //
 
-module jogo_desafio_memoria (
+module bitbakery (
     input clock,
     input reset,
-    input jogar,
-	input chaveMemoria,
-	input botaoDificuldade,
-    input [1:0] chaveMinigame,
-    input [3:0] botoes,
-    output [3:0] leds,
-    output ganhou,
-    output perdeu,
-    output pronto,
-	output timeout,
-    output [6:0] db_contagem,
-    output [6:0] db_memoria,
-    output [6:0] db_estado,
-    output [6:0] db_jogadafeita,
-    output [6:0] db_limite,
-    output db_clock,
-    output db_igual,
-    output db_iniciar,
-    output db_tem_jogada,
-	output db_dificuldade,
-	output db_sel_memoria,
-    output [1:0] db_selMux
+    input iniciar,
+    input dificuldade,
+    input [1:0] minigame,
+    input [6:0] botoes,
+    output [1:0] minigame_out,
+    output [2:0] leds_out,
+    output [3:0] estado_out,
+    output [6:0] jogada_out,
+    output [6:0] pontuacao_out
 );
 
+parameter inicial = 2'b00;
+parameter preparacao = 2'b01;
+parameter execucao = 2'b10;
+parameter fim = 2'b11;
 
-wire [3:0] s_botoes, s_memoria, s_contagem, s_estado, s_limite;
-wire [1:0] s_selMux;
-wire s_fimE, s_fimL, s_botoes_igual_memoria,s_meioL, s_dificuldade, s_zeraE, s_zeraL, s_contaE, s_contaL;
-wire s_zeraR, s_registraR, s_jogada, s_timeout, s_contaT, s_endereco_igual_limite, s_endereco_menor_limite;
-wire s_zeraM, s_contaM, s_meioM, s_fimM, s_sel_memoria;
+wire s_pronto_0, s_pronto_1, s_pronto_2, s_pronto;
+wire [2:0] s_leds_0, s_leds_1, s_leds_2;
+wire [3:0] s_estado_0, s_estado_1, s_estado_2, s_estado_inicial;
+wire [6:0] s_jogada_0, s_jogada_1, s_jogada_2;
+wire [6:0] s_pontuacao_0, s_pontuacao_1, s_pontuacao_2;
 
-assign db_iniciar = jogar;
-assign db_clock = clock;
-assign db_igual = s_botoes_igual_memoria;
-assign db_dificuldade = s_dificuldade;
-assign db_selMux = s_selMux;
-assign db_sel_memoria = s_sel_memoria;
+reg [1:0] MiniGame, Eatual, Eprox;
+reg Dificuldade, s_iniciar;
 
-unidade_controle controlUnit (
-    .clock                  (clock),
-    .reset                  (reset),
-    .iniciar                (jogar),
-    .jogada                 (s_jogada),
-	.timeout                (s_timeout),
-    .botoesIgualMemoria     (s_botoes_igual_memoria),
-    .fimE                   (s_fimE),
-    .fimL                   (s_fimL),
-	.meioL					(s_meioL),
-    .enderecoIgualLimite    (s_endereco_igual_limite),
-    .enderecoMenorLimite    (s_endereco_menor_limite),
-    .zeraE                  (s_zeraE),
-    .contaE                 (s_contaE),
-    .zeraL                  (s_zeraL),
-    .contaL                 (s_contaL),
-    .zeraR                  (s_zeraR),
-    .registraR              (s_registraR),
-    .acertou                (ganhou),
-    .errou                  (perdeu),
-    .pronto                 (pronto),
-    .fim_timeout            (timeout),
-    .db_estado              (s_estado),
-	.contaT                 (s_contaT),
-	.db_dificuldade 			(s_dificuldade),
-    .chaveMinigame          (chaveMinigame),
-	.chaveDificuldade			(botaoDificuldade),
-    .seletor                (s_selMux),
-    .zeraM                  (s_zeraM),
-    .contaM                 (s_contaM),
-    .meioM                  (s_meioM),
-	 .chaveMemoria     		 (chaveMemoria),
-	 .seletorMemoria			 (s_sel_memoria),
-    .fimM                   (s_fimM)
+initial begin
+    MiniGame <= 2'b11;
+    Dificuldade <= 1'b0;
+    Eatual <= 2'b00;
+    Eprox <= 2'b00;
+end
+
+always @(posedge clock or posedge reset) begin
+    if (reset)
+        Eatual <= inicial;
+    else
+        Eatual <= Eprox;
+end
+
+// Máquina de estados
+always @* begin
+    case (Eatual)
+        inicial: Eprox = iniciar ? preparacao : inicial;
+        preparacao: Eprox = (MiniGame != 2'b11)? execucao : preparacao;
+        execucao: Eprox = s_pronto ? fim : execucao;
+        fim: Eprox = iniciar ? preparacao : fim; 
+        default: Eprox = inicial;
+    endcase
+end
+
+// Lógica de saída
+always @* begin
+    s_iniciar <= (Eatual == preparacao)? 1'b1 : 1'b0;
+    Dificuldade <= (Eatual == preparacao)? dificuldade : Dificuldade;
+    MiniGame <= (Eatual == preparacao)? minigame : MiniGame;
+end
+
+mux_out saidas (
+    .minigame       (MiniGame),
+    .leds_0         (s_leds_0),
+    .estado_0       (s_estado_0),
+    .jogada_0       (s_jogada_0),
+    .pronto_0       (s_pronto_0),
+    .pontuacao_0    (s_pontuacao_0),
+    .leds_1         (s_leds_1),
+    .estado_1       (s_estado_1),
+    .jogada_1       (s_jogada_1),
+    .pronto_1       (s_pronto_1),
+    .pontuacao_1    (s_pontuacao_1),
+    .leds_2         (s_leds_2),
+    .estado_2       (s_estado_2),
+    .jogada_2       (s_jogada_2),
+    .pronto_2       (s_pronto_2),
+    .pontuacao_2    (s_pontuacao_2),
+    .estado_inicial (s_estado_inicial),
+    .leds_out       (leds_out),
+    .estado_out     (estado_out),
+    .jogada_out     (jogada_out),
+    .pronto_out     (s_pronto),
+    .pontuacao_out  (pontuacao_out)
 );
 
-fluxo_dados fluxo_dados (
-    .clock                  (clock),
-    .zeraE                  (s_zeraE),
-    .contaE                 (s_contaE),
-    .zeraL                  (s_zeraL),
-    .contaL                 (s_contaL),
-    .zeraR                  (s_zeraR),
-    .registraR              (s_registraR),
-    .botoes                 (botoes),
-	 .selecionaMemoria		 (s_sel_memoria),
-	 .contaT                 (s_contaT),
-    .botoesIgualMemoria     (s_botoes_igual_memoria),
-    .fimE                   (s_fimE),
-    .fimL                   (s_fimL),
-	 .meioL 						 (s_meioL),
-    .endecoIgualLimite      (s_endereco_igual_limite),
-    .endecoMenorLimite      (s_endereco_menor_limite),
-    .jogada_feita           (s_jogada),
-    .db_tem_jogada          (db_tem_jogada),
-    .db_limite              (s_limite),
-    .db_contagem            (s_contagem),
-    .db_memoria             (s_memoria),
-    .db_jogada              (s_botoes),
-	.timeout                (s_timeout),
-    .leds                   (leds),	
-    .seletor                (s_selMux),
-    .zeraM                  (s_zeraM),
-    .contaM                 (s_contaM),
-    .meioM                  (s_meioM),
-    .fimM                   (s_fimM)
+jogo_desafio_memoria game0 (
+    .clock          (clock),
+    .reset          (reset),
+    .jogar          (s_iniciar),
+    .dificuldade    (Dificuldade),
+    .botoes         (botoes),
+    .estado         (s_estado_0),
+    .jogadas        (s_jogada_0),
+    .leds           (s_leds_0),
+    .pontuacao      (s_pontuacao_0),
+    .pronto         (s_pronto_0)
 );
 
-hexa7seg display_jogada (
-    .hexa       (s_botoes),
-    .display    (db_jogadafeita)
+cakegame game1 (
+    .clock          (clock),
+    .reset          (reset),
+    .jogar          (s_iniciar),
+    .dificuldade    (Dificuldade),
+    .botoes         (botoes),
+    .estado         (s_estado_1),
+    .jogadas        (s_jogada_1),
+    .leds           (s_leds_1),
+    .pontuacao      (s_pontuacao_1),
+    .pronto         (s_pronto_1)
 );
 
-hexa7seg display_contagem (
-    .hexa       (s_contagem),
-    .display    (db_contagem)
+clothesgame game2 (
+    .clock          (clock),
+    .reset          (reset),
+    .jogar          (s_iniciar),
+    .dificuldade    (Dificuldade),
+    .botoes         (botoes),
+    .estado         (s_estado_2),
+    .jogadas        (s_jogada_2),
+    .leds           (s_leds_2),
+    .pontuacao      (s_pontuacao_2),
+    .pronto         (s_pronto_2)
 );
 
-hexa7seg display_memoria (
-    .hexa       (s_memoria),
-    .display    (db_memoria)
-);
+assign s_estado_inicial = Eatual;
+assign minigame_out = MiniGame;
 
-hexa7seg display_estado (
-    .hexa       (s_estado),
-    .display    (db_estado)
-);
-
-hexa7seg display_limite (
-    .hexa       (s_limite),
-    .display    (db_limite)
-);
-
-endmodule/* -----------------------------------------------------------------
+endmodule
+/* -----------------------------------------------------------------
  *  Arquivo   : comparador_85.v
  *  Projeto   : Experiencia 2 - Um Fluxo de Dados Simples
  * -----------------------------------------------------------------
@@ -300,6 +294,364 @@ module edge_detector (
     end
 
     assign pulso = ~reg1 & reg0;
+
+endmodule
+/* ----------------------------------------------------------------
+ * Arquivo   : hexa7seg.v
+ * Projeto   : Experiencia 2 - Um Fluxo de Dados Simples
+ *--------------------------------------------------------------
+ * Descricao : decodificador hexadecimal para 
+ *             display de 7 segmentos 
+ * 
+ * entrada : hexa - codigo binario de 4 bits hexadecimal
+ * saida   : sseg - codigo de 7 bits para display de 7 segmentos
+ *
+ * baseado no componente bcd7seg.v da Intel FPGA
+ *--------------------------------------------------------------
+ * dica de uso: mapeamento para displays da placa DE0-CV
+ *              bit 6 mais significativo é o bit a esquerda
+ *              p.ex. sseg(6) -> HEX0[6] ou HEX06
+ *--------------------------------------------------------------
+ * Revisoes  :
+ *     Data        Versao  Autor             Descricao
+ *     24/12/2023  1.0     Edson Midorikawa  criacao
+ *--------------------------------------------------------------
+ */
+
+module hexa7seg (hexa, display);
+    input      [3:0] hexa;
+    output reg [6:0] display;
+
+    /*
+     *    ---
+     *   | 0 |
+     * 5 |   | 1
+     *   |   |
+     *    ---
+     *   | 6 |
+     * 4 |   | 2
+     *   |   |
+     *    ---
+     *     3
+     */
+        
+    always @(hexa)
+    case (hexa)
+        4'h0:    display = 7'b1000000;
+        4'h1:    display = 7'b1111001;
+        4'h2:    display = 7'b0100100;
+        4'h3:    display = 7'b0110000;
+        4'h4:    display = 7'b0011001;
+        4'h5:    display = 7'b0010010;
+        4'h6:    display = 7'b0000010;
+        4'h7:    display = 7'b1111000;
+        4'h8:    display = 7'b0000000;
+        4'h9:    display = 7'b0010000;
+        4'ha:    display = 7'b0001000;
+        4'hb:    display = 7'b0000011;
+        4'hc:    display = 7'b1000110;
+        4'hd:    display = 7'b0100001;
+        4'he:    display = 7'b0000110;
+        4'hf:    display = 7'b0001110;
+        default: display = 7'b1111111;
+    endcase
+endmodule
+/*------------------------------------------------------------------------
+ * Arquivo   : mux2x1.v
+ * Projeto   : Jogo do Desafio da Memoria
+ *------------------------------------------------------------------------
+ * Descricao : multiplexador 3x1
+ * 
+ * adaptado a partir do codigo my_4t1_mux.vhd do livro "Free Range VHDL"
+ * 
+ * exemplo de uso: ver testbench mux3x1_tb.v
+ *------------------------------------------------------------------------
+ * Revisoes  :
+ *     Data        Versao  Autor             Descricao
+ *     15/02/2024  1.0     Edson Midorikawa  criacao
+ *     31/01/2025  1.1     Edson Midorikawa  revisao
+ *------------------------------------------------------------------------
+ */
+
+module mux2x1 (
+    input [3:0] D0,
+    input [3:0] D1,
+    input SEL,
+    output reg [3:0] OUT
+);
+
+always @(*) begin
+    case (SEL)
+        1'b0:    OUT = D0;
+        1'b1:    OUT = D1;
+        default: OUT = 4'b0; // saida em 1
+    endcase
+end
+
+endmodule
+/*------------------------------------------------------------------------
+ * Arquivo   : mux2x1.v
+ * Projeto   : Jogo do Desafio da Memoria
+ *------------------------------------------------------------------------
+ * Descricao : multiplexador 3x1
+ * 
+ * adaptado a partir do codigo my_4t1_mux.vhd do livro "Free Range VHDL"
+ * 
+ * exemplo de uso: ver testbench mux3x1_tb.v
+ *------------------------------------------------------------------------
+ * Revisoes  :
+ *     Data        Versao  Autor             Descricao
+ *     15/02/2024  1.0     Edson Midorikawa  criacao
+ *     31/01/2025  1.1     Edson Midorikawa  revisao
+ *------------------------------------------------------------------------
+ */
+
+module mux3x1 (
+    input [3:0] D0,
+    input [3:0] D1,
+    input [3:0] D2,
+    input [1:0] SEL,
+    output reg [3:0] OUT
+);
+
+always @(*) begin
+    case (SEL)
+        2'b00:    OUT = D0;
+        2'b01:    OUT = D1;
+        2'b10:    OUT = D2;
+        default: OUT = 4'b0; // saida em 1
+    endcase
+end
+
+endmodule
+//------------------------------------------------------------------
+// Arquivo   : mux_out.v
+// Projeto   : Multiplexador de saida
+//------------------------------------------------------------------
+// Descricao : Multiplexa as saidas dos minigames
+//
+//------------------------------------------------------------------
+// Revisoes  :
+//     Data        Versao  Autor             Descricao
+//     14/03/2025  1.0     T5BB5             versao inicial
+//------------------------------------------------------------------
+//
+
+module mux_out (
+    input [1:0] minigame,
+    input [2:0] leds_0,
+    input [3:0] estado_0,
+    input [6:0] jogada_0,
+    input [6:0] pontuacao_0,
+    input pronto_0,
+    input [2:0] leds_1,
+    input [3:0] estado_1,
+    input [6:0] jogada_1,
+    input [6:0] pontuacao_1,
+    input pronto_1,
+    input [2:0] leds_2,
+    input [3:0] estado_2,
+    input [6:0] jogada_2,
+    input [6:0] pontuacao_2,
+    input pronto_2,
+    input [3:0] estado_inicial,
+    output reg [2:0] leds_out,
+    output reg [3:0] estado_out,
+    output reg [6:0] jogada_out,
+    output reg [6:0] pontuacao_out,
+    output reg pronto_out
+);
+
+always @(*) begin
+    case (minigame)
+        2'b00: begin
+            leds_out = leds_0;
+            estado_out = estado_0;
+            jogada_out = jogada_0;
+            pontuacao_out = pontuacao_0;
+            pronto_out = pronto_0;
+        end
+        2'b01: begin
+            leds_out = leds_1;
+            estado_out = estado_1;
+            jogada_out = jogada_1;
+            pontuacao_out = pontuacao_1;
+            pronto_out = pronto_1;
+        end
+        2'b10: begin
+            leds_out = leds_2;
+            estado_out = estado_2;
+            jogada_out = jogada_2;
+            pontuacao_out = pontuacao_2;
+            pronto_out = pronto_2;
+        end
+        2'b11: begin
+            leds_out = 3'b0;
+            jogada_out = 7'b0;
+            estado_out = estado_inicial;
+            pontuacao_out = 7'b0;
+            pronto_out = 1'b0;
+        end
+        default: begin
+            leds_out = 3'b0;
+            estado_out = 4'b0;
+            jogada_out = 7'b0;
+            pontuacao_out = 7'b0;
+            pronto_out = 1'b0;
+        end
+    endcase
+end
+    
+endmodule
+//------------------------------------------------------------------
+// Arquivo   : registrador_4.v
+// Projeto   : Experiencia 3 - Projeto de uma Unidade de Controle 
+//------------------------------------------------------------------
+// Descricao : Registrador de 4 bits
+//             
+//------------------------------------------------------------------
+// Revisoes  :
+//     Data        Versao  Autor             Descricao
+//     14/12/2023  1.0     Edson Midorikawa  versao inicial
+//------------------------------------------------------------------
+//
+module registrador_4 (
+    input        clock,
+    input        clear,
+    input        enable,
+    input  [3:0] D,
+    output [3:0] Q
+);
+
+    reg [3:0] IQ;
+
+    always @(posedge clock or posedge clear) begin
+        if (clear)
+            IQ <= 0;
+        else if (enable)
+            IQ <= D;
+    end
+
+    assign Q = IQ;
+
+endmodule//------------------------------------------------------------------
+// Arquivo   : sync_rom_16x4.v
+// Projeto   : Experiencia 3 - Projeto de uma Unidade de Controle 
+//------------------------------------------------------------------
+// Descricao : ROM sincrona 16x4 (conteúdo pre-programado)
+//             
+//------------------------------------------------------------------
+// Revisoes  :
+//     Data        Versao  Autor             Descricao
+//     14/12/2023  1.0     Edson Midorikawa  versao inicial
+//------------------------------------------------------------------
+//
+module sync_rom_16x4_mem2 (clock, address, data_out);
+    input            clock;
+    input      [3:0] address;
+    output reg [3:0] data_out;
+
+    always @ (posedge clock)
+    begin
+        case (address)
+            4'b0000: data_out = 4'b0001; //1
+            4'b0001: data_out = 4'b0100; //2
+            4'b0010: data_out = 4'b0010; //3
+            4'b0011: data_out = 4'b1000; //4
+            4'b0100: data_out = 4'b0001; //5
+            4'b0101: data_out = 4'b0100; //6
+            4'b0110: data_out = 4'b0010; //7
+            4'b0111: data_out = 4'b1000; //8
+            4'b1000: data_out = 4'b0001; //9
+            4'b1001: data_out = 4'b0001; //10
+            4'b1010: data_out = 4'b1000; //11
+            4'b1011: data_out = 4'b1000; //12
+            4'b1100: data_out = 4'b0010; //13
+            4'b1101: data_out = 4'b0100; //14
+            4'b1110: data_out = 4'b0100; //15
+            4'b1111: data_out = 4'b0001; //16
+        endcase
+    end
+endmodule
+
+//------------------------------------------------------------------
+// Arquivo   : sync_rom_16x4.v
+// Projeto   : Experiencia 3 - Projeto de uma Unidade de Controle 
+//------------------------------------------------------------------
+// Descricao : ROM sincrona 16x4 (conteúdo pre-programado)
+//             
+//------------------------------------------------------------------
+// Revisoes  :
+//     Data        Versao  Autor             Descricao
+//     14/12/2023  1.0     Edson Midorikawa  versao inicial
+//------------------------------------------------------------------
+//
+module sync_rom_16x4 (clock, address, data_out);
+    input            clock;
+    input      [3:0] address;
+    output reg [3:0] data_out;
+
+    always @ (posedge clock)
+    begin
+        case (address)
+            4'b0000: data_out = 4'b0001; //1
+            4'b0001: data_out = 4'b0010; //2
+            4'b0010: data_out = 4'b0100; //3
+            4'b0011: data_out = 4'b1000; //4
+            4'b0100: data_out = 4'b0100; //5
+            4'b0101: data_out = 4'b0010; //6
+            4'b0110: data_out = 4'b0001; //7
+            4'b0111: data_out = 4'b0001; //8
+            4'b1000: data_out = 4'b0010; //9
+            4'b1001: data_out = 4'b0010; //10
+            4'b1010: data_out = 4'b0100; //11
+            4'b1011: data_out = 4'b0100; //12
+            4'b1100: data_out = 4'b1000; //13
+            4'b1101: data_out = 4'b1000; //14
+            4'b1110: data_out = 4'b0001; //15
+            4'b1111: data_out = 4'b0100; //16
+        endcase
+    end
+endmodule
+
+
+module cakegame (
+    input clock,
+    input reset,
+    input jogar,
+    input dificuldade,
+    input [6:0] botoes,
+    output [6:0] jogadas,
+    output [3:0] estado,
+    output [2:0] leds,
+    output [6:0] pontuacao,
+    output pronto
+);
+    assign jogadas = 7'b0;
+    assign pontuacao = 7'b0;
+    assign pronto = 1'b1;
+    assign estado = 4'b0;
+    assign leds = 3'b111;
+    
+endmodule
+
+module clothesgame (
+    input clock,
+    input reset,
+    input jogar,
+    input dificuldade,
+    input [6:0] botoes,
+    output [6:0] jogadas,
+    output [3:0] estado,
+    output [2:0] leds,
+    output [6:0] pontuacao,
+    output pronto
+);
+    assign jogadas = 7'b0;
+    assign pontuacao = 7'b0;
+    assign pronto = 1'b1;
+    assign estado = 4'b0;
+    assign leds = 3'b101;
 
 endmodule
 //------------------------------------------------------------------
@@ -485,245 +837,6 @@ module fluxo_dados (
     assign leds = s_leds;
 
  endmodule
-/* ----------------------------------------------------------------
- * Arquivo   : hexa7seg.v
- * Projeto   : Experiencia 2 - Um Fluxo de Dados Simples
- *--------------------------------------------------------------
- * Descricao : decodificador hexadecimal para 
- *             display de 7 segmentos 
- * 
- * entrada : hexa - codigo binario de 4 bits hexadecimal
- * saida   : sseg - codigo de 7 bits para display de 7 segmentos
- *
- * baseado no componente bcd7seg.v da Intel FPGA
- *--------------------------------------------------------------
- * dica de uso: mapeamento para displays da placa DE0-CV
- *              bit 6 mais significativo é o bit a esquerda
- *              p.ex. sseg(6) -> HEX0[6] ou HEX06
- *--------------------------------------------------------------
- * Revisoes  :
- *     Data        Versao  Autor             Descricao
- *     24/12/2023  1.0     Edson Midorikawa  criacao
- *--------------------------------------------------------------
- */
-
-module hexa7seg (hexa, display);
-    input      [3:0] hexa;
-    output reg [6:0] display;
-
-    /*
-     *    ---
-     *   | 0 |
-     * 5 |   | 1
-     *   |   |
-     *    ---
-     *   | 6 |
-     * 4 |   | 2
-     *   |   |
-     *    ---
-     *     3
-     */
-        
-    always @(hexa)
-    case (hexa)
-        4'h0:    display = 7'b1000000;
-        4'h1:    display = 7'b1111001;
-        4'h2:    display = 7'b0100100;
-        4'h3:    display = 7'b0110000;
-        4'h4:    display = 7'b0011001;
-        4'h5:    display = 7'b0010010;
-        4'h6:    display = 7'b0000010;
-        4'h7:    display = 7'b1111000;
-        4'h8:    display = 7'b0000000;
-        4'h9:    display = 7'b0010000;
-        4'ha:    display = 7'b0001000;
-        4'hb:    display = 7'b0000011;
-        4'hc:    display = 7'b1000110;
-        4'hd:    display = 7'b0100001;
-        4'he:    display = 7'b0000110;
-        4'hf:    display = 7'b0001110;
-        default: display = 7'b1111111;
-    endcase
-endmodule
-/*------------------------------------------------------------------------
- * Arquivo   : mux2x1.v
- * Projeto   : Jogo do Desafio da Memoria
- *------------------------------------------------------------------------
- * Descricao : multiplexador 3x1
- * 
- * adaptado a partir do codigo my_4t1_mux.vhd do livro "Free Range VHDL"
- * 
- * exemplo de uso: ver testbench mux3x1_tb.v
- *------------------------------------------------------------------------
- * Revisoes  :
- *     Data        Versao  Autor             Descricao
- *     15/02/2024  1.0     Edson Midorikawa  criacao
- *     31/01/2025  1.1     Edson Midorikawa  revisao
- *------------------------------------------------------------------------
- */
-
-module mux2x1 (
-    input [3:0] D0,
-    input [3:0] D1,
-    input SEL,
-    output reg [3:0] OUT
-);
-
-always @(*) begin
-    case (SEL)
-        1'b0:    OUT = D0;
-        1'b1:    OUT = D1;
-        default: OUT = 4'b0; // saida em 1
-    endcase
-end
-
-endmodule
-/*------------------------------------------------------------------------
- * Arquivo   : mux2x1.v
- * Projeto   : Jogo do Desafio da Memoria
- *------------------------------------------------------------------------
- * Descricao : multiplexador 3x1
- * 
- * adaptado a partir do codigo my_4t1_mux.vhd do livro "Free Range VHDL"
- * 
- * exemplo de uso: ver testbench mux3x1_tb.v
- *------------------------------------------------------------------------
- * Revisoes  :
- *     Data        Versao  Autor             Descricao
- *     15/02/2024  1.0     Edson Midorikawa  criacao
- *     31/01/2025  1.1     Edson Midorikawa  revisao
- *------------------------------------------------------------------------
- */
-
-module mux3x1 (
-    input [3:0] D0,
-    input [3:0] D1,
-    input [3:0] D2,
-    input [1:0] SEL,
-    output reg [3:0] OUT
-);
-
-always @(*) begin
-    case (SEL)
-        2'b00:    OUT = D0;
-        2'b01:    OUT = D1;
-        2'b10:    OUT = D2;
-        default: OUT = 4'b0; // saida em 1
-    endcase
-end
-
-endmodule
-//------------------------------------------------------------------
-// Arquivo   : registrador_4.v
-// Projeto   : Experiencia 3 - Projeto de uma Unidade de Controle 
-//------------------------------------------------------------------
-// Descricao : Registrador de 4 bits
-//             
-//------------------------------------------------------------------
-// Revisoes  :
-//     Data        Versao  Autor             Descricao
-//     14/12/2023  1.0     Edson Midorikawa  versao inicial
-//------------------------------------------------------------------
-//
-module registrador_4 (
-    input        clock,
-    input        clear,
-    input        enable,
-    input  [3:0] D,
-    output [3:0] Q
-);
-
-    reg [3:0] IQ;
-
-    always @(posedge clock or posedge clear) begin
-        if (clear)
-            IQ <= 0;
-        else if (enable)
-            IQ <= D;
-    end
-
-    assign Q = IQ;
-
-endmodule//------------------------------------------------------------------
-// Arquivo   : sync_rom_16x4.v
-// Projeto   : Experiencia 3 - Projeto de uma Unidade de Controle 
-//------------------------------------------------------------------
-// Descricao : ROM sincrona 16x4 (conteúdo pre-programado)
-//             
-//------------------------------------------------------------------
-// Revisoes  :
-//     Data        Versao  Autor             Descricao
-//     14/12/2023  1.0     Edson Midorikawa  versao inicial
-//------------------------------------------------------------------
-//
-module sync_rom_16x4_mem2 (clock, address, data_out);
-    input            clock;
-    input      [3:0] address;
-    output reg [3:0] data_out;
-
-    always @ (posedge clock)
-    begin
-        case (address)
-            4'b0000: data_out = 4'b0001; //1
-            4'b0001: data_out = 4'b0100; //2
-            4'b0010: data_out = 4'b0010; //3
-            4'b0011: data_out = 4'b1000; //4
-            4'b0100: data_out = 4'b0001; //5
-            4'b0101: data_out = 4'b0100; //6
-            4'b0110: data_out = 4'b0010; //7
-            4'b0111: data_out = 4'b1000; //8
-            4'b1000: data_out = 4'b0001; //9
-            4'b1001: data_out = 4'b0001; //10
-            4'b1010: data_out = 4'b1000; //11
-            4'b1011: data_out = 4'b1000; //12
-            4'b1100: data_out = 4'b0010; //13
-            4'b1101: data_out = 4'b0100; //14
-            4'b1110: data_out = 4'b0100; //15
-            4'b1111: data_out = 4'b0001; //16
-        endcase
-    end
-endmodule
-
-//------------------------------------------------------------------
-// Arquivo   : sync_rom_16x4.v
-// Projeto   : Experiencia 3 - Projeto de uma Unidade de Controle 
-//------------------------------------------------------------------
-// Descricao : ROM sincrona 16x4 (conteúdo pre-programado)
-//             
-//------------------------------------------------------------------
-// Revisoes  :
-//     Data        Versao  Autor             Descricao
-//     14/12/2023  1.0     Edson Midorikawa  versao inicial
-//------------------------------------------------------------------
-//
-module sync_rom_16x4 (clock, address, data_out);
-    input            clock;
-    input      [3:0] address;
-    output reg [3:0] data_out;
-
-    always @ (posedge clock)
-    begin
-        case (address)
-            4'b0000: data_out = 4'b0001; //1
-            4'b0001: data_out = 4'b0010; //2
-            4'b0010: data_out = 4'b0100; //3
-            4'b0011: data_out = 4'b1000; //4
-            4'b0100: data_out = 4'b0100; //5
-            4'b0101: data_out = 4'b0010; //6
-            4'b0110: data_out = 4'b0001; //7
-            4'b0111: data_out = 4'b0001; //8
-            4'b1000: data_out = 4'b0010; //9
-            4'b1001: data_out = 4'b0010; //10
-            4'b1010: data_out = 4'b0100; //11
-            4'b1011: data_out = 4'b0100; //12
-            4'b1100: data_out = 4'b1000; //13
-            4'b1101: data_out = 4'b1000; //14
-            4'b1110: data_out = 4'b0001; //15
-            4'b1111: data_out = 4'b0100; //16
-        endcase
-    end
-endmodule
-
 //------------------------------------------------------------------
 // Arquivo   : exp3_unidade_controle.v
 // Projeto   : Experiencia 3 - Projeto de uma Unidade de Controle
@@ -749,12 +862,11 @@ module unidade_controle (
     input botoesIgualMemoria,
     input fimE,
     input fimL,
-	input chaveMemoria,
+	 input chaveMemoria,
 	input meioL,
     input enderecoIgualLimite,
     input enderecoMenorLimite,
 	input chaveDificuldade,
-    input [1:0] chaveMinigame,
     input fimM,
     input meioM,
     output reg [1:0] seletor,
@@ -771,52 +883,38 @@ module unidade_controle (
     output reg pronto,
     output reg fim_timeout,
     output reg [3:0] db_estado,
-	output reg contaT,
-	output  seletorMemoria,
-	output  db_dificuldade
+	 output reg contaT,
+	 output  seletorMemoria,
+	 output  db_dificuldade
 );
 
-    // Defini Minigames
-    parameter genius = 2'b00;
-    parameter bolo = 2'b01;
-    parameter roupas = 2'b10;
-
     // Define estados
-    parameter inicial               = 6'b000000;  // 0
-    parameter preparacao            = 6'b000001;  // 1
-    parameter escolhe_jogo          = 6'b000010;  // 2
-
-    // Genius 6'b01xxxx
-    parameter genius_proxima_mostra        = 6'b010000;  // 16 0x10  
-    parameter genius_espera_jogada         = 6'b010001;  // 17 0x11
-    parameter genius_registra_jogada       = 6'b010010;  // 18 0x12
-    parameter genius_compara_jogada        = 6'b010011;  // 19 0x13
-    parameter genius_proxima_jogada        = 6'b010100;  // 20 0x14
-    parameter genius_foi_ultima_sequencia  = 6'b010101;  // 21 0x15
-    parameter genius_proxima_sequencia     = 6'b010110;  // 22 0x16
-    parameter genius_mostra_jogada         = 6'b010111;  // 23 0x17
-    parameter genius_intervalo_mostra      = 6'b011000;  // 24 0x18
-    parameter genius_inicia_sequencia      = 6'b011001;  // 25 0x19
-	parameter genius_intervalo_rodada      = 6'b011010;  // 26 0x1A
-    parameter genius_final_timeout 	       = 6'b011011;  // 27 0x1B
-    parameter genius_final_acertou         = 6'b011100;  // 28 0x1C
-    parameter genius_final_errou           = 6'b011101;  // 29 0x1D
-
-    // bolo 6'b10xxxx
-
-    // Roupas 6'b11xxxx
+    parameter inicial               = 4'b0000;  // 0
+    parameter preparacao            = 4'b0001;  // 1
+    parameter proxima_mostra        = 4'b0010;  // 2
+    parameter espera_jogada         = 4'b0011;  // 3
+    parameter registra_jogada       = 4'b0100;  // 4
+    parameter compara_jogada        = 4'b0101;  // 5
+    parameter proxima_jogada        = 4'b0110;  // 6
+    parameter foi_ultima_sequencia  = 4'b0111;  // 7
+    parameter proxima_sequencia     = 4'b1000;  // 8
+    parameter mostra_jogada         = 4'b1001;  // 9    
+    parameter intervalo_mostra      = 4'b1010;  // A
+    parameter inicia_sequencia      = 4'b1011;  // B
+	parameter intervalo_rodada      = 4'b1100;  // C
+    parameter final_timeout 	    = 4'b1101;  // D
+    parameter final_acertou         = 4'b1110;  // E
+    parameter final_errou           = 4'b1111;  // F
 	 
 
     // Variaveis de estado
-    reg [5:0] Eatual, Eprox;
-	reg Dificuldade, Memoria;
-    reg [1:0] Minigame;
+    reg [3:0] Eatual, Eprox;
+	 reg Dificuldade, Memoria;
 
     initial begin
         Eatual = inicial;
 		  Dificuldade = 1'b0;
 		  Memoria = 1'b0;
-          Minigame = 2'b00;
     end
 
     // Memoria de estado
@@ -831,96 +929,200 @@ module unidade_controle (
     always @* begin
         case (Eatual)
             inicial:          Eprox <= iniciar ? preparacao : inicial;
-            preparacao:       Eprox <= genius_mostra_jogada;
-
-
-            // Genius Game
-            genius_mostra_jogada:    Eprox <= meioM ? genius_intervalo_mostra : genius_mostra_jogada;
-            genius_intervalo_mostra: Eprox <= fimM ? genius_proxima_mostra : genius_intervalo_mostra;
-            genius_proxima_mostra:   Eprox <= enderecoIgualLimite ? genius_inicia_sequencia : genius_mostra_jogada;
-            genius_inicia_sequencia: Eprox <= genius_espera_jogada;
-            genius_espera_jogada:    begin 
+            preparacao:       Eprox <= mostra_jogada;
+            mostra_jogada:    Eprox <= meioM ? intervalo_mostra : mostra_jogada;
+            intervalo_mostra: Eprox <= fimM ? proxima_mostra : intervalo_mostra;
+            proxima_mostra:   Eprox <= enderecoIgualLimite ? inicia_sequencia : mostra_jogada;
+            inicia_sequencia: Eprox <= espera_jogada;
+            espera_jogada:    begin 
                 if (jogada) begin
-					Eprox <= genius_registra_jogada;
+					Eprox <= registra_jogada;
 				end else if (timeout) begin
-					Eprox <= genius_final_timeout;
+					Eprox <= final_timeout;
 				end else begin
-					Eprox <= genius_espera_jogada;
+					Eprox <= espera_jogada;
 				end
             end													
-            genius_registra_jogada:  Eprox <= genius_compara_jogada;
-            genius_compara_jogada:   begin 
+            registra_jogada:  Eprox <= compara_jogada;
+            compara_jogada:   begin 
                 if (enderecoMenorLimite && botoesIgualMemoria) begin
-					Eprox <= genius_proxima_jogada;
+					Eprox <= proxima_jogada;
 				end else if (enderecoIgualLimite && botoesIgualMemoria) begin
-					Eprox <= genius_foi_ultima_sequencia ;
+					Eprox <= foi_ultima_sequencia ;
 				end else begin
-					Eprox <= genius_final_errou;
+					Eprox <= final_errou;
 				end
             end													
-            genius_proxima_jogada:         Eprox <= genius_espera_jogada;
-            genius_foi_ultima_sequencia:   Eprox <= (fimL || (meioL && ~Dificuldade)) ? genius_final_acertou : genius_intervalo_rodada;
-			genius_intervalo_rodada:       Eprox <= meioM ? genius_proxima_sequencia : genius_intervalo_rodada;
-            genius_proxima_sequencia:      Eprox <= genius_mostra_jogada;
-            genius_final_timeout:          Eprox <= iniciar ? preparacao : genius_final_timeout;
-            genius_final_errou:            Eprox <= iniciar ? preparacao : genius_final_errou;
-            genius_final_acertou:          Eprox <= iniciar ? preparacao : genius_final_acertou;
-
-
-            // Bolo Game
-
-            // Roupas Game
+            proxima_jogada:         Eprox <= espera_jogada;
+            foi_ultima_sequencia:   Eprox <= (fimL || (meioL && ~Dificuldade)) ? final_acertou : intervalo_rodada;
+			intervalo_rodada:        Eprox <= meioM ? proxima_sequencia : intervalo_rodada;
+            proxima_sequencia:      Eprox <= mostra_jogada;
+            final_timeout:          Eprox <= iniciar ? preparacao : final_timeout;
+            final_errou:            Eprox <= iniciar ? preparacao : final_errou;
+            final_acertou:          Eprox <= iniciar ? preparacao : final_acertou;
             default:                Eprox <= inicial;
         endcase
     end
 
     // Logica de saida (maquina Moore)
     always @* begin
-        if (Minigame == genius) begin
-            zeraL     	<= (Eatual == inicial || Eatual == preparacao) ? 1'b1 : 1'b0;
-            zeraR     	<= (Eatual == inicial || Eatual == preparacao) ? 1'b1 : 1'b0;
-            zeraE     	<= (Eatual == inicial || Eatual == preparacao || Eatual == genius_proxima_sequencia || Eatual == genius_inicia_sequencia) ? 1'b1 : 1'b0;
-            registraR 	<= (Eatual == genius_registra_jogada) ? 1'b1 : 1'b0;
-            contaL    	<= (Eatual == genius_proxima_sequencia) ? 1'b1 : 1'b0;
-            contaE    	<= (Eatual == genius_proxima_jogada || Eatual == genius_proxima_mostra) ? 1'b1 : 1'b0;
-            pronto    	<= (Eatual == genius_final_acertou || Eatual == genius_final_errou || Eatual == genius_final_timeout) ? 1'b1 : 1'b0;
-            acertou   	<= (Eatual == genius_final_acertou) ? 1'b1 : 1'b0;
-            errou     	<= (Eatual == genius_final_errou) ? 1'b1 : 1'b0;
-            contaT	   	<= (Eatual == genius_espera_jogada) ? 1'b1 : 1'b0;
-            zeraM       <= (Eatual == genius_foi_ultima_sequencia || Eatual == preparacao || Eatual == genius_proxima_mostra || Eatual == genius_proxima_sequencia) ? 1'b1 : 1'b0;
-            contaM      <= (Eatual == genius_intervalo_rodada || Eatual == genius_mostra_jogada || Eatual == genius_intervalo_mostra) ? 1'b1 : 1'b0;
-            fim_timeout <= (Eatual == genius_final_timeout) ? 1'b1 : 1'b0;
-            if (Eatual == genius_espera_jogada || Eatual == genius_registra_jogada || Eatual == genius_proxima_jogada 
-            || Eatual == genius_compara_jogada || Eatual == genius_foi_ultima_sequencia || Eatual == genius_espera_jogada 
-            || Eatual == genius_intervalo_rodada) begin
-                seletor <= 2'b10;
-            end else if (Eatual == genius_mostra_jogada) begin
-                seletor <= 2'b01;
-            end else begin
-                seletor <= 2'b00;
-            end
+        zeraL     	<= (Eatual == inicial || Eatual == preparacao) ? 1'b1 : 1'b0;
+        zeraR     	<= (Eatual == inicial || Eatual == preparacao) ? 1'b1 : 1'b0;
+        zeraE     	<= (Eatual == inicial || Eatual == preparacao || Eatual == proxima_sequencia || Eatual == inicia_sequencia) ? 1'b1 : 1'b0;
+        registraR 	<= (Eatual == registra_jogada) ? 1'b1 : 1'b0;
+        contaL    	<= (Eatual == proxima_sequencia) ? 1'b1 : 1'b0;
+        contaE    	<= (Eatual == proxima_jogada || Eatual == proxima_mostra) ? 1'b1 : 1'b0;
+        pronto    	<= (Eatual == final_acertou || Eatual == final_errou || Eatual == final_timeout) ? 1'b1 : 1'b0;
+        acertou   	<= (Eatual == final_acertou) ? 1'b1 : 1'b0;
+        errou     	<= (Eatual == final_errou) ? 1'b1 : 1'b0;
+		contaT	   	<= (Eatual == espera_jogada) ? 1'b1 : 1'b0;
+		zeraM       <= (Eatual == foi_ultima_sequencia || Eatual == preparacao || Eatual == proxima_mostra || Eatual == proxima_sequencia) ? 1'b1 : 1'b0;
+        contaM      <= (Eatual == intervalo_rodada || Eatual == mostra_jogada || Eatual == intervalo_mostra) ? 1'b1 : 1'b0;
+        fim_timeout <= (Eatual == final_timeout) ? 1'b1 : 1'b0;
+        if (Eatual == espera_jogada || Eatual == registra_jogada || Eatual == proxima_jogada 
+		  || Eatual == compara_jogada || Eatual == foi_ultima_sequencia || Eatual == espera_jogada 
+		  || Eatual == intervalo_rodada) begin
+            seletor <= 2'b10;
+        end else if (Eatual == mostra_jogada) begin
+            seletor <= 2'b01;
+        end else begin
+            seletor <= 2'b00;
         end
 
-        if (Minigame == bolo) begin
-            // Implementar
-        end
-
-        if (Minigame == roupas) begin
-            // Implementar
-        end
-        
-        // Assign dos registradores de controle
         if (Eatual == preparacao) begin 
 		    Dificuldade <= chaveDificuldade;
-			Memoria <= chaveMemoria;
-            Minigame <= chaveMinigame;
+			 Memoria <= chaveMemoria;
 		end
 
         // Saida de depuracao (estado)
-        db_estado = Eatual;
+        case (Eatual)
+            inicial:                db_estado <= 4'b0000;  // 0
+            preparacao:             db_estado <= 4'b0001;  // 1
+            proxima_mostra:         db_estado <= 4'b0010;  // 2
+            espera_jogada:          db_estado <= 4'b0011;  // 3
+            registra_jogada:        db_estado <= 4'b0100;  // 4
+            compara_jogada:         db_estado <= 4'b0101;  // 5
+            proxima_jogada:         db_estado <= 4'b0110;  // 6
+            foi_ultima_sequencia:   db_estado <= 4'b0111;  // 7
+            proxima_sequencia:      db_estado <= 4'b1000;  // 8
+            mostra_jogada:          db_estado <= 4'b1001;  // 9
+            intervalo_mostra:       db_estado <= 4'b1010;  // A
+            inicia_sequencia:       db_estado <= 4'b1011;  // B
+			   intervalo_rodada:        db_estado <= 4'b1100;  // C
+            final_timeout:	 	      db_estado <= 4'b1101;  // D
+            final_acertou:          db_estado <= 4'b1110;  // E
+            final_errou:            db_estado <= 4'b1111;  // F
+            default:                db_estado <= 4'b1001;  // 9 ERRO
+        endcase
     end
 	
 	assign db_dificuldade = Dificuldade;
 	assign seletorMemoria = Memoria;
+
+endmodule//------------------------------------------------------------------
+// Arquivo   : circuito_exp5.v
+// Projeto   : Experiencia 5 - Projeto de um Sistema Digital 
+//------------------------------------------------------------------
+// Descricao : Modulo principal da experiencia
+//             
+//------------------------------------------------------------------
+// Revisoes  :
+//     Data        Versao  Autor            Descricao
+//     18/01/2025  1.0     T5BB5            versao inicial
+//------------------------------------------------------------------
+//
+
+module jogo_desafio_memoria (
+    input clock,
+    input reset,
+    input jogar,
+    input dificuldade,
+    input [6:0] botoes,
+    output [6:0] jogadas,
+    output [3:0] estado,
+    output [2:0] leds,
+    output [6:0] pontuacao,
+    output pronto
+);
+
+wire [3:0] s_botoes, s_memoria, s_contagem, s_estado, s_limite;
+wire [1:0] s_selMux;
+wire s_fimE, s_fimL, s_botoes_igual_memoria,s_meioL, s_dificuldade, s_zeraE, s_zeraL, s_contaE, s_contaL;
+wire s_zeraR, s_registraR, s_jogada, s_timeout, s_contaT, s_endereco_igual_limite, s_endereco_menor_limite;
+wire s_zeraM, s_contaM, s_meioM, s_fimM, s_sel_memoria;
+wire [3:0] s_jogadas;
+
+wire s_ganhou, s_perdeu, s_fim_timeout;
+assign pontuacao = 7'b0;
+assign leds = {s_ganhou, s_fim_timeout, s_perdeu};
+assign estado = s_estado;
+assign jogadas = {3'b0, s_jogadas[3:0]};
+
+unidade_controle controlUnit (
+    .clock                  (clock),
+    .reset                  (reset),
+    .iniciar                (jogar),
+    .jogada                 (s_jogada),
+	.timeout                (s_timeout),
+    .botoesIgualMemoria     (s_botoes_igual_memoria),
+    .fimE                   (s_fimE),
+    .fimL                   (s_fimL),
+	.meioL					(s_meioL),
+    .enderecoIgualLimite    (s_endereco_igual_limite),
+    .enderecoMenorLimite    (s_endereco_menor_limite),
+    .zeraE                  (s_zeraE),
+    .contaE                 (s_contaE),
+    .zeraL                  (s_zeraL),
+    .contaL                 (s_contaL),
+    .zeraR                  (s_zeraR),
+    .registraR              (s_registraR),
+    .acertou                (s_ganhou),
+    .errou                  (s_perdeu),
+    .pronto                 (pronto),
+    .fim_timeout            (s_fim_timeout),
+    .db_estado              (s_estado),
+	.contaT                 (s_contaT),
+	.db_dificuldade 		(s_dificuldade),
+	.chaveDificuldade		(dificuldade),
+    .seletor                (s_selMux),
+    .zeraM                  (s_zeraM),
+    .contaM                 (s_contaM),
+    .meioM                  (s_meioM),
+    .chaveMemoria     		(1'b0),
+    .seletorMemoria			(s_sel_memoria),
+    .fimM                   (s_fimM)
+);
+
+fluxo_dados fluxo_dados (
+    .clock                  (clock),
+    .zeraE                  (s_zeraE),
+    .contaE                 (s_contaE),
+    .zeraL                  (s_zeraL),
+    .contaL                 (s_contaL),
+    .zeraR                  (s_zeraR),
+    .registraR              (s_registraR),
+    .botoes                 (botoes[3:0]),
+    .selecionaMemoria		(s_sel_memoria),
+    .contaT                 (s_contaT),
+    .botoesIgualMemoria     (s_botoes_igual_memoria),
+    .fimE                   (s_fimE),
+    .fimL                   (s_fimL),
+    .meioL 					(s_meioL),
+    .endecoIgualLimite      (s_endereco_igual_limite),
+    .endecoMenorLimite      (s_endereco_menor_limite),
+    .jogada_feita           (s_jogada),
+    .db_tem_jogada          (db_tem_jogada),
+    .db_limite              (s_limite),
+    .db_contagem            (s_contagem),
+    .db_memoria             (s_memoria),
+    .db_jogada              (s_botoes),
+	.timeout                (s_timeout),
+    .leds                   (s_jogadas),	
+    .seletor                (s_selMux),
+    .zeraM                  (s_zeraM),
+    .contaM                 (s_contaM),
+    .meioM                  (s_meioM),
+    .fimM                   (s_fimM)
+);
 
 endmodule
