@@ -23,12 +23,11 @@ module unidade_controle (
     input botoesIgualMemoria,
     input fimE,
     input fimL,
-	input chaveMemoria,
+	 input chaveMemoria,
 	input meioL,
     input enderecoIgualLimite,
     input enderecoMenorLimite,
 	input chaveDificuldade,
-    input [1:0] chaveMinigame,
     input fimM,
     input meioM,
     output reg [1:0] seletor,
@@ -45,52 +44,38 @@ module unidade_controle (
     output reg pronto,
     output reg fim_timeout,
     output reg [3:0] db_estado,
-	output reg contaT,
-	output  seletorMemoria,
-	output  db_dificuldade
+	 output reg contaT,
+	 output  seletorMemoria,
+	 output  db_dificuldade
 );
 
-    // Defini Minigames
-    parameter genius = 2'b00;
-    parameter bolo = 2'b01;
-    parameter roupas = 2'b10;
-
     // Define estados
-    parameter inicial               = 6'b000000;  // 0
-    parameter preparacao            = 6'b000001;  // 1
-    parameter escolhe_jogo          = 6'b000010;  // 2
-
-    // Genius 6'b01xxxx
-    parameter genius_proxima_mostra        = 6'b010000;  // 16 0x10  
-    parameter genius_espera_jogada         = 6'b010001;  // 17 0x11
-    parameter genius_registra_jogada       = 6'b010010;  // 18 0x12
-    parameter genius_compara_jogada        = 6'b010011;  // 19 0x13
-    parameter genius_proxima_jogada        = 6'b010100;  // 20 0x14
-    parameter genius_foi_ultima_sequencia  = 6'b010101;  // 21 0x15
-    parameter genius_proxima_sequencia     = 6'b010110;  // 22 0x16
-    parameter genius_mostra_jogada         = 6'b010111;  // 23 0x17
-    parameter genius_intervalo_mostra      = 6'b011000;  // 24 0x18
-    parameter genius_inicia_sequencia      = 6'b011001;  // 25 0x19
-	parameter genius_intervalo_rodada      = 6'b011010;  // 26 0x1A
-    parameter genius_final_timeout 	       = 6'b011011;  // 27 0x1B
-    parameter genius_final_acertou         = 6'b011100;  // 28 0x1C
-    parameter genius_final_errou           = 6'b011101;  // 29 0x1D
-
-    // bolo 6'b10xxxx
-
-    // Roupas 6'b11xxxx
+    parameter inicial               = 4'b0000;  // 0
+    parameter preparacao            = 4'b0001;  // 1
+    parameter proxima_mostra        = 4'b0010;  // 2
+    parameter espera_jogada         = 4'b0011;  // 3
+    parameter registra_jogada       = 4'b0100;  // 4
+    parameter compara_jogada        = 4'b0101;  // 5
+    parameter proxima_jogada        = 4'b0110;  // 6
+    parameter foi_ultima_sequencia  = 4'b0111;  // 7
+    parameter proxima_sequencia     = 4'b1000;  // 8
+    parameter mostra_jogada         = 4'b1001;  // 9    
+    parameter intervalo_mostra      = 4'b1010;  // A
+    parameter inicia_sequencia      = 4'b1011;  // B
+	parameter intervalo_rodada      = 4'b1100;  // C
+    parameter final_timeout 	    = 4'b1101;  // D
+    parameter final_acertou         = 4'b1110;  // E
+    parameter final_errou           = 4'b1111;  // F
 	 
 
     // Variaveis de estado
-    reg [5:0] Eatual, Eprox;
-	reg Dificuldade, Memoria;
-    reg [1:0] Minigame;
+    reg [3:0] Eatual, Eprox;
+	 reg Dificuldade, Memoria;
 
     initial begin
         Eatual = inicial;
 		  Dificuldade = 1'b0;
 		  Memoria = 1'b0;
-          Minigame = 2'b00;
     end
 
     // Memoria de estado
@@ -105,93 +90,91 @@ module unidade_controle (
     always @* begin
         case (Eatual)
             inicial:          Eprox <= iniciar ? preparacao : inicial;
-            preparacao:       Eprox <= genius_mostra_jogada;
-
-
-            // Genius Game
-            genius_mostra_jogada:    Eprox <= meioM ? genius_intervalo_mostra : genius_mostra_jogada;
-            genius_intervalo_mostra: Eprox <= fimM ? genius_proxima_mostra : genius_intervalo_mostra;
-            genius_proxima_mostra:   Eprox <= enderecoIgualLimite ? genius_inicia_sequencia : genius_mostra_jogada;
-            genius_inicia_sequencia: Eprox <= genius_espera_jogada;
-            genius_espera_jogada:    begin 
+            preparacao:       Eprox <= mostra_jogada;
+            mostra_jogada:    Eprox <= meioM ? intervalo_mostra : mostra_jogada;
+            intervalo_mostra: Eprox <= fimM ? proxima_mostra : intervalo_mostra;
+            proxima_mostra:   Eprox <= enderecoIgualLimite ? inicia_sequencia : mostra_jogada;
+            inicia_sequencia: Eprox <= espera_jogada;
+            espera_jogada:    begin 
                 if (jogada) begin
-					Eprox <= genius_registra_jogada;
+					Eprox <= registra_jogada;
 				end else if (timeout) begin
-					Eprox <= genius_final_timeout;
+					Eprox <= final_timeout;
 				end else begin
-					Eprox <= genius_espera_jogada;
+					Eprox <= espera_jogada;
 				end
             end													
-            genius_registra_jogada:  Eprox <= genius_compara_jogada;
-            genius_compara_jogada:   begin 
+            registra_jogada:  Eprox <= compara_jogada;
+            compara_jogada:   begin 
                 if (enderecoMenorLimite && botoesIgualMemoria) begin
-					Eprox <= genius_proxima_jogada;
+					Eprox <= proxima_jogada;
 				end else if (enderecoIgualLimite && botoesIgualMemoria) begin
-					Eprox <= genius_foi_ultima_sequencia ;
+					Eprox <= foi_ultima_sequencia ;
 				end else begin
-					Eprox <= genius_final_errou;
+					Eprox <= final_errou;
 				end
             end													
-            genius_proxima_jogada:         Eprox <= genius_espera_jogada;
-            genius_foi_ultima_sequencia:   Eprox <= (fimL || (meioL && ~Dificuldade)) ? genius_final_acertou : genius_intervalo_rodada;
-			genius_intervalo_rodada:       Eprox <= meioM ? genius_proxima_sequencia : genius_intervalo_rodada;
-            genius_proxima_sequencia:      Eprox <= genius_mostra_jogada;
-            genius_final_timeout:          Eprox <= iniciar ? preparacao : genius_final_timeout;
-            genius_final_errou:            Eprox <= iniciar ? preparacao : genius_final_errou;
-            genius_final_acertou:          Eprox <= iniciar ? preparacao : genius_final_acertou;
-
-
-            // Bolo Game
-
-            // Roupas Game
+            proxima_jogada:         Eprox <= espera_jogada;
+            foi_ultima_sequencia:   Eprox <= (fimL || (meioL && ~Dificuldade)) ? final_acertou : intervalo_rodada;
+			intervalo_rodada:        Eprox <= meioM ? proxima_sequencia : intervalo_rodada;
+            proxima_sequencia:      Eprox <= mostra_jogada;
+            final_timeout:          Eprox <= iniciar ? preparacao : final_timeout;
+            final_errou:            Eprox <= iniciar ? preparacao : final_errou;
+            final_acertou:          Eprox <= iniciar ? preparacao : final_acertou;
             default:                Eprox <= inicial;
         endcase
     end
 
     // Logica de saida (maquina Moore)
     always @* begin
-        if (Minigame == genius) begin
-            zeraL     	<= (Eatual == inicial || Eatual == preparacao) ? 1'b1 : 1'b0;
-            zeraR     	<= (Eatual == inicial || Eatual == preparacao) ? 1'b1 : 1'b0;
-            zeraE     	<= (Eatual == inicial || Eatual == preparacao || Eatual == genius_proxima_sequencia || Eatual == genius_inicia_sequencia) ? 1'b1 : 1'b0;
-            registraR 	<= (Eatual == genius_registra_jogada) ? 1'b1 : 1'b0;
-            contaL    	<= (Eatual == genius_proxima_sequencia) ? 1'b1 : 1'b0;
-            contaE    	<= (Eatual == genius_proxima_jogada || Eatual == genius_proxima_mostra) ? 1'b1 : 1'b0;
-            pronto    	<= (Eatual == genius_final_acertou || Eatual == genius_final_errou || Eatual == genius_final_timeout) ? 1'b1 : 1'b0;
-            acertou   	<= (Eatual == genius_final_acertou) ? 1'b1 : 1'b0;
-            errou     	<= (Eatual == genius_final_errou) ? 1'b1 : 1'b0;
-            contaT	   	<= (Eatual == genius_espera_jogada) ? 1'b1 : 1'b0;
-            zeraM       <= (Eatual == genius_foi_ultima_sequencia || Eatual == preparacao || Eatual == genius_proxima_mostra || Eatual == genius_proxima_sequencia) ? 1'b1 : 1'b0;
-            contaM      <= (Eatual == genius_intervalo_rodada || Eatual == genius_mostra_jogada || Eatual == genius_intervalo_mostra) ? 1'b1 : 1'b0;
-            fim_timeout <= (Eatual == genius_final_timeout) ? 1'b1 : 1'b0;
-            if (Eatual == genius_espera_jogada || Eatual == genius_registra_jogada || Eatual == genius_proxima_jogada 
-            || Eatual == genius_compara_jogada || Eatual == genius_foi_ultima_sequencia || Eatual == genius_espera_jogada 
-            || Eatual == genius_intervalo_rodada) begin
-                seletor <= 2'b10;
-            end else if (Eatual == genius_mostra_jogada) begin
-                seletor <= 2'b01;
-            end else begin
-                seletor <= 2'b00;
-            end
+        zeraL     	<= (Eatual == inicial || Eatual == preparacao) ? 1'b1 : 1'b0;
+        zeraR     	<= (Eatual == inicial || Eatual == preparacao) ? 1'b1 : 1'b0;
+        zeraE     	<= (Eatual == inicial || Eatual == preparacao || Eatual == proxima_sequencia || Eatual == inicia_sequencia) ? 1'b1 : 1'b0;
+        registraR 	<= (Eatual == registra_jogada) ? 1'b1 : 1'b0;
+        contaL    	<= (Eatual == proxima_sequencia) ? 1'b1 : 1'b0;
+        contaE    	<= (Eatual == proxima_jogada || Eatual == proxima_mostra) ? 1'b1 : 1'b0;
+        pronto    	<= (Eatual == final_acertou || Eatual == final_errou || Eatual == final_timeout) ? 1'b1 : 1'b0;
+        acertou   	<= (Eatual == final_acertou) ? 1'b1 : 1'b0;
+        errou     	<= (Eatual == final_errou) ? 1'b1 : 1'b0;
+		contaT	   	<= (Eatual == espera_jogada) ? 1'b1 : 1'b0;
+		zeraM       <= (Eatual == foi_ultima_sequencia || Eatual == preparacao || Eatual == proxima_mostra || Eatual == proxima_sequencia) ? 1'b1 : 1'b0;
+        contaM      <= (Eatual == intervalo_rodada || Eatual == mostra_jogada || Eatual == intervalo_mostra) ? 1'b1 : 1'b0;
+        fim_timeout <= (Eatual == final_timeout) ? 1'b1 : 1'b0;
+        if (Eatual == espera_jogada || Eatual == registra_jogada || Eatual == proxima_jogada 
+		  || Eatual == compara_jogada || Eatual == foi_ultima_sequencia || Eatual == espera_jogada 
+		  || Eatual == intervalo_rodada) begin
+            seletor <= 2'b10;
+        end else if (Eatual == mostra_jogada) begin
+            seletor <= 2'b01;
+        end else begin
+            seletor <= 2'b00;
         end
 
-        if (Minigame == bolo) begin
-            // Implementar
-        end
-
-        if (Minigame == roupas) begin
-            // Implementar
-        end
-        
-        // Assign dos registradores de controle
         if (Eatual == preparacao) begin 
 		    Dificuldade <= chaveDificuldade;
-			Memoria <= chaveMemoria;
-            Minigame <= chaveMinigame;
+			 Memoria <= chaveMemoria;
 		end
 
         // Saida de depuracao (estado)
-        db_estado = Eatual;
+        case (Eatual)
+            inicial:                db_estado <= 4'b0000;  // 0
+            preparacao:             db_estado <= 4'b0001;  // 1
+            proxima_mostra:         db_estado <= 4'b0010;  // 2
+            espera_jogada:          db_estado <= 4'b0011;  // 3
+            registra_jogada:        db_estado <= 4'b0100;  // 4
+            compara_jogada:         db_estado <= 4'b0101;  // 5
+            proxima_jogada:         db_estado <= 4'b0110;  // 6
+            foi_ultima_sequencia:   db_estado <= 4'b0111;  // 7
+            proxima_sequencia:      db_estado <= 4'b1000;  // 8
+            mostra_jogada:          db_estado <= 4'b1001;  // 9
+            intervalo_mostra:       db_estado <= 4'b1010;  // A
+            inicia_sequencia:       db_estado <= 4'b1011;  // B
+			   intervalo_rodada:        db_estado <= 4'b1100;  // C
+            final_timeout:	 	      db_estado <= 4'b1101;  // D
+            final_acertou:          db_estado <= 4'b1110;  // E
+            final_errou:            db_estado <= 4'b1111;  // F
+            default:                db_estado <= 4'b1001;  // 9 ERRO
+        endcase
     end
 	
 	assign db_dificuldade = Dificuldade;
