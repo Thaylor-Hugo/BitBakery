@@ -22,8 +22,7 @@ module bitbakery (
     output [2:0] leds_out,
     output [3:0] estado_out,
     output [6:0] jogada_out,
-    output [6:0] pontuacao_out,
-    output [3:0] db_jogadas
+    output [6:0] pontuacao_out
 );
 
 parameter inicial = 2'b00;
@@ -107,8 +106,7 @@ jogo_desafio_memoria game0 (
     .jogadas        (s_jogada_0),
     .leds           (s_leds_0),
     .pontuacao      (s_pontuacao_0),
-    .pronto         (s_pronto_0),
-    .db_jogada      (db_jogadas)
+    .pronto         (s_pronto_0)
 );
 
 cakegame game1 (

@@ -21,8 +21,7 @@ module jogo_desafio_memoria (
     output [3:0] estado,
     output [2:0] leds,
     output [6:0] pontuacao,
-    output pronto,
-    output [3:0] db_jogada
+    output pronto
 );
 
 wire [3:0] s_botoes, s_memoria, s_contagem, s_estado, s_limite;
@@ -33,7 +32,6 @@ wire s_zeraM, s_contaM, s_meioM, s_fimM, s_sel_memoria;
 wire [3:0] s_jogadas;
 
 wire s_ganhou, s_perdeu, s_fim_timeout;
-assign db_jogada = s_jogadas;
 assign pontuacao = 7'b0;
 assign leds = {s_ganhou, s_fim_timeout, s_perdeu};
 assign estado = s_estado;
@@ -63,14 +61,14 @@ unidade_controle controlUnit (
     .fim_timeout            (s_fim_timeout),
     .db_estado              (s_estado),
 	.contaT                 (s_contaT),
-	.db_dificuldade 			(s_dificuldade),
-	.chaveDificuldade			(botaoDificuldade),
+	.db_dificuldade 		(s_dificuldade),
+	.chaveDificuldade		(dificuldade),
     .seletor                (s_selMux),
     .zeraM                  (s_zeraM),
     .contaM                 (s_contaM),
     .meioM                  (s_meioM),
-	 .chaveMemoria     		 (chaveMemoria),
-	 .seletorMemoria			 (s_sel_memoria),
+    .chaveMemoria     		(1'b0),
+    .seletorMemoria			(s_sel_memoria),
     .fimM                   (s_fimM)
 );
 
@@ -83,12 +81,12 @@ fluxo_dados fluxo_dados (
     .zeraR                  (s_zeraR),
     .registraR              (s_registraR),
     .botoes                 (botoes[3:0]),
-	 .selecionaMemoria		 (s_sel_memoria),
-	 .contaT                 (s_contaT),
+    .selecionaMemoria		(s_sel_memoria),
+    .contaT                 (s_contaT),
     .botoesIgualMemoria     (s_botoes_igual_memoria),
     .fimE                   (s_fimE),
     .fimL                   (s_fimL),
-	 .meioL 						 (s_meioL),
+    .meioL 					(s_meioL),
     .endecoIgualLimite      (s_endereco_igual_limite),
     .endecoMenorLimite      (s_endereco_menor_limite),
     .jogada_feita           (s_jogada),

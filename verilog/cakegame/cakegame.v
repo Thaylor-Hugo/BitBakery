@@ -15,6 +15,6 @@ module cakegame (
     assign pontuacao = 7'b0;
     assign pronto = 1'b1;
     assign estado = 4'b0;
-    assign leds = 3'b0;
+    assign leds = 3'b111;
     
 endmodule
