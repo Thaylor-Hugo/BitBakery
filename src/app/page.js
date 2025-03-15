@@ -1,9 +1,6 @@
 'use client'
 import { useGameChooser } from '../hooks/useGameChooser';
-
-function Header({ title }) {
-    return <h1 class="text-9xl text-center">{title ? title : "Default title"}</h1>
-}
+import Header from '../components/basic';
 
 // Component for showing a minigame icon
 function House({ game }) {

@@ -7,13 +7,24 @@ from analog_service import analog_loop, sensors, states, minigames
 app = Flask(__name__)
 CORS(app)  # Enable CORS
 
+
 def pygame_loop():
     pygame.init()
-    screen = pygame.display.set_mode((300, 300))
+    pygame.font.init()
+    my_font = pygame.font.SysFont('Helvetica', 20)
+    screen = pygame.display.set_mode((400, 100))
     while True:
         handle_pygame_events()
         pygame.display.flip()
+        state_str = my_font.render("State: {0}".format(str(sensors["state"])), False, (255, 255, 255))
+        minigame_str = my_font.render("Minigame: {0}".format(str(sensors["minigame"])), False, (255, 255, 255))
+        leds_str = my_font.render("Leds: {0}".format(str(sensors["leds"])), False, (255, 255, 255))
+        screen.fill((0, 0, 0))
+        screen.blit(state_str, (0,0))
+        screen.blit(minigame_str, (0,30))
+        screen.blit(leds_str, (0,60))
         pygame.time.wait(50)
+
 
 def handle_pygame_events():
     for event in pygame.event.get():
@@ -47,9 +58,11 @@ def handle_pygame_events():
             elif event.key == pygame.K_y:
                 sensors["state"] = states[5]
 
+
 @app.route('/api/sensors')
 def get_sensors():
     return jsonify({"sensors": sensors})
+
 
 if __name__ == '__main__':
     # Mock sensors values
