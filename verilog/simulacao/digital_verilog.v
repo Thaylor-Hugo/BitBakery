@@ -167,7 +167,20 @@ module comparador_85 (ALBi, AGBi, AEBi, A, B, ALBo, AGBo, AEBo);
     assign AGBo = ~CSG[4];
     assign AEBo = ((A == B) && AEBi);
 
-endmodule /* comparador_85 *///------------------------------------------------------------------
+endmodule /* comparador_85 */
+module comparador (
+    input [6:0] A,
+    input [6:0] B,
+    output ALBo,
+    output AGBo,
+    output AEBo
+);
+
+assign ALBo = (A < B);
+assign AGBo = (A > B);
+assign AEBo = (A == B);
+
+endmodule//------------------------------------------------------------------
 // Arquivo   : contador_163.v
 // Projeto   : Experiencia 2 - Um Fluxo de Dados Simples
 //------------------------------------------------------------------
@@ -374,10 +387,10 @@ endmodule
  */
 
 module mux2x1 (
-    input [3:0] D0,
-    input [3:0] D1,
+    input [6:0] D0,
+    input [6:0] D1,
     input SEL,
-    output reg [3:0] OUT
+    output reg [6:0] OUT
 );
 
 always @(*) begin
@@ -407,11 +420,11 @@ endmodule
  */
 
 module mux3x1 (
-    input [3:0] D0,
-    input [3:0] D1,
-    input [3:0] D2,
+    input [6:0] D0,
+    input [6:0] D1,
+    input [6:0] D2,
     input [1:0] SEL,
-    output reg [3:0] OUT
+    output reg [6:0] OUT
 );
 
 always @(*) begin
@@ -519,11 +532,11 @@ module registrador_4 (
     input        clock,
     input        clear,
     input        enable,
-    input  [3:0] D,
-    output [3:0] Q
+    input  [6:0] D,
+    output [6:0] Q
 );
 
-    reg [3:0] IQ;
+    reg [6:0] IQ;
 
     always @(posedge clock or posedge clear) begin
         if (clear)
@@ -615,6 +628,228 @@ module sync_rom_16x4 (clock, address, data_out);
 endmodule
 
 
+module cakegame_fd (
+    input clock,
+    input [6:0] buttons,
+    input [1:0] out_sel,
+    input dificuldade,
+    input clear_reg,
+    input enable_reg,
+    input clear_mem_counter,
+    input enable_mem_counter,
+    input clear_show_counter,
+    input enable_show_counter,
+    input enable_timeout_counter,
+    input clear_points_counter,
+    input enable_points_counter,
+    output end_mem_counter,
+    output correct_play,
+    output has_play,
+    output end_show,
+    output half_show,
+    output timeout,
+    output [6:0] play,
+    output [3:0] points
+);
+
+wire [3:0] s_address, s_limit;
+wire [6:0] s_data, s_data_2, s_mem_out;
+wire [6:0] s_reg;
+wire signal = buttons[0] | buttons[1] | buttons[2] | buttons[3] | buttons[4] | buttons[5] | buttons[6];
+
+// Define saída das Memórias
+contador_163 address_counter (
+    .clock  (clock),
+    .clr    (~clear_mem_counter),
+    .ld     (1'b1),
+    .ent    (1'b1),
+    .enp    (enable_mem_counter),
+    .D      (4'b0),
+    .Q      (s_address),
+    .rco    (end_mem_counter)
+);
+
+sync_rom_16x4 rom_1 (
+    .clock      (clock),
+    .address    (s_address),
+    .data_out   (s_data)
+);
+
+sync_rom_16x4_mem2 rom_2 (
+    .clock      (clock),
+    .address    (s_address),
+    .data_out   (s_data_2)
+);
+
+mux2x1 mux_memorias (
+    .SEL    (dificuldade),
+    .D0     (s_data),
+    .D1     (s_data_2),
+    .OUT    (s_mem_out)
+);
+
+// Detecta Jogada
+edge_detector play_detector (
+    .clock  (clock),
+    .reset  (clear_reg),
+    .sinal  (signal),
+    .pulso  (has_play)
+);
+
+registrador_4 play_reg (
+    .clock  (clock),
+    .clear  (clear_reg),
+    .enable (enable_reg),
+    .D      (buttons),
+    .Q      (s_reg)
+);
+
+// Compara jogada com memórias
+comparador compare (
+    .A    (s_mem_out),
+    .B    (s_reg),
+    .ALBo (    ),
+    .AGBo (    ),
+    .AEBo (correct_play)
+);
+
+// General Timers
+contador_m  #(.M(1000),.N(16)) show_counter (
+    .clock      (clock),   
+    .zera_as    (clear_show_counter),
+    .zera_s     (1'b0),
+    .conta	    (enable_show_counter),
+    .Q          (),
+    .fim        (end_show),
+    .meio       (half_show)
+);
+
+contador_m  #(.M(4000), .N(16)) timeout_counter (
+    .clock      (clock),   
+    .zera_as    (~enable_timeout_counter),
+    .zera_s     (1'b0),
+    .conta	    (enable_timeout_counter),
+    .Q          (),
+    .fim        (timeout),
+    .meio       ()
+);
+
+contador_163 points_counter (
+    .clock  (clock),
+    .clr    (~clear_points_counter),
+    .ld     (1'b1),
+    .ent    (1'b1),
+    .enp    (enable_points_counter),
+    .D      (4'b0),
+    .Q      (points),
+    .rco    ()
+);
+
+// Play output
+mux3x1 out_mux (
+    .D0     (7'b0),
+    .D1     (s_mem_out),
+    .D2     (buttons),
+    .SEL    (out_sel),
+    .OUT    (play)
+);
+
+endmodule
+module cakegame_uc (
+    input clock,
+    input reset,
+    input start,
+    input end_mem_counter,
+    input correct_play,
+    input has_play,
+    input end_show,
+    input half_show,
+    input timeout,
+    output reg [1:0] out_sel,
+    output reg clear_reg,
+    output reg enable_reg,
+    output reg clear_mem_counter,
+    output reg enable_mem_counter,
+    output reg clear_show_counter,
+    output reg enable_show_counter,
+    output reg enable_timeout_counter,
+    output reg clear_points_counter,
+    output reg enable_points_counter,
+    output reg finished,
+    output reg [3:0] state
+);
+    
+// State definitions
+parameter inicio        = 4'b0000; // 0
+parameter preparation   = 4'b0001; // 1
+parameter show_play     = 4'b0010; // 2
+parameter show_interval = 4'b0011; // 3
+parameter next_show     = 4'b0100; // 4
+parameter initiate_play = 4'b0101; // 5
+parameter wait_play     = 4'b0110; // 6
+parameter register_play = 4'b0111; // 7
+parameter compare_play  = 4'b1000; // 8
+parameter next_play     = 4'b1001; // 9
+parameter end_state     = 4'b1111; // F
+
+// State variables
+reg [3:0] current_state, next_state;
+
+// Initial state
+initial begin
+    current_state <= inicio;
+end
+
+// State memory
+always @(posedge clock or posedge reset) begin
+    if (reset)
+        current_state <= inicio;
+    else
+        current_state <= next_state;
+end
+
+// Next state logic
+always @* begin
+    case (current_state)
+        inicio:         next_state <= start ? preparation : inicio;
+        preparation:    next_state <= show_play;
+        show_play:      next_state <= half_show ? show_interval : show_play;
+        show_interval:  next_state <= end_show ? next_show : show_interval;
+        next_show:      next_state <= end_mem_counter ? initiate_play : show_play;
+        initiate_play:  next_state <= wait_play;
+        wait_play:      next_state <= has_play ? compare_play : timeout ? end_state : wait_play;
+        register_play:  next_state <= compare_play;
+        compare_play:   next_state <= next_play;
+        next_play:      next_state <= end_mem_counter ? end_state : wait_play;
+        end_state:      next_state <= start? preparation : end_state;   
+        default:        next_state <= inicio;
+    endcase
+end
+
+// Output logic
+always @* begin
+    clear_reg <= (current_state == preparation) ? 1'b1 : 1'b0;
+    enable_reg <= (current_state == register_play) ? 1'b1 : 1'b0;
+    clear_mem_counter <= (current_state == preparation || current_state == initiate_play) ? 1'b1 : 1'b0;
+    enable_mem_counter <= (current_state == next_show || current_state == next_play) ? 1'b1 : 1'b0;
+    clear_show_counter <= (current_state == preparation) ? 1'b1 : 1'b0;
+    enable_show_counter <= (current_state == show_interval || current_state == show_play) ? 1'b1 : 1'b0;
+    enable_timeout_counter <= (current_state == wait_play) ? 1'b1 : 1'b0;
+    clear_points_counter <= (current_state == preparation) ? 1'b1 : 1'b0;
+    enable_points_counter <= (correct_play && (current_state == next_play)) ? 1'b1 : 1'b0;
+    finished <= (current_state == end_state) ? 1'b1 : 1'b0;
+    state <= current_state;
+
+    if (current_state == wait_play || current_state == register_play
+        || current_state == compare_play || current_state == next_play)
+        out_sel <= 2'b10;
+    else if (current_state == show_play)
+        out_sel <= 2'b01;
+    else
+        out_sel <= 2'b00;
+end
+
+endmodule
 module cakegame (
     input clock,
     input reset,
@@ -627,12 +862,63 @@ module cakegame (
     output [6:0] pontuacao,
     output pronto
 );
-    assign jogadas = 7'b0;
-    assign pontuacao = 7'b0;
-    assign pronto = 1'b1;
-    assign estado = 4'b0;
-    assign leds = 3'b111;
-    
+
+wire [1:0] s_out_sel;
+wire [3:0] s_estado;
+wire s_clear_reg, s_enable_reg, s_clear_mem_counter, s_enable_mem_counter, s_clear_show_counter, s_enable_show_counter, s_enable_timeout_counter, s_clear_points_counter, s_enable_points_counter, s_end_mem_counter, s_correct_play, s_has_play, s_end_show, s_half_show, s_timeout, s_pronto;
+
+cakegame_fd data_flux(
+    .clock                  (clock),
+    .buttons                (botoes),
+    .out_sel                (s_out_sel),
+    .dificuldade            (dificuldade),
+    .clear_reg              (s_clear_reg),
+    .enable_reg             (s_enable_reg),
+    .clear_mem_counter      (s_clear_mem_counter),
+    .enable_mem_counter     (s_enable_mem_counter),
+    .clear_show_counter     (s_clear_show_counter),
+    .enable_show_counter    (s_enable_show_counter),
+    .enable_timeout_counter (s_enable_timeout_counter),
+    .clear_points_counter   (s_clear_points_counter),
+    .enable_points_counter  (s_enable_points_counter),
+    .end_mem_counter        (s_end_mem_counter),
+    .correct_play           (s_correct_play),
+    .has_play               (s_has_play),
+    .end_show               (s_end_show),
+    .half_show              (s_half_show),
+    .timeout                (s_timeout),
+    .play                   (jogadas),
+    .points                 (pontuacao)
+);
+
+cakegame_uc control_unit(
+    .clock                  (clock),
+    .reset                  (reset),
+    .start                  (jogar),
+    .end_mem_counter        (s_end_mem_counter),
+    .correct_play           (s_correct_play),
+    .has_play               (s_has_play),
+    .end_show               (s_end_show),
+    .half_show              (s_half_show),
+    .timeout                (s_timeout),
+    .out_sel                (s_out_sel),
+    .clear_reg              (s_clear_reg),
+    .enable_reg             (s_enable_reg),
+    .clear_mem_counter      (s_clear_mem_counter),
+    .enable_mem_counter     (s_enable_mem_counter),
+    .clear_show_counter     (s_clear_show_counter),
+    .enable_show_counter    (s_enable_show_counter),
+    .enable_timeout_counter (s_enable_timeout_counter),
+    .clear_points_counter   (s_clear_points_counter),
+    .enable_points_counter  (s_enable_points_counter),
+    .finished               (pronto),
+    .state                  (s_estado)
+);
+
+// TODO: Implementar lógica de leds
+assign leds = (s_estado == 4'b1111) ? 3'b100 : (s_estado == 4'b0110)? 3'b010 : 3'b001;
+assign estado = s_estado;
+
 endmodule
 
 module clothesgame (
