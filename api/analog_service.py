@@ -1,67 +1,79 @@
-
 from WF_SDK import device, static, supplies       # import instruments
- 
 from time import sleep                            # needed for delays
 
 sensors = {
-    "state": "initial",
-    "minigame": "cakegame",
-    "leds": [False, False, False, False, False],
+    "state": "inicio",
+    "minigame": "memorygame",
+    "jogada": [False, False, False, False, False, False, False],
+    "pontuacao": 0,
 }
 
-states = ["initial", "preparacao", "escolha_minigame", "state3", "state4", "state5"]
-minigames = ["cakegame", "clothesgame", "memorygame"]
+cake_states = ["inicio", "preparation", "show_play", "show_interval", "next_show", "initiate_play", "wait_play", 
+                "register_play", "compare_play", "next_play", "end_state"]
 
+genius_states =["inicial", "preparacao", "proxima_mostra", "espera_jogada", "registra_jogada", "compara_jogada", 
+                "proxima_jogada", "foi_ultima_sequencia", "proxima_sequencia", "mostra_jogada", "intervalo_mostra", 
+                "inicia_sequencia", "intervalo_rodada", "final_timeout", "final_acertou", "final_errou"]
 
+minigames = ["memorygame", "cakegame", "clothesgame"]
 device_name = "Analog Discovery 2"
+
+
+def convert_dec(bin):
+    dec = 0
+    for i in range(len(bin)):
+        if (bin[i]):
+            dec += 2**i
+    return dec
+
+
+def analog_loop():
+    # connect to the device
+    device_data = device.open()
+    device_data.name = device_name
+    
+    # start the positive supply
+    supplies_data = supplies.data()
+    supplies_data.master_state = True
+    supplies_data.state = True
+    supplies_data.voltage = 3.3
+    supplies.switch(device_data, supplies_data)
  
-"""-----------------------------------------------------------------------"""
- 
-# connect to the device
-device_data = device.open()
-device_data.name = device_name
- 
-"""-----------------------------------"""
- 
-# start the positive supply
-supplies_data = supplies.data()
-supplies_data.master_state = True
-supplies_data.state = True
-supplies_data.voltage = 3.3
-supplies.switch(device_data, supplies_data)
- 
-# set all pins as output
-for index in range(16):
-    static.set_mode(device_data, index, False)
- 
-try:
-    while True:
-        # repeat
-        mask = 1
-        while mask < 0x10000:
+    # set all pins as input
+    for index in range(16):
+        static.set_mode(device_data, index, False)
+    
+    try:
+        while True:
             # go through possible states
+            sensors_temp = []
             for index in range(16):
                 # set the state of every DIO channel
-                static.get_state(device_data, index)
-                print("DIO", index, "is", device_data.state)
-            sleep(0.1)  # delay
-            mask <<= 1  # switch mask
- 
-except KeyboardInterrupt:
-    # stop if Ctrl+C is pressed
-    pass
- 
-finally:
-    # stop the static I/O
-    static.close(device_data)
- 
-    # stop and reset the power supplies
-    supplies_data.master_state = False
-    supplies.switch(device_data, supplies_data)
-    supplies.close(device_data)
- 
-    """-----------------------------------"""
- 
-    # close the connection
-    device.close(device_data)
+                sensors_temp.append(static.get_state(device_data, index))
+            sleep(0.001)  # delay
+            sensors["jogada"] = sensors_temp[:7]
+            sensors["minigame"] = minigames[convert_dec(sensors_temp[11:14])]
+            if (sensors["minigame"] == "cakegame"):
+                sensors["state"] = cake_states[convert_dec(sensors_temp[7:11])]
+            else:
+                sensors["state"] = genius_states[convert_dec(sensors_temp[7:11])]
+            sensors["pontuacao"] = convert_dec(sensors_temp[14:])
+            
+            print(sensors)
+
+    except KeyboardInterrupt:
+        # stop if Ctrl+C is pressed
+        pass
+    
+    finally:
+        # stop the static I/O
+        static.close(device_data)
+    
+        # stop and reset the power supplies
+        supplies_data.master_state = False
+        supplies.switch(device_data, supplies_data)
+        supplies.close(device_data)
+    
+        # close the connection
+        device.close(device_data)
 
