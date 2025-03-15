@@ -32,22 +32,22 @@ export function useCakeGame() {
 
                 if (sensors.state == "show_play" || sensors.state == "show_interval" || sensors.state == "next_show") {
                     // Gabarito
-                    if (sensors.leds.every(val => val === false)) {
+                    if (sensors.jogada.every(val => val === false)) {
                         changed = true;
-                    } else if(!sensors.leds.every(val => val === false) && changed) {
+                    } else if(!sensors.jogada.every(val => val === false) && changed) {
                         changed = false;
                         setFinalCake([
                             ...final_cake, 
-                            sensors.leds
+                            sensors.jogada
                         ]);
                     }
                 } else {
                     // Jogada do usuário
-                    if (sensors.leds.every(val => val === false)) {
+                    if (sensors.jogada.every(val => val === false)) {
                         changed = true;
-                    } else if(!sensors.leds.every(val => val === false) && changed) {
+                    } else if(!sensors.jogada.every(val => val === false) && changed) {
                         changed = false;
-                        setUserCake([...user_cake, sensors.leds]);
+                        setUserCake([...user_cake, sensors.jogada]);
                     }
 
                     // Próxima jogada
