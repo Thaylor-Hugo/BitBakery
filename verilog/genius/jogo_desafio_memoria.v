@@ -20,7 +20,7 @@ module jogo_desafio_memoria (
     output [6:0] jogadas,
     output [3:0] estado,
     output [2:0] leds,
-    output [6:0] pontuacao,
+    output [2:0] pontuacao,
     output pronto
 );
 
@@ -32,7 +32,7 @@ wire s_zeraM, s_contaM, s_meioM, s_fimM, s_sel_memoria;
 wire [3:0] s_jogadas;
 
 wire s_ganhou, s_perdeu, s_fim_timeout;
-assign pontuacao = 7'b0;
+assign pontuacao = 2'b0;
 assign leds = {s_ganhou, s_fim_timeout, s_perdeu};
 assign estado = s_estado;
 assign jogadas = {3'b0, s_jogadas[3:0]};

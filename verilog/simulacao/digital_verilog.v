@@ -22,7 +22,7 @@ module bitbakery (
     output [2:0] leds_out,
     output [3:0] estado_out,
     output [6:0] jogada_out,
-    output [6:0] pontuacao_out
+    output [2:0] pontuacao_out
 );
 
 parameter inicial = 2'b00;
@@ -34,7 +34,7 @@ wire s_pronto_0, s_pronto_1, s_pronto_2, s_pronto;
 wire [2:0] s_leds_0, s_leds_1, s_leds_2;
 wire [3:0] s_estado_0, s_estado_1, s_estado_2, s_estado_inicial;
 wire [6:0] s_jogada_0, s_jogada_1, s_jogada_2;
-wire [6:0] s_pontuacao_0, s_pontuacao_1, s_pontuacao_2;
+wire [2:0] s_pontuacao_0, s_pontuacao_1, s_pontuacao_2;
 
 reg [1:0] MiniGame, Eatual, Eprox;
 reg Dificuldade, s_iniciar;
@@ -455,23 +455,23 @@ module mux_out (
     input [2:0] leds_0,
     input [3:0] estado_0,
     input [6:0] jogada_0,
-    input [6:0] pontuacao_0,
+    input [2:0] pontuacao_0,
     input pronto_0,
     input [2:0] leds_1,
     input [3:0] estado_1,
     input [6:0] jogada_1,
-    input [6:0] pontuacao_1,
+    input [2:0] pontuacao_1,
     input pronto_1,
     input [2:0] leds_2,
     input [3:0] estado_2,
     input [6:0] jogada_2,
-    input [6:0] pontuacao_2,
+    input [2:0] pontuacao_2,
     input pronto_2,
     input [3:0] estado_inicial,
     output reg [2:0] leds_out,
     output reg [3:0] estado_out,
     output reg [6:0] jogada_out,
-    output reg [6:0] pontuacao_out,
+    output reg [2:0] pontuacao_out,
     output reg pronto_out
 );
 
@@ -649,7 +649,7 @@ module cakegame_fd (
     output half_show,
     output timeout,
     output [6:0] play,
-    output [6:0] points
+    output [2:0] points
 );
 
 wire [3:0] s_address;
@@ -734,14 +734,14 @@ contador_m  #(.M(4000), .N(16)) timeout_counter (
     .meio       ()
 );
 
-contador_m #(.M(20), .N(7)) points_counter (
+contador_m #(.M(8), .N(3)) points_counter (
     .clock      (clock),
     .zera_as    (clear_points_counter),
     .zera_s     (1'b0),
     .conta      (enable_points_counter),
-    .Q      (points),
-    .fim    (),
-    .meio   ()
+    .Q          (points),
+    .fim        (),
+    .meio       ()
 );
 
 // Play output
@@ -858,7 +858,7 @@ module cakegame (
     output [6:0] jogadas,
     output [3:0] estado,
     output [2:0] leds,
-    output [6:0] pontuacao,
+    output [2:0] pontuacao,
     output pronto
 );
 
@@ -929,11 +929,11 @@ module clothesgame (
     output [6:0] jogadas,
     output [3:0] estado,
     output [2:0] leds,
-    output [6:0] pontuacao,
+    output [2:0] pontuacao,
     output pronto
 );
     assign jogadas = 7'b0;
-    assign pontuacao = 7'b0;
+    assign pontuacao = 3'b0;
     assign pronto = 1'b1;
     assign estado = 4'b0;
     assign leds = 3'b101;
@@ -1326,7 +1326,7 @@ module jogo_desafio_memoria (
     output [6:0] jogadas,
     output [3:0] estado,
     output [2:0] leds,
-    output [6:0] pontuacao,
+    output [2:0] pontuacao,
     output pronto
 );
 
@@ -1338,7 +1338,7 @@ wire s_zeraM, s_contaM, s_meioM, s_fimM, s_sel_memoria;
 wire [3:0] s_jogadas;
 
 wire s_ganhou, s_perdeu, s_fim_timeout;
-assign pontuacao = 7'b0;
+assign pontuacao = 2'b0;
 assign leds = {s_ganhou, s_fim_timeout, s_perdeu};
 assign estado = s_estado;
 assign jogadas = {3'b0, s_jogadas[3:0]};

@@ -8,7 +8,7 @@ module cakegame (
     output [6:0] jogadas,
     output [3:0] estado,
     output [2:0] leds,
-    output [6:0] pontuacao,
+    output [2:0] pontuacao,
     output pronto
 );
 

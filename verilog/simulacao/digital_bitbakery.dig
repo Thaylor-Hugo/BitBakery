@@ -24,7 +24,7 @@
         </entry>
         <entry>
           <string>externalOutputs</string>
-          <string>minigame_out:2,leds_out:3,estado_out:4,jogada_out:7,pontuacao_out:7</string>
+          <string>minigame_out:2,leds_out:3,estado_out:4,jogada_out:7,pontuacao_out:3</string>
         </entry>
         <entry>
           <string>CodeFile</string>
@@ -416,7 +416,7 @@
         </entry>
         <entry>
           <string>Bits</string>
-          <int>7</int>
+          <int>3</int>
         </entry>
       </elementAttributes>
       <pos x="1240" y="800"/>

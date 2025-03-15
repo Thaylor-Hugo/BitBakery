@@ -22,7 +22,7 @@ module bitbakery (
     output [2:0] leds_out,
     output [3:0] estado_out,
     output [6:0] jogada_out,
-    output [6:0] pontuacao_out
+    output [2:0] pontuacao_out
 );
 
 parameter inicial = 2'b00;
@@ -34,7 +34,7 @@ wire s_pronto_0, s_pronto_1, s_pronto_2, s_pronto;
 wire [2:0] s_leds_0, s_leds_1, s_leds_2;
 wire [3:0] s_estado_0, s_estado_1, s_estado_2, s_estado_inicial;
 wire [6:0] s_jogada_0, s_jogada_1, s_jogada_2;
-wire [6:0] s_pontuacao_0, s_pontuacao_1, s_pontuacao_2;
+wire [2:0] s_pontuacao_0, s_pontuacao_1, s_pontuacao_2;
 
 reg [1:0] MiniGame, Eatual, Eprox;
 reg Dificuldade, s_iniciar;

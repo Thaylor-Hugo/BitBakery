@@ -20,7 +20,7 @@ module cakegame_fd (
     output half_show,
     output timeout,
     output [6:0] play,
-    output [6:0] points
+    output [2:0] points
 );
 
 wire [3:0] s_address;
@@ -105,14 +105,14 @@ contador_m  #(.M(4000), .N(16)) timeout_counter (
     .meio       ()
 );
 
-contador_m #(.M(20), .N(7)) points_counter (
+contador_m #(.M(8), .N(3)) points_counter (
     .clock      (clock),
     .zera_as    (clear_points_counter),
     .zera_s     (1'b0),
     .conta      (enable_points_counter),
-    .Q      (points),
-    .fim    (),
-    .meio   ()
+    .Q          (points),
+    .fim        (),
+    .meio       ()
 );
 
 // Play output
