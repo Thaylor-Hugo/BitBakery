@@ -9,7 +9,7 @@ export function useGameChooser() {
             try {
                 const res = await fetch('http://localhost:5328/api/sensors');
                 const { sensors } = await res.json();
-                if (sensors.state == "initial" || sensors.state == "preparacao" || sensors.state == "escolha_minigame") {
+                if (sensors.state == "inicio" || sensors.state == "inicial" || sensors.state == "preparation" || sensors.state == "preparacao") {
                     router.push('/');
                 } else {
                     router.push('/minigame/' + sensors.minigame);

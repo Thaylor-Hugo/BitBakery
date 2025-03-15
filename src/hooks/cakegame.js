@@ -24,12 +24,14 @@ export function useCakeGame() {
             try {
                 const res = await fetch('http://localhost:5328/api/sensors');
                 const { sensors } = await res.json();
-                if (sensors.state == "initial" || sensors.state == "preparacao" || sensors.state == "escolha_minigame") {
+                if (sensors.state == "inicio" || sensors.state == "preparation") {
                     setFinalCake([]);
                     setUserCake([]);
                     router.push('/');
                 }
-                if (sensors.state == "mostra_bolo") {
+
+                if (sensors.state == "show_play" || sensors.state == "show_interval" || sensors.state == "next_show") {
+                    // Gabarito
                     if (sensors.leds.every(val => val === false)) {
                         changed = true;
                     } else if(!sensors.leds.every(val => val === false) && changed) {
@@ -40,16 +42,19 @@ export function useCakeGame() {
                         ]);
                     }
                 } else {
+                    // Jogada do usuário
                     if (sensors.leds.every(val => val === false)) {
                         changed = true;
                     } else if(!sensors.leds.every(val => val === false) && changed) {
                         changed = false;
                         setUserCake([...user_cake, sensors.leds]);
                     }
-                    if (sensors.state == "proxima_jogada" && changed_state) {
+
+                    // Próxima jogada
+                    if ((sensors.state == "register_play" || sensors.state == "compare_play" || sensors.state == "next_play") && changed_state) {
                         setJogada(jogada + 1);
                         changed_state = false;
-                    } else if (sensors.state != "proxima_jogada") {
+                    } else if ((sensors.state != "register_play" && sensors.state != "compare_play" && sensors.state != "next_play")) {
                         changed_state = true;
                     }
                 }

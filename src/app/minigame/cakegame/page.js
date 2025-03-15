@@ -71,8 +71,8 @@ function Massa({color}) {
 }
 
 function Camada({camada, cobertura}) {
-    const colors = ["Crimson", "HotPink", "OrangeRed", "Khaki", "SkyBlue"];
-    const dark_colors = ["FireBrick", "MediumVioletRed", "DarkOrange", "DarkKhaki", "DeepSkyBlue"];
+    const colors = ["Crimson", "HotPink", "OrangeRed", "Khaki", "SkyBlue", "LightSlateGray", "SpringGreen"];
+    const dark_colors = ["FireBrick", "MediumVioletRed", "DarkOrange", "DarkKhaki", "DeepSkyBlue", "DarkSlateGray", "SeaGreen"];
     for (let i = 0; i < camada.length; i++) {
         if (camada[i] === true) {
             if (cobertura) {
