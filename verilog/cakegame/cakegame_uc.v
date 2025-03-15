@@ -60,7 +60,7 @@ always @* begin
         show_interval:  next_state <= end_show ? next_show : show_interval;
         next_show:      next_state <= end_mem_counter ? initiate_play : show_play;
         initiate_play:  next_state <= wait_play;
-        wait_play:      next_state <= has_play ? compare_play : timeout ? end_state : wait_play;
+        wait_play:      next_state <= has_play ? register_play : timeout ? end_state : wait_play;
         register_play:  next_state <= compare_play;
         compare_play:   next_state <= next_play;
         next_play:      next_state <= end_mem_counter ? end_state : wait_play;

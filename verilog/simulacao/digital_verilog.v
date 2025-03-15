@@ -562,27 +562,27 @@ endmodule//------------------------------------------------------------------
 module sync_rom_16x4_mem2 (clock, address, data_out);
     input            clock;
     input      [3:0] address;
-    output reg [3:0] data_out;
+    output reg [6:0] data_out;
 
     always @ (posedge clock)
     begin
         case (address)
-            4'b0000: data_out = 4'b0001; //1
-            4'b0001: data_out = 4'b0100; //2
-            4'b0010: data_out = 4'b0010; //3
-            4'b0011: data_out = 4'b1000; //4
-            4'b0100: data_out = 4'b0001; //5
-            4'b0101: data_out = 4'b0100; //6
-            4'b0110: data_out = 4'b0010; //7
-            4'b0111: data_out = 4'b1000; //8
-            4'b1000: data_out = 4'b0001; //9
-            4'b1001: data_out = 4'b0001; //10
-            4'b1010: data_out = 4'b1000; //11
-            4'b1011: data_out = 4'b1000; //12
-            4'b1100: data_out = 4'b0010; //13
-            4'b1101: data_out = 4'b0100; //14
-            4'b1110: data_out = 4'b0100; //15
-            4'b1111: data_out = 4'b0001; //16
+            7'b0000000: data_out = 7'b0000001; //1
+            7'b0000001: data_out = 7'b0000100; //2
+            7'b0000010: data_out = 7'b0000010; //3
+            7'b0000011: data_out = 7'b0001000; //4
+            7'b0000100: data_out = 7'b0000001; //5
+            7'b0000101: data_out = 7'b0000100; //6
+            7'b0000110: data_out = 7'b0000010; //7
+            7'b0000111: data_out = 7'b0001000; //8
+            7'b0001000: data_out = 7'b0000001; //9
+            7'b0001001: data_out = 7'b0000001; //10
+            7'b0001010: data_out = 7'b0001000; //11
+            7'b0001011: data_out = 7'b0001000; //12
+            7'b0001100: data_out = 7'b0000010; //13
+            7'b0001101: data_out = 7'b0000100; //14
+            7'b0001110: data_out = 7'b0000100; //15
+            7'b0001111: data_out = 7'b0000001; //16
         endcase
     end
 endmodule
@@ -602,27 +602,27 @@ endmodule
 module sync_rom_16x4 (clock, address, data_out);
     input            clock;
     input      [3:0] address;
-    output reg [3:0] data_out;
+    output reg [6:0] data_out;
 
     always @ (posedge clock)
     begin
         case (address)
-            4'b0000: data_out = 4'b0001; //1
-            4'b0001: data_out = 4'b0010; //2
-            4'b0010: data_out = 4'b0100; //3
-            4'b0011: data_out = 4'b1000; //4
-            4'b0100: data_out = 4'b0100; //5
-            4'b0101: data_out = 4'b0010; //6
-            4'b0110: data_out = 4'b0001; //7
-            4'b0111: data_out = 4'b0001; //8
-            4'b1000: data_out = 4'b0010; //9
-            4'b1001: data_out = 4'b0010; //10
-            4'b1010: data_out = 4'b0100; //11
-            4'b1011: data_out = 4'b0100; //12
-            4'b1100: data_out = 4'b1000; //13
-            4'b1101: data_out = 4'b1000; //14
-            4'b1110: data_out = 4'b0001; //15
-            4'b1111: data_out = 4'b0100; //16
+            7'b0000000: data_out = 7'b0000001; //1
+            7'b0000001: data_out = 7'b0000010; //2
+            7'b0000010: data_out = 7'b0000100; //3
+            7'b0000011: data_out = 7'b0001000; //4
+            7'b0000100: data_out = 7'b0000100; //5
+            7'b0000101: data_out = 7'b0000010; //6
+            7'b0000110: data_out = 7'b0000001; //7
+            7'b0000111: data_out = 7'b0000001; //8
+            7'b0001000: data_out = 7'b0000010; //9
+            7'b0001001: data_out = 7'b0000010; //10
+            7'b0001010: data_out = 7'b0000100; //11
+            7'b0001011: data_out = 7'b0000100; //12
+            7'b0001100: data_out = 7'b0001000; //13
+            7'b0001101: data_out = 7'b0001000; //14
+            7'b0001110: data_out = 7'b0000001; //15
+            7'b0001111: data_out = 7'b0000100; //16
         endcase
     end
 endmodule
@@ -649,10 +649,10 @@ module cakegame_fd (
     output half_show,
     output timeout,
     output [6:0] play,
-    output [3:0] points
+    output [6:0] points
 );
 
-wire [3:0] s_address, s_limit;
+wire [3:0] s_address;
 wire [6:0] s_data, s_data_2, s_mem_out;
 wire [6:0] s_reg;
 wire signal = buttons[0] | buttons[1] | buttons[2] | buttons[3] | buttons[4] | buttons[5] | buttons[6];
@@ -734,15 +734,14 @@ contador_m  #(.M(4000), .N(16)) timeout_counter (
     .meio       ()
 );
 
-contador_163 points_counter (
-    .clock  (clock),
-    .clr    (~clear_points_counter),
-    .ld     (1'b1),
-    .ent    (1'b1),
-    .enp    (enable_points_counter),
-    .D      (4'b0),
+contador_m #(.M(20), .N(7)) points_counter (
+    .clock      (clock),
+    .zera_as    (clear_points_counter),
+    .zera_s     (1'b0),
+    .conta      (enable_points_counter),
     .Q      (points),
-    .rco    ()
+    .fim    (),
+    .meio   ()
 );
 
 // Play output
@@ -817,7 +816,7 @@ always @* begin
         show_interval:  next_state <= end_show ? next_show : show_interval;
         next_show:      next_state <= end_mem_counter ? initiate_play : show_play;
         initiate_play:  next_state <= wait_play;
-        wait_play:      next_state <= has_play ? compare_play : timeout ? end_state : wait_play;
+        wait_play:      next_state <= has_play ? register_play : timeout ? end_state : wait_play;
         register_play:  next_state <= compare_play;
         compare_play:   next_state <= next_play;
         next_play:      next_state <= end_mem_counter ? end_state : wait_play;
