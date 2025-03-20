@@ -85,7 +85,7 @@ comparador compare (
 );
 
 // General Timers
-contador_m  #(.M(5000),.N(16)) show_counter (
+contador_m  #(.M(50000000),.N(32)) show_counter (
     .clock      (clock),   
     .zera_as    (clear_show_counter),
     .zera_s     (1'b0),
@@ -95,7 +95,7 @@ contador_m  #(.M(5000),.N(16)) show_counter (
     .meio       (half_show)
 );
 
-contador_m  #(.M(20000), .N(16)) timeout_counter (
+contador_m  #(.M(200000000), .N(32)) timeout_counter (
     .clock      (clock),   
     .zera_as    (~enable_timeout_counter),
     .zera_s     (1'b0),

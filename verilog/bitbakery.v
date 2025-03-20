@@ -13,22 +13,33 @@
 
 module bitbakery (
     input clock,
-    input reset,
-    input iniciar,
+    input reset_in,
+    input iniciar_in,
     input dificuldade,
     input [1:0] minigame,
-    input [6:0] botoes,
+    input [6:0] botoes_in,
     output [1:0] minigame_out,
     output [2:0] leds_out,
     output [3:0] estado_out,
     output [6:0] jogada_out,
-    output [2:0] pontuacao_out
+    output [2:0] pontuacao_out,
+	 output [6:0] db_estado,
+	 output [1:0] db_minigame,
+	 output [6:0] db_jogada,
+	 output db_iniciar,
+	 output db_clock
 );
 
 parameter inicial = 2'b00;
 parameter preparacao = 2'b01;
 parameter execucao = 2'b10;
 parameter fim = 2'b11;
+
+wire reset, iniciar;
+wire [6:0] botoes;
+assign iniciar = ~iniciar_in;
+assign reset = ~reset_in;
+assign botoes = ~botoes_in;
 
 wire s_pronto_0, s_pronto_1, s_pronto_2, s_pronto;
 wire [2:0] s_leds_0, s_leds_1, s_leds_2;
@@ -38,6 +49,17 @@ wire [2:0] s_pontuacao_0, s_pontuacao_1, s_pontuacao_2;
 
 reg [1:0] MiniGame, Eatual, Eprox;
 reg Dificuldade, s_iniciar;
+
+assign db_clock = clock;
+assign db_minigame = minigame_out;
+assign db_iniciar = iniciar;
+assign db_jogada = jogada_out;
+
+hexa7seg display_state (
+	.hexa (estado_out),
+	.display (db_estado)
+);
+
 
 initial begin
     MiniGame <= 2'b11;
