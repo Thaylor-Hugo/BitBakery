@@ -114,7 +114,7 @@ export default function CakeGame() {
     const {final_cake, user_cake, jogada} = useCakeGame();
 
     const possible_positions = ["left-5", "left-40", "left-75", "left-110", "left-145", "left-180", "left-215", "left-250", "left-285", "left-320", "left-355", "left-390", "left-425", "left-460", "left-495", "left-530"];
-    const user_cake_class = "h-full absolute bottom-0 left-0 transition-all duration-500 ease-in-out".concat(" ", possible_positions[jogada]);
+    const user_cake_class = "h-full absolute bottom-0 left-0 transition-all duration-2500 ease-in-out".concat(" ", possible_positions[jogada]);
     return (
         <div class="h-screen flex flex-col">
             <div>

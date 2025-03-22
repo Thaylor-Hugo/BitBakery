@@ -1,15 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-
-// let final_cake = new CakeObject();
-// let user_cake = new CakeObject();
-
-// function CakeObject() {
-//     this.reset = function() {
-//         this.camada = [];
-//     }
-//     this.reset();
-// }
         
 export function useCakeGame() {
     let changed = false;
@@ -47,15 +37,8 @@ export function useCakeGame() {
                         changed = true;
                     } else if(!sensors.jogada.every(val => val === false) && changed) {
                         changed = false;
-                        setUserCake([...user_cake, sensors.jogada]);
-                    }
-
-                    // Próxima jogada
-                    if ((sensors.state == "register_play" || sensors.state == "compare_play" || sensors.state == "next_play") && changed_state) {
                         setJogada(jogada + 1);
-                        changed_state = false;
-                    } else if ((sensors.state != "register_play" && sensors.state != "compare_play" && sensors.state != "next_play")) {
-                        changed_state = true;
+                        setUserCake([...user_cake, sensors.jogada]);
                     }
                 }
             } catch (error) {

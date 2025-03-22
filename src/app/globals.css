@@ -10,5 +10,5 @@
 }
 
 .fall-animation {
-    animation: fall 1s ease-in-out forwards;
+    animation: fall 0.7s ease-in-out forwards;
 }
