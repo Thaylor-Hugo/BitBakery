@@ -17,6 +17,8 @@ genius_states =["inicial", "preparacao", "proxima_mostra", "espera_jogada", "reg
 
 minigames = ["memorygame", "cakegame", "clothesgame"]
 device_name = "Analog Discovery 2"
+device_data = None
+supplies_data = None
 
 
 def convert_dec(bin):
@@ -27,7 +29,7 @@ def convert_dec(bin):
     return dec
 
 
-def analog_loop():
+def init_analog():
     # connect to the device
     device_data = device.open()
     device_data.name = device_name
@@ -38,10 +40,16 @@ def analog_loop():
     supplies_data.state = True
     supplies_data.voltage = 3.3
     supplies.switch(device_data, supplies_data)
- 
+
+def set_output(index, state):
+    static.set_state(device_data, index, state)
+
+def analog_loop():
+    init_analog()
+
     # set all pins as input
     for index in range(16):
-        static.set_mode(device_data, index, False)
+        set_output(index, False)
     
     try:
         while True:
@@ -64,16 +72,19 @@ def analog_loop():
     except KeyboardInterrupt:
         # stop if Ctrl+C is pressed
         pass
-    
     finally:
-        # stop the static I/O
-        static.close(device_data)
+        close_analog()
     
-        # stop and reset the power supplies
-        supplies_data.master_state = False
-        supplies.switch(device_data, supplies_data)
-        supplies.close(device_data)
-    
-        # close the connection
-        device.close(device_data)
+
+def close_analog():
+    # stop the static I/O
+    static.close(device_data)
+
+    # stop and reset the power supplies
+    supplies_data.master_state = False
+    supplies.switch(device_data, supplies_data)
+    supplies.close(device_data)
+
+    # close the connection
+    device.close(device_data)
 

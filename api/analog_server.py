@@ -5,7 +5,7 @@ import threading
 
 # For mock sensors uncoment this line and coment the next one. Also change commented lines on main function
 # from sensors_mock import mock_loop, sensors
-from analog_service import analog_loop, sensors, states, minigames
+from analog_service import analog_loop, close_analog, sensors
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS
@@ -22,8 +22,13 @@ if __name__ == '__main__':
     # mock_thread.start()
 
     # Analog sensors values
-    analog_thread = threading.Thread(target=analog_loop, daemon=True)
-    analog_thread.start()
+    try:
+        analog_thread = threading.Thread(target=analog_loop, daemon=True)
+        analog_thread.start()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        close_analog()
 
     # Start Flask server
     app.run(port=5328)
