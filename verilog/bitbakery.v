@@ -12,7 +12,7 @@
 //
 
 module bitbakery (
-    input clock,
+    input clock_in,
     input reset_in,
     input iniciar_in,
     input dificuldade,
@@ -35,7 +35,7 @@ parameter preparacao = 2'b01;
 parameter execucao = 2'b10;
 parameter fim = 2'b11;
 
-wire reset, iniciar;
+wire reset, iniciar, clock;
 wire [6:0] botoes;
 assign iniciar = ~iniciar_in;
 assign reset = ~reset_in;
@@ -92,6 +92,11 @@ always @* begin
     Dificuldade <= (Eatual == preparacao)? dificuldade : Dificuldade;
     MiniGame <= (Eatual == preparacao)? minigame : MiniGame;
 end
+
+clock_diviser clock_out (
+    .clock (clock_in),
+    .clock_divised (clock)
+);
 
 mux_out saidas (
     .minigame       (MiniGame),

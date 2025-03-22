@@ -94,7 +94,7 @@ module fluxo_dados (
     );
 
     // contador_m
-    contador_m  #(.M(50000000),.N(32)) contadorM (
+    contador_m  #(.M(1000),.N(32)) contadorM (
        .clock     (clock),   
        .zera_as   (zeraM),
        .zera_s    (1'b0),
@@ -105,7 +105,7 @@ module fluxo_dados (
     );
 	 
 	 // contador_m
-    contador_m  #(.M(200000000), .N(64)) contador_timeout (
+    contador_m  #(.M(5000), .N(64)) contador_timeout (
        .clock     (clock),   
        .zera_as   (~contaT),
        .zera_s    (1'b0),
