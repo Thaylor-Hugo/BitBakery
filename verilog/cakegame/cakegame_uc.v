@@ -33,6 +33,7 @@ parameter wait_play     = 4'b0110; // 6
 parameter register_play = 4'b0111; // 7
 parameter compare_play  = 4'b1000; // 8
 parameter next_play     = 4'b1001; // 9
+parameter start_show    = 4'b1010; // A
 parameter end_state     = 4'b1111; // F
 
 // State variables
@@ -55,7 +56,8 @@ end
 always @* begin
     case (current_state)
         inicio:         next_state <= start ? preparation : inicio;
-        preparation:    next_state <= show_play;
+        preparation:    next_state <= half_show ?  start_show : preparation;     // Intervalo para começar - definido para a interface não pular a primeira jogada
+        start_show:     next_state <= show_play;
         show_play:      next_state <= half_show ? show_interval : show_play;
         show_interval:  next_state <= end_show ? next_show : show_interval;
         next_show:      next_state <= end_mem_counter ? initiate_play : show_play;
@@ -75,8 +77,8 @@ always @* begin
     enable_reg <= (current_state == register_play) ? 1'b1 : 1'b0;
     clear_mem_counter <= (current_state == preparation || current_state == initiate_play) ? 1'b1 : 1'b0;
     enable_mem_counter <= (current_state == next_show || current_state == next_play) ? 1'b1 : 1'b0;
-    clear_show_counter <= (current_state == preparation) ? 1'b1 : 1'b0;
-    enable_show_counter <= (current_state == show_interval || current_state == show_play) ? 1'b1 : 1'b0;
+    clear_show_counter <= (current_state == start_show || current_state == inicio || current_state == end_state) ? 1'b1 : 1'b0;
+    enable_show_counter <= (current_state == preparation || current_state == show_interval || current_state == show_play) ? 1'b1 : 1'b0;
     enable_timeout_counter <= (current_state == wait_play) ? 1'b1 : 1'b0;
     clear_points_counter <= (current_state == preparation) ? 1'b1 : 1'b0;
     enable_points_counter <= (correct_play && (current_state == next_play)) ? 1'b1 : 1'b0;
