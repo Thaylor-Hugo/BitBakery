@@ -181,6 +181,9 @@ module cakegame_fd (
     input enable_timeout_counter,
     input clear_points_counter,
     input enable_points_counter,
+    input clear_ram,
+    input enable_ram,
+    input reset_random,
     output end_mem_counter,
     output correct_play,
     output has_play,
@@ -192,9 +195,11 @@ module cakegame_fd (
 );
 
 wire [3:0] s_address;
-wire [6:0] s_data, s_data_2, s_mem_out;
+wire [6:0] s_data, s_data_2, s_mem_out, s_ram_out;
 wire [6:0] s_reg;
 wire signal = buttons[0] | buttons[1] | buttons[2] | buttons[3] | buttons[4] | buttons[5] | buttons[6];
+wire [2:0] s_random_address_1;
+wire [1:0] s_random_address_2;
 
 // Define saída das Memórias
 contador_163 address_counter (
@@ -208,15 +213,38 @@ contador_163 address_counter (
     .rco    (end_mem_counter)
 );
 
-sync_rom_16x4 rom_1 (
+sync_ram ram (
+    .clock          (clock),
+    .reset          (clear_ram),
+    .write_enable   (enable_ram),
+    .address        (s_address),
+    .data_in        (s_mem_out),
+    .data_out       (s_ram_out)
+);
+
+random #(.N(3)) random_address_1 (
+    .clock          (clock),
+    .reset          (reset_random),
+    .write_enable   (1'b1),
+    .address        (s_random_address_1)
+);
+
+random #(.N(2)) random_address_2 (
+    .clock          (clock),
+    .reset          (reset_random),
+    .write_enable   (1'b1),
+    .address        (s_random_address_2)
+);
+
+rom rom_1 (
     .clock      (clock),
-    .address    (s_address),
+    .address    (s_random_address_1),
     .data_out   (s_data)
 );
 
-sync_rom_16x4_mem2 rom_2 (
+rom_easy rom_2 (
     .clock      (clock),
-    .address    (s_address),
+    .address    (s_random_address_2),
     .data_out   (s_data_2)
 );
 
@@ -245,7 +273,7 @@ registrador_4 play_reg (
 
 // Compara jogada com memórias
 comparador compare (
-    .A    (s_mem_out),
+    .A    (s_ram_out),
     .B    (s_reg),
     .ALBo (    ),
     .AGBo (    ),
@@ -286,7 +314,7 @@ contador_m #(.M(8), .N(3)) points_counter (
 // Play output
 mux3x1 out_mux (
     .D0     (7'b0),
-    .D1     (s_mem_out),
+    .D1     (s_ram_out),
     .D2     (buttons),
     .SEL    (out_sel),
     .OUT    (play)
@@ -313,6 +341,9 @@ module cakegame_uc (
     output reg enable_timeout_counter,
     output reg clear_points_counter,
     output reg enable_points_counter,
+    output reg clear_ram,
+    output reg enable_ram,
+    output reg reset_random,
     output reg finished,
     output reg [3:0] state
 );
@@ -329,6 +360,7 @@ parameter register_play = 4'b0111; // 7
 parameter compare_play  = 4'b1000; // 8
 parameter next_play     = 4'b1001; // 9
 parameter start_show    = 4'b1010; // A
+parameter register_show = 4'b1011; // B
 parameter end_state     = 4'b1111; // F
 
 // State variables
@@ -355,7 +387,8 @@ always @* begin
         start_show:     next_state <= show_play;
         show_play:      next_state <= half_show ? show_interval : show_play;
         show_interval:  next_state <= end_show ? next_show : show_interval;
-        next_show:      next_state <= end_mem_counter ? initiate_play : show_play;
+        next_show:      next_state <= end_mem_counter ? initiate_play : register_show;
+        register_show:  next_state <= show_play;
         initiate_play:  next_state <= wait_play;
         wait_play:      next_state <= has_play ? register_play : timeout ? end_state : wait_play;
         register_play:  next_state <= compare_play;
@@ -377,6 +410,9 @@ always @* begin
     enable_timeout_counter <= (current_state == wait_play) ? 1'b1 : 1'b0;
     clear_points_counter <= (current_state == preparation) ? 1'b1 : 1'b0;
     enable_points_counter <= (correct_play && (current_state == next_play)) ? 1'b1 : 1'b0;
+    clear_ram <= (current_state == preparation) ? 1'b1 : 1'b0;
+    enable_ram <= (current_state == start_show || current_state == register_show) ? 1'b1 : 1'b0;
+    reset_random <= (current_state == preparation) ? 1'b1 : 1'b0;
     finished <= (current_state == end_state) ? 1'b1 : 1'b0;
     state <= current_state;
 
@@ -406,6 +442,7 @@ module cakegame (
 wire [1:0] s_out_sel;
 wire [3:0] s_estado;
 wire s_clear_reg, s_enable_reg, s_clear_mem_counter, s_enable_mem_counter, s_clear_show_counter, s_enable_show_counter, s_enable_timeout_counter, s_clear_points_counter, s_enable_points_counter, s_end_mem_counter, s_correct_play, s_has_play, s_end_show, s_half_show, s_timeout, s_pronto;
+wire clear_ram, enable_ram;
 
 cakegame_fd data_flux(
     .clock                  (clock),
@@ -421,6 +458,9 @@ cakegame_fd data_flux(
     .enable_timeout_counter (s_enable_timeout_counter),
     .clear_points_counter   (s_clear_points_counter),
     .enable_points_counter  (s_enable_points_counter),
+    .clear_ram              (clear_ram),
+    .enable_ram             (enable_ram),
+    .reset_random           (reset_random),
     .end_mem_counter        (s_end_mem_counter),
     .correct_play           (s_correct_play),
     .has_play               (s_has_play),
@@ -451,6 +491,9 @@ cakegame_uc control_unit(
     .enable_timeout_counter (s_enable_timeout_counter),
     .clear_points_counter   (s_clear_points_counter),
     .enable_points_counter  (s_enable_points_counter),
+    .clear_ram              (clear_ram),
+    .enable_ram             (enable_ram),
+    .reset_random           (reset_random),
     .finished               (pronto),
     .state                  (s_estado)
 );
@@ -1464,3 +1507,128 @@ assign clock_divised = clock;
 // end
     
 endmodule
+
+module sync_ram (
+    input clock,
+    input reset,
+    input write_enable,
+    input [3:0] address,
+    input [6:0] data_in,
+    output reg [6:0] data_out
+);
+
+reg [6:0] ram [15:0];
+integer i;
+
+always @ (posedge clock or posedge reset) begin
+    if (reset)
+        for (i = 0; i < 16; i = i + 1)
+            ram[i] <= 7'b0;
+    else begin
+        if (write_enable)
+            ram[address] <= data_in;
+        data_out <= ram[address];
+    end
+end
+    
+endmodule
+
+module random #(
+  parameter N = 3,           // 2 or 3 bits
+  parameter LFSR_SIZE = 7    // Period = 127 cycles (for N=3)
+) (
+  input clock,
+  input reset,
+  input write_enable,
+  output [N-1:0] address
+);
+
+// LFSR state and seed initialization
+reg [LFSR_SIZE-1:0] lfsr;
+reg [LFSR_SIZE-1:0] seed;
+
+initial begin
+    seed <= 0;
+    lfsr <= {LFSR_SIZE{1'b1}};
+end
+
+// LFSR feedback polynomial (x^7 + x^6 + 1)
+wire feedback = lfsr[LFSR_SIZE-1] ^ lfsr[LFSR_SIZE-2];
+
+always @(posedge clock or posedge reset) begin
+  if (reset) begin
+    lfsr <= {seed, 1'b1};   // Avoid zero initialization
+    seed <= seed + 1;
+  end
+  else if (write_enable) begin
+    lfsr <= {lfsr[LFSR_SIZE-2:0], feedback};
+  end
+end
+
+// Bijective mapping: Ensure all 2^N combinations appear
+assign address = lfsr[N-1:0] ^ lfsr[LFSR_SIZE-1:LFSR_SIZE-N];
+
+endmodule
+//------------------------------------------------------------------
+// Arquivo   : sync_cake_rom.v
+// Projeto   : BitBakery 
+//------------------------------------------------------------------
+// Descricao : ROM sincrona 16x4 (conteúdo pre-programado)
+//              Memoria para diferentes bolos
+//             
+//------------------------------------------------------------------
+// Revisoes  :
+//     Data        Versao  Autor             Descricao
+//     14/12/2023  1.0     Edson Midorikawa  versao inicial
+//     22/03/2025  1.0     T5BB5             versao final
+//------------------------------------------------------------------
+//
+module rom (clock, address, data_out);
+    input            clock;
+    input      [2:0] address;
+    output reg [6:0] data_out;
+
+    always @ (posedge clock)
+    begin
+        case (address)
+            3'b000: data_out = 7'b0000001;
+            3'b001: data_out = 7'b0000010;
+            3'b010: data_out = 7'b0000100;
+            3'b011: data_out = 7'b0001000;
+            3'b100: data_out = 7'b0010000;
+            3'b101: data_out = 7'b0100000;
+            3'b110: data_out = 7'b1000000;
+        endcase
+    end
+endmodule
+
+//------------------------------------------------------------------
+// Arquivo   : sync_cake_rom.v
+// Projeto   : BitBakery 
+//------------------------------------------------------------------
+// Descricao : ROM sincrona 16x4 (conteúdo pre-programado)
+//              Memoria para diferentes bolos
+//             
+//------------------------------------------------------------------
+// Revisoes  :
+//     Data        Versao  Autor             Descricao
+//     14/12/2023  1.0     Edson Midorikawa  versao inicial
+//     22/03/2025  1.0     T5BB5             versao final
+//------------------------------------------------------------------
+//
+module rom_easy (clock, address, data_out);
+    input            clock;
+    input      [1:0] address;
+    output reg [6:0] data_out;
+
+    always @ (posedge clock)
+    begin
+        case (address)
+            2'b00: data_out = 7'b0000001;
+            2'b01: data_out = 7'b0000010;
+            2'b10: data_out = 7'b0000100;
+            2'b11: data_out = 7'b0001000;
+        endcase
+    end
+endmodule
+

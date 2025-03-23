@@ -13,6 +13,9 @@ module cakegame_fd (
     input enable_timeout_counter,
     input clear_points_counter,
     input enable_points_counter,
+    input clear_ram,
+    input enable_ram,
+    input reset_random,
     output end_mem_counter,
     output correct_play,
     output has_play,
@@ -24,9 +27,11 @@ module cakegame_fd (
 );
 
 wire [3:0] s_address;
-wire [6:0] s_data, s_data_2, s_mem_out;
+wire [6:0] s_data, s_data_2, s_mem_out, s_ram_out;
 wire [6:0] s_reg;
 wire signal = buttons[0] | buttons[1] | buttons[2] | buttons[3] | buttons[4] | buttons[5] | buttons[6];
+wire [2:0] s_random_address_1;
+wire [1:0] s_random_address_2;
 
 // Define saída das Memórias
 contador_163 address_counter (
@@ -40,15 +45,38 @@ contador_163 address_counter (
     .rco    (end_mem_counter)
 );
 
-sync_rom_16x4 rom_1 (
+sync_ram ram (
+    .clock          (clock),
+    .reset          (clear_ram),
+    .write_enable   (enable_ram),
+    .address        (s_address),
+    .data_in        (s_mem_out),
+    .data_out       (s_ram_out)
+);
+
+random #(.N(3)) random_address_1 (
+    .clock          (clock),
+    .reset          (reset_random),
+    .write_enable   (1'b1),
+    .address        (s_random_address_1)
+);
+
+random #(.N(2)) random_address_2 (
+    .clock          (clock),
+    .reset          (reset_random),
+    .write_enable   (1'b1),
+    .address        (s_random_address_2)
+);
+
+rom rom_1 (
     .clock      (clock),
-    .address    (s_address),
+    .address    (s_random_address_1),
     .data_out   (s_data)
 );
 
-sync_rom_16x4_mem2 rom_2 (
+rom_easy rom_2 (
     .clock      (clock),
-    .address    (s_address),
+    .address    (s_random_address_2),
     .data_out   (s_data_2)
 );
 
@@ -77,7 +105,7 @@ registrador_4 play_reg (
 
 // Compara jogada com memórias
 comparador compare (
-    .A    (s_mem_out),
+    .A    (s_ram_out),
     .B    (s_reg),
     .ALBo (    ),
     .AGBo (    ),
@@ -118,7 +146,7 @@ contador_m #(.M(8), .N(3)) points_counter (
 // Play output
 mux3x1 out_mux (
     .D0     (7'b0),
-    .D1     (s_mem_out),
+    .D1     (s_ram_out),
     .D2     (buttons),
     .SEL    (out_sel),
     .OUT    (play)

@@ -18,6 +18,9 @@ module cakegame_uc (
     output reg enable_timeout_counter,
     output reg clear_points_counter,
     output reg enable_points_counter,
+    output reg clear_ram,
+    output reg enable_ram,
+    output reg reset_random,
     output reg finished,
     output reg [3:0] state
 );
@@ -34,6 +37,7 @@ parameter register_play = 4'b0111; // 7
 parameter compare_play  = 4'b1000; // 8
 parameter next_play     = 4'b1001; // 9
 parameter start_show    = 4'b1010; // A
+parameter register_show = 4'b1011; // B
 parameter end_state     = 4'b1111; // F
 
 // State variables
@@ -60,7 +64,8 @@ always @* begin
         start_show:     next_state <= show_play;
         show_play:      next_state <= half_show ? show_interval : show_play;
         show_interval:  next_state <= end_show ? next_show : show_interval;
-        next_show:      next_state <= end_mem_counter ? initiate_play : show_play;
+        next_show:      next_state <= end_mem_counter ? initiate_play : register_show;
+        register_show:  next_state <= show_play;
         initiate_play:  next_state <= wait_play;
         wait_play:      next_state <= has_play ? register_play : timeout ? end_state : wait_play;
         register_play:  next_state <= compare_play;
@@ -82,6 +87,9 @@ always @* begin
     enable_timeout_counter <= (current_state == wait_play) ? 1'b1 : 1'b0;
     clear_points_counter <= (current_state == preparation) ? 1'b1 : 1'b0;
     enable_points_counter <= (correct_play && (current_state == next_play)) ? 1'b1 : 1'b0;
+    clear_ram <= (current_state == preparation) ? 1'b1 : 1'b0;
+    enable_ram <= (current_state == start_show || current_state == register_show) ? 1'b1 : 1'b0;
+    reset_random <= (current_state == preparation) ? 1'b1 : 1'b0;
     finished <= (current_state == end_state) ? 1'b1 : 1'b0;
     state <= current_state;
 
