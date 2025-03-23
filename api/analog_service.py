@@ -9,7 +9,7 @@ sensors = {
 }
 
 cake_states = ["inicio", "preparation", "show_play", "show_interval", "next_show", "initiate_play", "wait_play", 
-                "register_play", "compare_play", "next_play", "end_state"]
+                "register_play", "compare_play", "next_play", "start_show", "register_show", "end_state"]
 
 genius_states =["inicial", "preparacao", "proxima_mostra", "espera_jogada", "registra_jogada", "compara_jogada", 
                 "proxima_jogada", "foi_ultima_sequencia", "proxima_sequencia", "mostra_jogada", "intervalo_mostra", 

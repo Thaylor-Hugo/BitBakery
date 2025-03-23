@@ -20,7 +20,7 @@ export function useCakeGame() {
                     router.push('/');
                 }
 
-                if (sensors.state == "show_play" || sensors.state == "show_interval" || sensors.state == "next_show") {
+                if (sensors.state == "show_play" || sensors.state == "show_interval" || sensors.state == "next_show" || sensors.state == "start_show" || sensors.state == "register_show") {
                     // Gabarito
                     if (sensors.jogada.every(val => val === false)) {
                         changed = true;

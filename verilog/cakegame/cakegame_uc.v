@@ -38,7 +38,7 @@ parameter compare_play  = 4'b1000; // 8
 parameter next_play     = 4'b1001; // 9
 parameter start_show    = 4'b1010; // A
 parameter register_show = 4'b1011; // B
-parameter end_state     = 4'b1111; // F
+parameter end_state     = 4'b1100; // C
 
 // State variables
 reg [3:0] current_state, next_state;

@@ -72,7 +72,7 @@ cakegame_uc control_unit(
 );
 
 // TODO: Implementar lógica de leds
-assign leds = (s_estado == 4'b1111) ? 3'b100 : (s_estado == 4'b0110)? 3'b010 : 3'b001;
+assign leds = (s_estado == 4'b1100) ? 3'b100 : (s_estado == 4'b0110)? 3'b010 : 3'b001;
 assign estado = s_estado;
 
 endmodule
