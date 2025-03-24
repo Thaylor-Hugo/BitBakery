@@ -3,7 +3,6 @@ import { useRouter } from 'next/navigation';
         
 export function useCakeGame() {
     let changed = false;
-    let changed_state = false;
     const router = useRouter();
     const [final_cake, setFinalCake] = useState([]);
     const [user_cake, setUserCake] = useState([]);
@@ -26,10 +25,8 @@ export function useCakeGame() {
                         changed = true;
                     } else if(!sensors.jogada.every(val => val === false) && changed) {
                         changed = false;
-                        setFinalCake([
-                            ...final_cake, 
-                            sensors.jogada
-                        ]);
+                        console.log(sensors.jogada);
+                        setFinalCake( (prevfinalCake) => [...prevfinalCake, sensors.jogada] );
                     }
                 } else {
                     // Jogada do usuário
@@ -37,15 +34,15 @@ export function useCakeGame() {
                         changed = true;
                     } else if(!sensors.jogada.every(val => val === false) && changed) {
                         changed = false;
-                        setJogada(jogada + 1);
-                        setUserCake([...user_cake, sensors.jogada]);
+                        setJogada( (prevJogada) => prevJogada + 1);
+                        setUserCake( (prevUserCake) => [...prevUserCake, sensors.jogada]);
                     }
                 }
             } catch (error) {
                 console.error('Error fetching sensors:', error);
             }
         };
-        const interval = setInterval(fetchSensors, 100);
+        const interval = setInterval(fetchSensors, 1);
         return () => clearInterval(interval);
     }, [router, final_cake, user_cake, jogada]);
     return {final_cake, user_cake, jogada};
