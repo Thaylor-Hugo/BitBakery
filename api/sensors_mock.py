@@ -3,7 +3,7 @@ import threading
 
 sensors = {
     "state": "inicio",
-    "minigame": "cakegame",
+    "minigame": "memorygame",
     "jogada": [False, False, False, False, False, False, False],
     "pontuacao": 0,
 }
@@ -19,7 +19,7 @@ minigames = ["memorygame", "cakegame", "clothesgame"]
 
 inputs = {
     "jogada": [False, False, False, False, False, False, False],
-    "minigame": "cakegame",
+    "minigame": "memorygame",
     "dificuldade": False,
     "jogar": False
 }

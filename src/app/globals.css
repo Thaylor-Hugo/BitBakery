@@ -12,3 +12,18 @@
 .fall-animation {
     animation: fall 0.7s ease-in-out forwards;
 }
+
+#container {
+    padding: 50px;
+    background-color: #FFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80vh; /* Ocupa a altura total da janela */
+}
+
+.circulos {
+    display: flex;
+    align-items: center; /* Centraliza verticalmente */
+    justify-content: center; /* Centraliza horizontalmente */
+}

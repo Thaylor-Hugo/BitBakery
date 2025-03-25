@@ -1,9 +1,17 @@
+'use client'
 
-export default function MemoryGame() {
+import Head from 'next/head';
+import CirclesContainer from '../../../components/Circle';
+import '../../globals.css';
+
+export default function memorygame() {
   return (
-    <div>
-      <h1>Memory MiniGame</h1>
-      <p>You choose the memory game!</p>
+    <div id="container">
+        <Head>
+            <title>REACT! REACT! REACT!</title>
+            <link rel="stylesheet" href="styles/globals.css" />
+        </Head>
+        <CirclesContainer />
     </div>
   );
 }
