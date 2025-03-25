@@ -12,7 +12,7 @@ initial begin
 end
 
 always @(posedge clock) begin
-    if (counter == 25000000) begin
+    if (counter == 25000) begin
         counter <= 0;
         clock_divised <= ~clock_divised;
     end else begin
