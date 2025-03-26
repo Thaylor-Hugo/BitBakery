@@ -30,10 +30,11 @@ module bitbakery (
 	 output db_clock
 );
 
-parameter inicial = 2'b00;
-parameter preparacao = 2'b01;
-parameter execucao = 2'b10;
-parameter fim = 2'b11;
+parameter inicial = 3'b000;
+parameter preparacao = 3'b001;
+parameter execucao = 3'b010;
+parameter fim = 3'b011;
+parameter intervalo = 3'b100;
 
 wire reset, iniciar, clock;
 wire [6:0] botoes;
@@ -41,13 +42,14 @@ assign iniciar = ~iniciar_in;
 assign reset = ~reset_in;
 assign botoes = ~botoes_in;
 
-wire s_pronto_0, s_pronto_1, s_pronto_2, s_pronto;
+wire s_pronto_0, s_pronto_1, s_pronto_2, s_pronto, fim_intervalo;
 wire [2:0] s_leds_0, s_leds_1, s_leds_2;
 wire [3:0] s_estado_0, s_estado_1, s_estado_2, s_estado_inicial;
 wire [6:0] s_jogada_0, s_jogada_1, s_jogada_2;
 wire [2:0] s_pontuacao_0, s_pontuacao_1, s_pontuacao_2;
 
-reg [1:0] MiniGame, Eatual, Eprox;
+reg [1:0] MiniGame; 
+reg [2:0] Eatual, Eprox;
 reg Dificuldade, s_iniciar;
 
 assign db_clock = clock;
@@ -78,13 +80,25 @@ end
 // Máquina de estados
 always @* begin
     case (Eatual)
-        inicial: Eprox = iniciar ? preparacao : inicial;
+        inicial: Eprox = iniciar ? intervalo : inicial;
+        intervalo: Eprox = fim_intervalo ? preparacao : intervalo;
         preparacao: Eprox = (MiniGame != 2'b11)? execucao : preparacao;
         execucao: Eprox = s_pronto ? fim : execucao;
-        fim: Eprox = iniciar ? preparacao : fim; 
+        fim: Eprox = iniciar ? intervalo : fim; 
         default: Eprox = inicial;
     endcase
 end
+
+
+contador_m  #(.M(5000), .N(32)) contador_intervalo (
+    .clock      (clock),   
+    .zera_as    (Eatual == iniciar),
+    .zera_s     (1'b0),
+    .conta	    (Eatual == intervalo),
+    .Q          (),
+    .fim        (fim_intervalo),
+    .meio       ()
+);
 
 // Lógica de saída
 always @* begin
