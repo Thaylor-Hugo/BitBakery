@@ -20,16 +20,16 @@ if __name__ == '__main__':
     # Mock sensors values
     # mock_thread = threading.Thread(target=mock_loop, daemon=True)
     # mock_thread.start()
+    # app.run(port=5328)
 
     # Analog sensors values
     try:
         analog_thread = threading.Thread(target=analog_loop, daemon=True)
         analog_thread.start()
+        app.run(port=5328)
     except KeyboardInterrupt:
         pass
     finally:
         close_analog()
 
-    # Start Flask server
-    app.run(port=5328)
    
