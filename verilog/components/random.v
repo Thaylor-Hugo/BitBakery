@@ -12,6 +12,7 @@ module random #(
 // LFSR state and seed initialization
 reg [LFSR_SIZE-1:0] lfsr;
 reg [LFSR_SIZE-1:0] seed;
+wire [N-1:0] temp;
 
 initial begin
     seed <= 0;
@@ -32,6 +33,7 @@ always @(posedge clock or posedge reset) begin
 end
 
 // Bijective mapping: Ensure all 2^N combinations appear
-assign address = lfsr[N-1:0] ^ lfsr[LFSR_SIZE-1:LFSR_SIZE-N];
+assign temp = lfsr[N-1:0] ^ lfsr[LFSR_SIZE-1:LFSR_SIZE-N];
+assign address = (N==3) ? ((temp == 3'b111) ? 3'b000 : temp) : temp;
 
 endmodule
