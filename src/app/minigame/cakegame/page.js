@@ -3,6 +3,7 @@
 import { useCakeGame } from "../../../hooks/cakegame";
 import Canvas from "../../../components/canvas";
 import Header from "../../../components/basic";
+import GameOver from "../../../components/GameOver";
 
 function Cobertura({color, dark_color}) {
     const draw = (ctx, frameCount) => {
@@ -100,7 +101,6 @@ function CakePreview( {title, cake} ) {
                 if (rowIndex === cake.length - 1) {
                     camada_class += " fall-animation";
                     fall_start = "-" + (clientHeight - (rowIndex*20)) + "px";
-                    console.log(fall_start);
                 }
                 return <div key={rowIndex} class={camada_class} style={{"--fall-start": fall_start}}>
                     <Camada camada={row} cobertura={(rowIndex) % 2 !== 0} />
@@ -111,10 +111,13 @@ function CakePreview( {title, cake} ) {
 }
 
 export default function CakeGame() {
-    const {final_cake, user_cake, jogada} = useCakeGame();
+    const {final_cake, user_cake, jogada, gameover, pontuacao} = useCakeGame();
 
     const possible_positions = ["left-5", "left-40", "left-75", "left-110", "left-145", "left-180", "left-215", "left-250", "left-285", "left-320", "left-355", "left-390", "left-425", "left-460", "left-495", "left-530"];
     const user_cake_class = "h-full absolute bottom-0 left-0 transition-all duration-2500 ease-in-out".concat(" ", possible_positions[jogada]);
+    if (gameover) {
+        return <GameOver pontuacao={pontuacao} />
+    } 
     return (
         <div class="h-screen flex flex-col">
             <div>

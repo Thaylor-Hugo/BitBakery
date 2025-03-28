@@ -24,7 +24,6 @@ const colors = [
 const CirclesContainer = () => {
     const { jogada, pontuacao } = useMemoryGame(); // Mover a chamada do hook para dentro do componente funcional
     let temp_jogada = jogada ? jogada.slice(0, 4) : [];
-    console.log(temp_jogada);
 
     const renderData = colors.map((color, index) => (
         <Circle key={index + color} bgColor={temp_jogada[index] ? colors[index] : 'black'} />
