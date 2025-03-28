@@ -34,6 +34,6 @@ end
 
 // Bijective mapping: Ensure all 2^N combinations appear
 assign temp = lfsr[N-1:0] ^ lfsr[LFSR_SIZE-1:LFSR_SIZE-N];
-assign address = (N==3) ? ((temp == 3'b111) ? 3'b000 : temp) : temp;
+assign address = (N==3) ? ((temp == 3'b111) ? 3'b000 : ((temp == 3'b110) ? 3'b001 : temp)) : temp;
 
 endmodule
