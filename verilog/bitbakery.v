@@ -35,6 +35,7 @@ parameter preparacao = 3'b001;
 parameter execucao = 3'b010;
 parameter fim = 3'b011;
 parameter intervalo = 3'b100;
+parameter start_game = 3'b101;
 
 wire reset, iniciar, clock;
 wire [6:0] botoes;
@@ -80,11 +81,12 @@ end
 // Máquina de estados
 always @* begin
     case (Eatual)
-        inicial: Eprox = iniciar ? intervalo : inicial;
-        intervalo: Eprox = fim_intervalo ? preparacao : intervalo;
-        preparacao: Eprox = (MiniGame != 2'b11)? execucao : preparacao;
+        inicial: Eprox = iniciar ? preparacao : inicial;
+        preparacao: Eprox = (MiniGame != 2'b11 && MiniGame != 2'b10)? intervalo : preparacao;
+        intervalo: Eprox = fim_intervalo ? start_game : intervalo;
+        start_game: Eprox = execucao;
         execucao: Eprox = s_pronto ? fim : execucao;
-        fim: Eprox = iniciar ? intervalo : fim; 
+        fim: Eprox = iniciar ? preparacao : fim; 
         default: Eprox = inicial;
     endcase
 end
@@ -102,7 +104,7 @@ contador_m  #(.M(5000), .N(32)) contador_intervalo (
 
 // Lógica de saída
 always @* begin
-    s_iniciar <= (Eatual == preparacao)? 1'b1 : 1'b0;
+    s_iniciar <= (Eatual == start_game)? 1'b1 : 1'b0;
     Dificuldade <= (Eatual == preparacao)? dificuldade : Dificuldade;
     MiniGame <= (Eatual == preparacao)? minigame : MiniGame;
 end
