@@ -54,7 +54,7 @@ function Cobertura({color, dark_color}) {
         
     }
     return (
-        <Canvas class="w-30 h-10" draw={draw} /> 
+        <Canvas className="w-30 h-10" draw={draw} /> 
     );
 }
 
@@ -67,7 +67,7 @@ function Massa({color}) {
         ctx.fill()
     }
     return (
-        <Canvas class="w-30 h-10" draw={draw} />
+        <Canvas className="w-30 h-10" draw={draw} />
     );
 }
 
@@ -78,7 +78,7 @@ function Camada({camada, cobertura}) {
         if (camada[i] === true) {
             if (cobertura) {
                 return (
-                    <div class="absolute">
+                    <div className="absolute">
                         <Cobertura color={colors[i]} dark_color={dark_colors[i]} />
                     </div>
                 );
@@ -93,7 +93,7 @@ function Camada({camada, cobertura}) {
 
 function CakePreview( {title, cake} ) {
     return (
-        <div id="cake_div" class="relative h-full flex flex-col-reverse">
+        <div id="cake_div" className="relative h-full flex flex-col-reverse">
             {cake.slice().map((row, rowIndex) => {
                 let camada_class = (rowIndex) % 2 !== 0 ? "relative z-2" : "relative z-1";
                 let fall_start = "";
@@ -102,7 +102,7 @@ function CakePreview( {title, cake} ) {
                     camada_class += " fall-animation";
                     fall_start = "-" + (clientHeight - (rowIndex*20)) + "px";
                 }
-                return <div key={rowIndex} class={camada_class} style={{"--fall-start": fall_start}}>
+                return <div key={rowIndex} className={camada_class} style={{"--fall-start": fall_start}}>
                     <Camada camada={row} cobertura={(rowIndex) % 2 !== 0} />
                 </div>
             })}
@@ -119,24 +119,24 @@ export default function CakeGame() {
         return <GameOver pontuacao={pontuacao} />
     } 
     return (
-        <div class="h-screen flex flex-col">
+        <div className="h-screen flex flex-col">
             <div>
                 <Header title="Cake MiniGame" />
             </div>
-            <div class="bg-amber-600 h-1/4">
+            <div className="bg-amber-600 h-1/4">
             
             </div>
-            <div class="flex flex-grow">
-                <div class="bg-stone-400 w-1/8 flex items-end justify-center">
+            <div className="flex flex-grow">
+                <div className="bg-stone-400 w-1/8 flex items-end justify-center">
                     <CakePreview title="Gabarito" cake={final_cake} />
                 </div>
-                <div class="bg-stone-500 relative w-full">
-                    <div class={user_cake_class}>
+                <div className="bg-stone-500 relative w-full">
+                    <div className={user_cake_class}>
                         <CakePreview title="Entrada Usuario" cake={user_cake} />
                     </div>
                 </div>
             </div>
-            <div class="bg-amber-200 h-1/8">
+            <div className="bg-amber-200 h-1/8">
 
             </div>
         </div>

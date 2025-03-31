@@ -12,9 +12,9 @@ function House({ game }) {
     } else if (game === "memorygame") {
         src = "https://pngimg.com/uploads/brain/brain_PNG15.png"
     }
-    return<div class="flex flex-col items-center justify-center">
-            <img class="w-1/2" src={src} />
-            <p class="text-3xl text-center">{game}</p>
+    return<div className="flex flex-col items-center justify-center">
+            <img className="w-1/2" src={src} />
+            <p className="text-3xl text-center">{game}</p>
         </div>
     
 }
@@ -24,7 +24,7 @@ export default function HomePage() {
     return (
         <div>
             <Header title="BitBakery" />
-            <div class="columns-3">
+            <div className="columns-3">
                 <House game="cakegame" />
                 <House game="chothesgame" />
                 <House game="memorygame" />

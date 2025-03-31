@@ -14,7 +14,7 @@ export default function GameOver({ pontuacao }) {
     }
 
     return (
-        <div class="h-screen flex flex-col">
+        <div className="h-screen flex flex-col">
             <div>
                 <Header title={title} />
             </div>
