@@ -19,7 +19,6 @@ module bitbakery (
     input [1:0] minigame,
     input [6:0] botoes_in,
     output [1:0] minigame_out,
-    output [2:0] leds_out,
     output [3:0] estado_out,
     output [6:0] jogada_out,
     output [2:0] pontuacao_out,
@@ -30,10 +29,12 @@ module bitbakery (
 	 output db_clock
 );
 
-parameter inicial = 2'b00;
-parameter preparacao = 2'b01;
-parameter execucao = 2'b10;
-parameter fim = 2'b11;
+parameter inicial = 3'b000;
+parameter preparacao = 3'b001;
+parameter execucao = 3'b010;
+parameter fim = 3'b011;
+parameter intervalo = 3'b100;
+parameter start_game = 3'b101;
 
 wire reset, iniciar, clock;
 wire [6:0] botoes;
@@ -41,13 +42,13 @@ assign iniciar = ~iniciar_in;
 assign reset = ~reset_in;
 assign botoes = ~botoes_in;
 
-wire s_pronto_0, s_pronto_1, s_pronto_2, s_pronto;
-wire [2:0] s_leds_0, s_leds_1, s_leds_2;
+wire s_pronto_0, s_pronto_1, s_pronto_2, s_pronto, fim_intervalo;
 wire [3:0] s_estado_0, s_estado_1, s_estado_2, s_estado_inicial;
 wire [6:0] s_jogada_0, s_jogada_1, s_jogada_2;
 wire [2:0] s_pontuacao_0, s_pontuacao_1, s_pontuacao_2;
 
-reg [1:0] MiniGame, Eatual, Eprox;
+reg [1:0] MiniGame; 
+reg [2:0] Eatual, Eprox;
 reg Dificuldade, s_iniciar;
 
 assign db_clock = clock;
@@ -79,16 +80,29 @@ end
 always @* begin
     case (Eatual)
         inicial: Eprox = iniciar ? preparacao : inicial;
-        preparacao: Eprox = (MiniGame != 2'b11)? execucao : preparacao;
+        preparacao: Eprox = (MiniGame != 2'b11 && MiniGame != 2'b10)? intervalo : preparacao;
+        intervalo: Eprox = fim_intervalo ? start_game : intervalo;
+        start_game: Eprox = execucao;
         execucao: Eprox = s_pronto ? fim : execucao;
         fim: Eprox = iniciar ? preparacao : fim; 
         default: Eprox = inicial;
     endcase
 end
 
+
+contador_m  #(.M(5000), .N(32)) contador_intervalo (
+    .clock      (clock),   
+    .zera_as    (Eatual == iniciar),
+    .zera_s     (1'b0),
+    .conta	    (Eatual == intervalo),
+    .Q          (),
+    .fim        (fim_intervalo),
+    .meio       ()
+);
+
 // Lógica de saída
 always @* begin
-    s_iniciar <= (Eatual == preparacao)? 1'b1 : 1'b0;
+    s_iniciar <= (Eatual == start_game)? 1'b1 : 1'b0;
     Dificuldade <= (Eatual == preparacao)? dificuldade : Dificuldade;
     MiniGame <= (Eatual == preparacao)? minigame : MiniGame;
 end
@@ -100,23 +114,19 @@ clock_diviser clock_out (
 
 mux_out saidas (
     .minigame       (MiniGame),
-    .leds_0         (s_leds_0),
     .estado_0       (s_estado_0),
     .jogada_0       (s_jogada_0),
     .pronto_0       (s_pronto_0),
     .pontuacao_0    (s_pontuacao_0),
-    .leds_1         (s_leds_1),
     .estado_1       (s_estado_1),
     .jogada_1       (s_jogada_1),
     .pronto_1       (s_pronto_1),
     .pontuacao_1    (s_pontuacao_1),
-    .leds_2         (s_leds_2),
     .estado_2       (s_estado_2),
     .jogada_2       (s_jogada_2),
     .pronto_2       (s_pronto_2),
     .pontuacao_2    (s_pontuacao_2),
     .estado_inicial (s_estado_inicial),
-    .leds_out       (leds_out),
     .estado_out     (estado_out),
     .jogada_out     (jogada_out),
     .pronto_out     (s_pronto),
@@ -131,7 +141,6 @@ jogo_desafio_memoria game0 (
     .botoes         (botoes),
     .estado         (s_estado_0),
     .jogadas        (s_jogada_0),
-    .leds           (s_leds_0),
     .pontuacao      (s_pontuacao_0),
     .pronto         (s_pronto_0)
 );
@@ -144,7 +153,6 @@ cakegame game1 (
     .botoes         (botoes),
     .estado         (s_estado_1),
     .jogadas        (s_jogada_1),
-    .leds           (s_leds_1),
     .pontuacao      (s_pontuacao_1),
     .pronto         (s_pronto_1)
 );
@@ -157,7 +165,6 @@ clothesgame game2 (
     .botoes         (botoes),
     .estado         (s_estado_2),
     .jogadas        (s_jogada_2),
-    .leds           (s_leds_2),
     .pontuacao      (s_pontuacao_2),
     .pronto         (s_pronto_2)
 );
@@ -361,7 +368,7 @@ parameter compare_play  = 4'b1000; // 8
 parameter next_play     = 4'b1001; // 9
 parameter start_show    = 4'b1010; // A
 parameter register_show = 4'b1011; // B
-parameter end_state     = 4'b1111; // F
+parameter end_state     = 4'b1100; // C
 
 // State variables
 reg [3:0] current_state, next_state;
@@ -434,7 +441,6 @@ module cakegame (
     input [6:0] botoes,
     output [6:0] jogadas,
     output [3:0] estado,
-    output [2:0] leds,
     output [2:0] pontuacao,
     output pronto
 );
@@ -498,8 +504,6 @@ cakegame_uc control_unit(
     .state                  (s_estado)
 );
 
-// TODO: Implementar lógica de leds
-assign leds = (s_estado == 4'b1111) ? 3'b100 : (s_estado == 4'b0110)? 3'b010 : 3'b001;
 assign estado = s_estado;
 
 endmodule
@@ -1000,7 +1004,6 @@ module clothesgame (
     input [6:0] botoes,
     output [6:0] jogadas,
     output [3:0] estado,
-    output [2:0] leds,
     output [2:0] pontuacao,
     output pronto
 );
@@ -1008,7 +1011,6 @@ module clothesgame (
     assign pontuacao = 3'b0;
     assign pronto = 1'b1;
     assign estado = 4'b0;
-    assign leds = 3'b101;
 
 endmodule
 //------------------------------------------------------------------
@@ -1397,7 +1399,6 @@ module jogo_desafio_memoria (
     input [6:0] botoes,
     output [6:0] jogadas,
     output [3:0] estado,
-    output [2:0] leds,
     output [2:0] pontuacao,
     output pronto
 );
@@ -1411,7 +1412,6 @@ wire [3:0] s_jogadas;
 
 wire s_ganhou, s_perdeu, s_fim_timeout;
 assign pontuacao = 2'b0;
-assign leds = {s_ganhou, s_fim_timeout, s_perdeu};
 assign estado = s_estado;
 assign jogadas = {3'b0, s_jogadas[3:0]};
 
@@ -1498,7 +1498,7 @@ assign clock_divised = clock;
 // end
 
 // always @(posedge clock) begin
-//     if (counter == 25000000) begin
+//     if (counter == 25000) begin
 //         counter <= 0;
 //         clock_divised <= ~clock_divised;
 //     end else begin
@@ -1546,6 +1546,7 @@ module random #(
 // LFSR state and seed initialization
 reg [LFSR_SIZE-1:0] lfsr;
 reg [LFSR_SIZE-1:0] seed;
+wire [N-1:0] temp;
 
 initial begin
     seed <= 0;
@@ -1566,7 +1567,8 @@ always @(posedge clock or posedge reset) begin
 end
 
 // Bijective mapping: Ensure all 2^N combinations appear
-assign address = lfsr[N-1:0] ^ lfsr[LFSR_SIZE-1:LFSR_SIZE-N];
+assign temp = lfsr[N-1:0] ^ lfsr[LFSR_SIZE-1:LFSR_SIZE-N];
+assign address = (N==3) ? ((temp == 3'b111) ? 3'b000 : ((temp == 3'b110) ? 3'b001 : temp)) : temp;
 
 endmodule
 //------------------------------------------------------------------
