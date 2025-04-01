@@ -7,7 +7,6 @@ module cakegame (
     input [6:0] botoes,
     output [6:0] jogadas,
     output [3:0] estado,
-    output [2:0] leds,
     output [2:0] pontuacao,
     output pronto
 );
@@ -71,8 +70,6 @@ cakegame_uc control_unit(
     .state                  (s_estado)
 );
 
-// TODO: Implementar lógica de leds
-assign leds = (s_estado == 4'b1100) ? 3'b100 : (s_estado == 4'b0110)? 3'b010 : 3'b001;
 assign estado = s_estado;
 
 endmodule

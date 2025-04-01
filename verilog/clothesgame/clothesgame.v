@@ -7,7 +7,6 @@ module clothesgame (
     input [6:0] botoes,
     output [6:0] jogadas,
     output [3:0] estado,
-    output [2:0] leds,
     output [2:0] pontuacao,
     output pronto
 );
@@ -15,6 +14,5 @@ module clothesgame (
     assign pontuacao = 3'b0;
     assign pronto = 1'b1;
     assign estado = 4'b0;
-    assign leds = 3'b101;
 
 endmodule

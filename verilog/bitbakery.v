@@ -19,7 +19,6 @@ module bitbakery (
     input [1:0] minigame,
     input [6:0] botoes_in,
     output [1:0] minigame_out,
-    output [2:0] leds_out,
     output [3:0] estado_out,
     output [6:0] jogada_out,
     output [2:0] pontuacao_out,
@@ -44,7 +43,6 @@ assign reset = ~reset_in;
 assign botoes = ~botoes_in;
 
 wire s_pronto_0, s_pronto_1, s_pronto_2, s_pronto, fim_intervalo;
-wire [2:0] s_leds_0, s_leds_1, s_leds_2;
 wire [3:0] s_estado_0, s_estado_1, s_estado_2, s_estado_inicial;
 wire [6:0] s_jogada_0, s_jogada_1, s_jogada_2;
 wire [2:0] s_pontuacao_0, s_pontuacao_1, s_pontuacao_2;
@@ -116,23 +114,19 @@ clock_diviser clock_out (
 
 mux_out saidas (
     .minigame       (MiniGame),
-    .leds_0         (s_leds_0),
     .estado_0       (s_estado_0),
     .jogada_0       (s_jogada_0),
     .pronto_0       (s_pronto_0),
     .pontuacao_0    (s_pontuacao_0),
-    .leds_1         (s_leds_1),
     .estado_1       (s_estado_1),
     .jogada_1       (s_jogada_1),
     .pronto_1       (s_pronto_1),
     .pontuacao_1    (s_pontuacao_1),
-    .leds_2         (s_leds_2),
     .estado_2       (s_estado_2),
     .jogada_2       (s_jogada_2),
     .pronto_2       (s_pronto_2),
     .pontuacao_2    (s_pontuacao_2),
     .estado_inicial (s_estado_inicial),
-    .leds_out       (leds_out),
     .estado_out     (estado_out),
     .jogada_out     (jogada_out),
     .pronto_out     (s_pronto),
@@ -147,7 +141,6 @@ jogo_desafio_memoria game0 (
     .botoes         (botoes),
     .estado         (s_estado_0),
     .jogadas        (s_jogada_0),
-    .leds           (s_leds_0),
     .pontuacao      (s_pontuacao_0),
     .pronto         (s_pronto_0)
 );
@@ -160,7 +153,6 @@ cakegame game1 (
     .botoes         (botoes),
     .estado         (s_estado_1),
     .jogadas        (s_jogada_1),
-    .leds           (s_leds_1),
     .pontuacao      (s_pontuacao_1),
     .pronto         (s_pronto_1)
 );
@@ -173,7 +165,6 @@ clothesgame game2 (
     .botoes         (botoes),
     .estado         (s_estado_2),
     .jogadas        (s_jogada_2),
-    .leds           (s_leds_2),
     .pontuacao      (s_pontuacao_2),
     .pronto         (s_pronto_2)
 );
