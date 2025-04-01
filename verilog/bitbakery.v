@@ -104,7 +104,7 @@ contador_m  #(.M(5000), .N(32)) contador_intervalo (
 always @* begin
     s_iniciar <= (Eatual == start_game)? 1'b1 : 1'b0;
     Dificuldade <= (Eatual == preparacao)? dificuldade : Dificuldade;
-    MiniGame <= (Eatual == preparacao)? minigame : MiniGame;
+    MiniGame <= (Eatual == preparacao || Eatual == inicial)? minigame : MiniGame;
 end
 
 clock_diviser clock_out (
