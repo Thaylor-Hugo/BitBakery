@@ -131,10 +131,10 @@ export default function CakeGame() {
             
             </div>
             <div className="flex flex-grow">
-                <div className="w-1/8 flex items-end justify-center absolute bottom-103 left-85">
+                <div className="w-1/8 flex items-end justify-center absolute bottom-78 left-89">
                     <CakePreview title="Gabarito" cake={final_cake} />
                 </div>
-                <div className="relative w-full bottom-45 z-2">
+                <div className="relative w-full bottom-20 z-2">
                     <div className={user_cake_class}>
                         <CakePreview title="Entrada Usuario" cake={user_cake} />
                     </div>
