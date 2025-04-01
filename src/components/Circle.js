@@ -1,5 +1,4 @@
 import React from 'react';
-import { useMemoryGame } from "../hooks/memorygame";
 
 class Circle extends React.Component {
     render() {
@@ -16,24 +15,4 @@ class Circle extends React.Component {
     }
 }
 
-const colors = [
-    "#E94F37", "#1C89BF",
-    "springGreen", "#A40E4C"
-];
-
-const CirclesContainer = () => {
-    const { jogada, pontuacao } = useMemoryGame(); // Mover a chamada do hook para dentro do componente funcional
-    let temp_jogada = jogada ? jogada.slice(0, 4) : [];
-
-    const renderData = colors.map((color, index) => (
-        <Circle key={index + color} bgColor={temp_jogada[index] ? colors[index] : 'black'} />
-    ));
-
-    return (
-        <div className='circulos'>
-            {renderData}
-        </div>
-    );
-};
-
-export default CirclesContainer;
+export default Circle;

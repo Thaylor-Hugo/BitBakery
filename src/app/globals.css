@@ -19,11 +19,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 80vh; /* Ocupa a altura total da janela */
+    height: 80vh;
 }
 
 .circulos {
     display: flex;
-    align-items: center; /* Centraliza verticalmente */
-    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center;
+    justify-content: center;
 }
