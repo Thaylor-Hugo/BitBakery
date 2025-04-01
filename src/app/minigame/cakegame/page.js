@@ -72,8 +72,12 @@ function Massa({color}) {
 }
 
 function Camada({camada, cobertura}) {
-    const colors = ["Crimson", "HotPink", "OrangeRed", "Khaki", "SkyBlue", "LightSlateGray", "SpringGreen"];
-    const dark_colors = ["FireBrick", "MediumVioletRed", "DarkOrange", "DarkKhaki", "DeepSkyBlue", "DarkSlateGray", "SeaGreen"];
+    const colors = [
+        "#ff194f", "#ffb400", "#00a6ed",
+        "#00ff7f", "#632501", "#8f00ff"
+      ];
+    const dark_colors = ["#961130", "#916701", "#004969",
+        "#007038", "#301200", "#3b0069"];
     for (let i = 0; i < camada.length; i++) {
         if (camada[i] === true) {
             if (cobertura) {
@@ -117,26 +121,26 @@ export default function CakeGame() {
     const user_cake_class = "h-full absolute bottom-0 left-0 transition-all duration-2500 ease-in-out".concat(" ", possible_positions[jogada]);
     if (gameover) {
         return <GameOver pontuacao={pontuacao} />
-    } 
+    }
     return (
-        <div className="h-screen flex flex-col">
+        <div className="h-screen flex flex-col bg-[url('../../src/cakegame-bg.png')]">
             <div>
                 <Header title="Cake MiniGame" />
             </div>
-            <div className="bg-amber-600 h-1/4">
+            <div className="h-1/4">
             
             </div>
             <div className="flex flex-grow">
-                <div className="bg-stone-400 w-1/8 flex items-end justify-center">
+                <div className="w-1/8 flex items-end justify-center absolute bottom-103 left-85">
                     <CakePreview title="Gabarito" cake={final_cake} />
                 </div>
-                <div className="bg-stone-500 relative w-full">
+                <div className="relative w-full bottom-45 z-2">
                     <div className={user_cake_class}>
                         <CakePreview title="Entrada Usuario" cake={user_cake} />
                     </div>
                 </div>
             </div>
-            <div className="bg-amber-200 h-1/8">
+            <div className="h-1/8">
 
             </div>
         </div>
