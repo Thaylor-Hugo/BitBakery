@@ -19,7 +19,7 @@ export function useMemoryGame() {
 
                 if (sensors.state == "inicial") {
                     router.push('/');
-                } else if (sensors.state == "preparacao") {
+                } else if (!estados_finais.includes(sensors.state) && gameOver) {
                     setPontuacao(0);
                     setGameOver(false);
                 } else if (sensors.state == "espera_jogada") {
@@ -27,7 +27,7 @@ export function useMemoryGame() {
                 } else if (estados_mostra.includes(sensors.state) && estadoMudou) {
                     setEstadoMudou(false);
                     setPontuacao(prevpontuacao => prevpontuacao + 1);
-                } else if (estados_finais.includes(sensors.state)) {
+                } else if (estados_finais.includes(sensors.state) && !gameOver) {
                     setPontuacao(prevpontuacao => prevpontuacao + (sensors.state == "final_acertou" ? 1 : 0));
                     setGameOver(true);
                 }
