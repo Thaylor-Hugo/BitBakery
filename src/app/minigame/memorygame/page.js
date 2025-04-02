@@ -10,7 +10,7 @@ export default function memorygame() {
 
   const colors = [
     "#ff194f", "#ffb400", "#00a6ed",
-    "springGreen", "#ff194f", "#8f00ff"
+    "#00ff7f", "#632501", "#8f00ff"
   ];
 
   const { jogada, pontuacao, gameOver } = useMemoryGame();
@@ -20,10 +20,6 @@ export default function memorygame() {
       <Circle key={index + color} bgColor={temp_jogada[index] ? colors[index] : 'black'} />
   ));
 
-  if (gameOver) {
-    return <GameOver pontuacao={pontuacao} />;
-  }
-  
   return (
     <div id="container">
       <Head>
@@ -33,6 +29,9 @@ export default function memorygame() {
       <div className='circulos'>
           {renderData}
       </div>
+      {gameOver && (
+            <GameOver pontuacao={pontuacao} />
+        )}
     </div>
   );
 }
