@@ -26,7 +26,8 @@ module rom (clock, address, data_out);
             3'b011: data_out = 7'b0001000;
             3'b100: data_out = 7'b0010000;
             3'b101: data_out = 7'b0100000;
-            3'b110: data_out = 7'b1000000;
+            3'b110: data_out = 7'b0000001;
+            3'b111: data_out = 7'b0000010;
         endcase
     end
 endmodule
