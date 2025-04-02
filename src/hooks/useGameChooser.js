@@ -14,7 +14,7 @@ export function useGameChooser() {
                 setMinigame(sensors.minigame);
                 if (sensors.state == "inicio" || sensors.state == "inicial") {
                     router.push('/');
-                } else {
+                } else if (sensors.minigame == "cakegame" || sensors.minigame == "memorygame") {
                     router.push('/minigame/' + minigame);
                 }
                 
