@@ -119,17 +119,14 @@ export default function CakeGame() {
 
     const possible_positions = ["left-5", "left-40", "left-75", "left-110", "left-145", "left-180", "left-215", "left-250", "left-285", "left-320", "left-355", "left-390", "left-425", "left-460", "left-495", "left-530"];
     const user_cake_class = "h-full absolute bottom-0 left-0 transition-all duration-2500 ease-in-out".concat(" ", possible_positions[jogada]);
-    if (gameover) {
-        return <GameOver pontuacao={pontuacao} />
-    }
+
     return (
-        <div className="h-screen flex flex-col bg-[url('../../src/cakegame-bg.png')]">
+        <div className="h-screen flex flex-col bg-[url('../../src/cakegame-bg.png')] relative">
+            {/* Game Content */}
             <div>
                 <Header title="Cake MiniGame" />
             </div>
-            <div className="h-1/4">
-            
-            </div>
+            <div className="h-1/4"></div>
             <div className="flex flex-grow">
                 <div className="w-1/8 flex items-end justify-center absolute bottom-78 left-89">
                     <CakePreview title="Gabarito" cake={final_cake} />
@@ -140,9 +137,12 @@ export default function CakeGame() {
                     </div>
                 </div>
             </div>
-            <div className="h-1/8">
+            <div className="h-1/8"></div>
 
-            </div>
+            {/* Game Over Overlay */}
+            {gameover && (
+                <GameOver pontuacao={pontuacao} />
+            )}
         </div>
     );
 }

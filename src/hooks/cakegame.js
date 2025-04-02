@@ -21,6 +21,23 @@ export function useCakeGame() {
                     router.push('/');
                 }
 
+                if (sensors.state == "end_state" && !gameover) {
+                    setGameOver(true);
+                    final_cake.forEach((camada, index) => {
+                        if (camada.indexOf(true) == user_cake[index].indexOf(true)) {
+                            console.log("Acertou");
+                            setPontuacao( (prevPontuacao) => prevPontuacao + 1);
+                        }
+                    });
+                } else if (sensors.state != "end_state" && gameover) {
+                    setGameOver(false);
+                    setFinalCake([]);
+                    setUserCake([]);
+                    setPontuacao(0);
+                    setJogada(0);
+                }
+
+
                 if (sensors.state == "show_play" || sensors.state == "show_interval" || sensors.state == "next_show" || sensors.state == "start_show" || sensors.state == "register_show") {
                     // Gabarito
                     if (sensors.jogada.every(val => val === false)) {
@@ -40,26 +57,11 @@ export function useCakeGame() {
                     }
                 }
 
-                if (sensors.state == "end_state" && !gameover) {
-                    setFinalCake([]);
-                    setUserCake([]);
-                    setPontuacao(0);
-                    setJogada(0);
-                    setGameOver(true);
-                    final_cake.forEach((camada, index) => {
-                        if (camada.indexOf(true) == user_cake[index].indexOf(true)) {
-                            console.log("Acertou");
-                            setPontuacao( (prevPontuacao) => prevPontuacao + 1);
-                        }
-                    });
-                } else if (sensors.state != "end_state") {
-                    setGameOver(false);
-                }
             } catch (error) {
                 console.error('Error fetching sensors:', error);
             }
         };
-        const interval = setInterval(fetchSensors, 1);
+        const interval = setInterval(fetchSensors, 50);
         return () => clearInterval(interval);
     }, [router, final_cake, user_cake, jogada, gameover, pontuacao]);
     return {final_cake, user_cake, jogada, gameover, pontuacao};
