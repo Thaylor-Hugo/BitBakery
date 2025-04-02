@@ -3,7 +3,7 @@ import threading
 
 sensors = {
     "state": "inicio",
-    "minigame": "memorygame",
+    "minigame": "cakegame",
     "jogada": [False, False, False, False, False, False, False],
     "pontuacao": 0,
 }
@@ -19,9 +19,10 @@ minigames = ["memorygame", "cakegame", "clothesgame"]
 
 inputs = {
     "jogada": [False, False, False, False, False, False, False],
-    "minigame": "memorygame",
+    "minigame": "cakegame",
     "dificuldade": False,
-    "jogar": False
+    "jogar": False,
+    "reset": False
 }
 
 def mock_loop():
@@ -71,7 +72,13 @@ def bitbakery():
                 [False, False, False, True, False, False, False],
                 [False, False, False, False, True, False, False],
                 [False, False, False, False, False, True, False],
-                [False, False, False, False, False, False, True]]
+                [False, False, False, False, False, True, False],
+                [False, False, False, False, True, False, False],
+                [False, False, False, True, False, False, False],
+                [False, False, True, False, False, False, False],
+                [False, True, False, False, False, False, False],
+                [True, False, False, False, False, False, False]
+            ]
     jogando = False
     dificuldade = False
     camada_counter = 0
@@ -83,7 +90,14 @@ def bitbakery():
             jogando = True
             sensors["state"] = "inicio"
 
+        sensors["minigame"] = inputs["minigame"]
         while jogando:
+            if inputs["reset"]: 
+                jogando = False
+                sensors["state"] = "inicio"
+                sensors["pontuacao"] = 0
+                pygame.time.wait(1)
+                break
             match sensors["state"]:
                 case "inicio":
                     sensors["state"] = "preparation"
@@ -183,6 +197,12 @@ def handle_pygame_events():
                 inputs["dificuldade"] = not inputs["dificuldade"] 
             elif event.key == pygame.K_j:
                 inputs["jogar"] = not inputs["jogar"]
+            elif event.key == pygame.K_q:
+                inputs["minigame"] = "memorygame"
+            elif event.key == pygame.K_w:
+                inputs["minigame"] = "cakegame"
+            elif event.key == pygame.K_r:
+                inputs["reset"] = True
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_1:
                 inputs["jogada"][0] ^= True
@@ -198,6 +218,8 @@ def handle_pygame_events():
                 inputs["jogada"][5] ^= True
             elif event.key == pygame.K_7:
                 inputs["jogada"][6] ^= True
+            elif event.key == pygame.K_r:
+                inputs["reset"] = False
 
 if __name__ == '__main__':
     mock_loop()

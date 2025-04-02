@@ -15,7 +15,7 @@ genius_states =["inicial", "preparacao", "proxima_mostra", "espera_jogada", "reg
                 "proxima_jogada", "foi_ultima_sequencia", "proxima_sequencia", "mostra_jogada", "intervalo_mostra", 
                 "inicia_sequencia", "intervalo_rodada", "final_timeout", "final_acertou", "final_errou"]
 
-minigames = ["memorygame", "cakegame", "clothesgame"]
+minigames = ["memorygame", "cakegame", "memorygame", "cakegame"]
 device_name = "Analog Discovery 2"
 
 
