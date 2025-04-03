@@ -94,7 +94,7 @@ always @* begin
     state <= current_state;
 
     if (current_state == wait_play || current_state == register_play
-        || current_state == compare_play || current_state == next_play)
+        || current_state == compare_play || current_state == next_play || current_state == end_state)
         out_sel <= 2'b10;
     else if (current_state == show_play)
         out_sel <= 2'b01;

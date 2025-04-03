@@ -115,9 +115,9 @@ function CakePreview( {title, cake} ) {
 }
 
 export default function CakeGame() {
-    const {final_cake, user_cake, jogada, gameover, pontuacao} = useCakeGame();
+    const {final_cake, user_cake, jogada, gameover, pontuacao, playing} = useCakeGame();
 
-    const possible_positions = ["left-5", "left-40", "left-75", "left-110", "left-145", "left-180", "left-215", "left-250", "left-285", "left-320", "left-355", "left-390", "left-425", "left-460", "left-495", "left-530"];
+    const possible_positions = ["left-5", "left-35", "left-65", "left-95", "left-125", "left-155", "left-185", "left-215", "left-245", "left-275", "left-305", "left-335", "left-365", "left-395", "left-425", "left-455"];
     const user_cake_class = "h-full absolute bottom-0 left-0 transition-all duration-2500 ease-in-out".concat(" ", possible_positions[jogada]);
 
     return (
@@ -125,6 +125,9 @@ export default function CakeGame() {
             {/* Game Content */}
             <div>
                 <Header title="Cake MiniGame" />
+            </div>
+            <div>
+                <p className="font-sans text-4xl font-bold text-center text-white">{playing? "Faça o Bolo" : "Aguarde o Pedido"}</p>
             </div>
             <div className="h-1/4"></div>
             <div className="flex flex-grow">
