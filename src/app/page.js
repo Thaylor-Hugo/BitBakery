@@ -1,7 +1,6 @@
 'use client'
 import { useGameChooser } from '../hooks/useGameChooser';
 import Header from '../components/basic';
-import Image from 'next/image'
 
 function House({ game, minigame }) {
     let src = "";
