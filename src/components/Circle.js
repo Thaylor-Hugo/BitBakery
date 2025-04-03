@@ -8,8 +8,8 @@ class Circle extends React.Component {
             display: "inline-block",
             backgroundColor: this.props.bgColor,
             borderRadius: "50%",
-            width: 100,
-            height: 100,
+            width: 150,
+            height: 150,
         };
         return <div style={circleStyle}></div>;
     }

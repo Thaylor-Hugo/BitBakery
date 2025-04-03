@@ -20,22 +20,24 @@ export function useMemoryGame() {
                 if (sensors.state == "inicial") {
                     router.push('/');
                 } else if (!estados_finais.includes(sensors.state) && gameOver) {
-                    setPontuacao(0);
+                    setPontuacao(-1);
                     setGameOver(false);
                 } else if (sensors.state == "espera_jogada") {
                     setEstadoMudou(true);
-                } else if (estados_mostra.includes(sensors.state) && estadoMudou) {
+                } else if ((sensors.state == "proxima_mostra" || sensors.state == "mostra_jogada" || sensors.state == "intervalo_mostra") && estadoMudou) {
                     setEstadoMudou(false);
                     setPontuacao(prevpontuacao => prevpontuacao + 1);
+                    console.log("Pontuação: ", pontuacao);
                 } else if (estados_finais.includes(sensors.state) && !gameOver) {
                     setPontuacao(prevpontuacao => prevpontuacao + (sensors.state == "final_acertou" ? 1 : 0));
+                    console.log("Pontuação: ", pontuacao);
                     setGameOver(true);
                 }
             } catch (error) {
                 console.error('Error fetching sensors:', error);
             }
         };
-        const interval = setInterval(fetchSensors, 25);
+        const interval = setInterval(fetchSensors, 50);
         return () => clearInterval(interval);
     }, [router, estadoMudou, gameOver]);
     return { jogada, pontuacao, gameOver };
