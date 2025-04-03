@@ -91,7 +91,7 @@ always @* begin
 end
 
 
-contador_m  #(.M(5000), .N(32)) contador_intervalo (
+contador_m  #(.M(2000), .N(32)) contador_intervalo (
     .clock      (clock),   
     .zera_as    (Eatual == iniciar),
     .zera_s     (1'b0),
@@ -107,6 +107,8 @@ always @* begin
     Dificuldade <= (Eatual == preparacao)? dificuldade : Dificuldade;
     MiniGame <= (Eatual == preparacao || Eatual == inicial)? minigame : MiniGame;
 end
+
+assign pontuacao_out = {Dificuldade, 1'b0, 1'b0};
 
 clock_diviser clock_out (
     .clock (clock_in),
@@ -131,7 +133,7 @@ mux_out saidas (
     .estado_out     (s_estado),
     .jogada_out     (jogada_out),
     .pronto_out     (s_pronto),
-    .pontuacao_out  (pontuacao_out)
+    .pontuacao_out  ()
 );
 
 jogo_desafio_memoria game0 (
