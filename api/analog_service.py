@@ -5,7 +5,7 @@ sensors = {
     "state": "inicio",
     "minigame": "memorygame",
     "jogada": [False, False, False, False, False, False, False],
-    "pontuacao": 0,
+    "dificuldade": 0,
 }
 
 cake_states = ["inicio", "preparation", "show_play", "show_interval", "next_show", "initiate_play", "wait_play", 
@@ -46,7 +46,7 @@ def analog_loop():
     while True:
         # go through possible states
         sensors_temp = []
-        for index in range(16):
+        for index in range(14):
             # set the state of every DIO channel
             sensors_temp.append(static.get_state(device_data, index))
         # sleep(0.0001)  # delay
@@ -56,7 +56,7 @@ def analog_loop():
             sensors["state"] = cake_states[convert_dec(sensors_temp[7:11])]
         else:
             sensors["state"] = genius_states[convert_dec(sensors_temp[7:11])]
-        sensors["pontuacao"] = convert_dec(sensors_temp[13:])
+        sensors["dificuldade"] = convert_dec(sensors_temp[13])
         print(sensors)
    
 
