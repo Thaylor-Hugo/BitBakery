@@ -5,6 +5,7 @@ export function useMemoryGame() {
     const router = useRouter();
     const [jogada, setJogada] = useState();
     const [pontuacao, setPontuacao] = useState(0);
+    const [aguardar, setAguardar] = useState(true);
     const [gameOver, setGameOver] = useState(false);
     const [estadoMudou, setEstadoMudou] = useState(false);
     const estados_finais = ["final_timeout", "final_acertou", "final_errou"];
@@ -17,15 +18,17 @@ export function useMemoryGame() {
                 const { sensors } = await res.json();
                 setJogada(sensors.jogada);
 
-                if (sensors.state == "inicial") {
+                if (sensors.state == "inicial" || sensors.state == "inicio") {
                     router.push('/');
                 } else if (!estados_finais.includes(sensors.state) && gameOver) {
                     setPontuacao(-1);
                     setGameOver(false);
-                } else if (sensors.state == "espera_jogada") {
+                } else if (sensors.state == "espera_jogada" || sensors.state == "wait_play") {
+                    setAguardar(false);
                     setEstadoMudou(true);
-                } else if ((sensors.state == "proxima_mostra" || sensors.state == "mostra_jogada" || sensors.state == "intervalo_mostra") && estadoMudou) {
+                } else if (estados_mostra.includes(sensors.state) && estadoMudou) {
                     setEstadoMudou(false);
+                    setAguardar(true);
                     setPontuacao(prevpontuacao => prevpontuacao + 1);
                     console.log("Pontuação: ", pontuacao);
                 } else if (estados_finais.includes(sensors.state) && !gameOver) {
@@ -39,6 +42,6 @@ export function useMemoryGame() {
         };
         const interval = setInterval(fetchSensors, 50);
         return () => clearInterval(interval);
-    }, [router, estadoMudou, gameOver]);
-    return { jogada, pontuacao, gameOver };
+    }, [router, estadoMudou, gameOver, aguardar]);
+    return { jogada, pontuacao, gameOver, aguardar };
 }
