@@ -43,7 +43,7 @@ assign reset = ~reset_in;
 assign botoes = ~botoes_in;
 
 wire s_pronto_0, s_pronto_1, s_pronto_2, s_pronto, fim_intervalo;
-wire [3:0] s_estado_0, s_estado_1, s_estado_2, s_estado_inicial;
+wire [3:0] s_estado_0, s_estado_1, s_estado_2, s_estado_inicial, s_estado;
 wire [6:0] s_jogada_0, s_jogada_1, s_jogada_2;
 wire [2:0] s_pontuacao_0, s_pontuacao_1, s_pontuacao_2;
 
@@ -55,6 +55,7 @@ assign db_clock = clock;
 assign db_minigame = minigame_out;
 assign db_iniciar = iniciar;
 assign db_jogada = jogada_out;
+assign estado_out = (Eatual == intervalo)? 4'b0001 : s_estado;
 
 hexa7seg display_state (
 	.hexa (estado_out),
@@ -127,7 +128,7 @@ mux_out saidas (
     .pronto_2       (s_pronto_2),
     .pontuacao_2    (s_pontuacao_2),
     .estado_inicial (s_estado_inicial),
-    .estado_out     (estado_out),
+    .estado_out     (s_estado),
     .jogada_out     (jogada_out),
     .pronto_out     (s_pronto),
     .pontuacao_out  (pontuacao_out)
