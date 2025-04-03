@@ -1,15 +1,16 @@
 'use client'
 import { useGameChooser } from '../hooks/useGameChooser';
 import Header from '../components/basic';
+import Image from 'next/image'
 
 function House({ game, minigame }) {
     let src = "";
     const gameName = game === "cakegame" ? "Cake Game" : "Memory Game";
     
     if (game === "cakegame") {
-        src = "https://gallery.yopriceville.com/var/resizes/Free-Clipart-Pictures/Cakes-PNG/Cake_PNG_Transparent_Clip_Art_Image.png?m=1629830081";
+        src = "https://i.pinimg.com/236x/b6/3b/48/b63b48117aa60a3cc28cb8d18231ddc9.jpg";
     } else if (game === "memorygame") {
-        src = "https://pngimg.com/uploads/brain/brain_PNG15.png";
+        src = "https://i.pinimg.com/736x/0d/82/89/0d82895ccae32667f7508a597f594d30.jpg";
     }
 
     return (
