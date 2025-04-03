@@ -21,7 +21,7 @@ export default function memorygame() {
   ));
 
   return (
-    <div id="container">
+    <div className="bg-[url('../../src/memorygame-bg.png')]"  id="container">
       <Head>
         <title>Jogo da memória - BitBakery</title>
         <link rel="stylesheet" href="styles/globals.css" />
