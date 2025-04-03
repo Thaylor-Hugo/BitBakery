@@ -5,6 +5,7 @@ import Circle from '../../../components/Circle';
 import '../../globals.css';
 import { useMemoryGame } from '../../../hooks/memorygame';
 import GameOver from '../../../components/GameOver';
+import Header from "../../../components/basic";
 
 export default function memorygame() {
 
@@ -29,7 +30,7 @@ export default function memorygame() {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Joti+One&family=Mouse+Memoirs&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />      </Head>
       <div className='titulo-principal'>
-        <h1 className="space-grotesk-principal text-5xl text-center text-black">Jogo da memória</h1>
+        <Header title={"Jogo da memória"} className="space-grotesk-principal text-5xl text-center text-black"/>
       </div>
       <div>
         <p id="titulo-memoria" className="font-sans text-4xl font-bold text-center text-white">{aguardar ? "Aguarde para jogar" : "Faça sua jogada"}</p>

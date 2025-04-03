@@ -13,7 +13,7 @@ function House({ game, minigame }) {
     }
 
     return (
-        <div className={`group relative flex flex-col items-center justify-center p-6 m-4 bg-white rounded-2xl transition-all duration-300 cursor-pointer
+        <div className={`group relative flex flex-col items-center justify-center p-6 m-4 bg-[#1f193c88] rounded-2xl transition-all duration-300 cursor-pointer
             ${minigame ? 'shadow-xl -translate-y-2' : 'shadow-lg'}`}>
             
             <div className="relative w-64 h-64 overflow-hidden rounded-xl">
@@ -26,7 +26,7 @@ function House({ game, minigame }) {
             </div>
             
             <p className={`mt-4 text-2xl font-bold uppercase tracking-wide transition-colors duration-300
-                ${minigame ? 'text-blue-600' : 'text-gray-800'}`}>
+                ${minigame ? 'text-[#e04368]' : 'text-[#feedff]'}`}>
                 {gameName}
             </p>
         </div>
@@ -37,16 +37,16 @@ export default function HomePage() {
     const minigame = useGameChooser();
     const isCakeGame = minigame === "cakegame";
     return (
-        <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50">
+        <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 bg-[url('https://images2.alphacoders.com/136/thumb-1920-1364876.png')]">
             <Header title="BitBakery" className="py-6 bg-white shadow-md" />
             
             <div className="container mx-auto px-4 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gaap-8 max-w-4xl mx-auto">
                     <House game="cakegame" minigame={isCakeGame} />
                     <House game="memorygame" minigame={!isCakeGame}/>
                 </div>
                 
-                <p className="text-center mt-12 text-gray-600 text-lg italic animate-pulse">
+                <p className="text-center mt-12 text-[#feedff] text-lg italic animate-pulse">
                     Select a game to start your baking adventure!
                 </p>
             </div>
