@@ -5,6 +5,7 @@ export function useGameChooser() {
     const router = useRouter();
     
     const [minigame, setMinigame] = useState("");
+    const [difficulty, setDifficulty] = useState("");
 
     useEffect(() => {
         const fetchSensors = async () => {
@@ -12,6 +13,7 @@ export function useGameChooser() {
                 const res = await fetch('http://localhost:5328/api/sensors');
                 const { sensors } = await res.json();
                 setMinigame(sensors.minigame);
+                setDifficulty(sensors.difficulty);
                 if (sensors.state == "inicio" || sensors.state == "inicial") {
                     router.push('/');
                 } else if (sensors.minigame == "cakegame" || sensors.minigame == "memorygame") {
@@ -24,6 +26,6 @@ export function useGameChooser() {
         };
         const interval = setInterval(fetchSensors, 100);
         return () => clearInterval(interval);
-    }, [router, minigame]);
-    return minigame;
+    }, [router, minigame, difficulty]);
+    return {minigame, difficulty};
 }

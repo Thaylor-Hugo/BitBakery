@@ -5,7 +5,7 @@ sensors = {
     "state": "inicio",
     "minigame": "cakegame",
     "jogada": [False, False, False, False, False, False, False],
-    "pontuacao": 0,
+    "difficulty": False,
 }
 
 cake_states = ["inicio", "preparation", "show_play", "show_interval", "next_show", "initiate_play", "wait_play", 
@@ -20,7 +20,7 @@ minigames = ["memorygame", "cakegame", "clothesgame"]
 inputs = {
     "jogada": [False, False, False, False, False, False, False],
     "minigame": "cakegame",
-    "dificuldade": False,
+    "difficulty": False,
     "jogar": False,
     "reset": False
 }
@@ -35,12 +35,14 @@ def mock_loop():
     while True:
         handle_pygame_events()
         pygame.display.flip()
+
+        sensors["difficulty"] = inputs["difficulty"]
         
         # Inputs
         in_str = my_font.render("Inputs:", False, (255, 255, 255))
         jogada_in_str = my_font.render("Jogada: {0}".format(str(inputs["jogada"])), False, (255, 255, 255))
         minigame_in_str = my_font.render("Minigame: {0}".format(str(inputs["minigame"])), False, (255, 255, 255))
-        dificuldade_in_str = my_font.render("Dificuldade: {0}".format(str(inputs["dificuldade"])), False, (255, 255, 255))
+        dificuldade_in_str = my_font.render("Dificuldade: {0}".format(str(inputs["difficulty"])), False, (255, 255, 255))
         jogar_in_str = my_font.render("Jogar: {0}".format(str(inputs["jogar"])), False, (255, 255, 255))
 
         # Outputs
@@ -48,14 +50,12 @@ def mock_loop():
         state_str = my_font.render("State: {0}".format(str(sensors["state"])), False, (255, 255, 255))
         minigame_str = my_font.render("Minigame: {0}".format(str(sensors["minigame"])), False, (255, 255, 255))
         jogada_str = my_font.render("Jogada: {0}".format(str(sensors["jogada"])), False, (255, 255, 255))
-        pontuacao_str = my_font.render("Pontuacao: {0}".format(str(sensors["pontuacao"])), False, (255, 255, 255))
         
         screen.fill((0, 0, 0))
         screen.blit(out_str, (0,0))
         screen.blit(state_str, (0,30))
         screen.blit(minigame_str, (0,60))
         screen.blit(jogada_str, (0,90))
-        screen.blit(pontuacao_str, (0,120))
 
         screen.blit(in_str, (0,150))
         screen.blit(jogada_in_str, (0,180))
@@ -77,10 +77,13 @@ def bitbakery():
                 [False, False, False, True, False, False, False],
                 [False, False, True, False, False, False, False],
                 [False, True, False, False, False, False, False],
+                [False, False, False, False, True, False, False],
+                [False, False, False, True, False, False, False],
+                [False, False, True, False, False, False, False],
+                [False, True, False, False, False, False, False],
                 [True, False, False, False, False, False, False]
             ]
     jogando = False
-    dificuldade = False
     camada_counter = 0
     edge_detected = False
     jogada = [False, False, False, False, False, False, False]
@@ -95,19 +98,16 @@ def bitbakery():
             if inputs["reset"]: 
                 jogando = False
                 sensors["state"] = "inicio"
-                sensors["pontuacao"] = 0
                 pygame.time.wait(1)
                 break
             match sensors["state"]:
                 case "inicio":
                     sensors["state"] = "preparation"
-                    sensors["pontuacao"] = 0
                     sensors["minigame"] = inputs["minigame"]
                     pygame.time.wait(1)
                     break
                 case "preparation":
                     sensors["state"] = "show_play"
-                    dificuldade = inputs["dificuldade"]
                     camada_counter = 0
                     pygame.time.wait(1)
                     break
@@ -152,9 +152,6 @@ def bitbakery():
                     pygame.time.wait(1)
                     break
                 case "compare_play":
-                    if jogada == memory[camada_counter]:
-                        sensors["pontuacao"] += 1
-                    
                     sensors["state"] = "next_play"
                     pygame.time.wait(1)
                     break
@@ -194,7 +191,7 @@ def handle_pygame_events():
             elif event.key == pygame.K_7:
                 inputs["jogada"][6] ^= True
             elif event.key == pygame.K_m:
-                inputs["dificuldade"] = not inputs["dificuldade"] 
+                inputs["difficulty"] = not inputs["difficulty"] 
             elif event.key == pygame.K_j:
                 inputs["jogar"] = not inputs["jogar"]
             elif event.key == pygame.K_q:

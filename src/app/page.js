@@ -33,8 +33,24 @@ function House({ game, minigame }) {
     );
 }
 
+function Dificuldade({ difficulty, text }) {
+    if (difficulty) {
+        console.log(text);
+    }
+    return (
+        <div className={`group relative flex flex-col items-center justify-center p-4
+             m-4 bg-[#1f193c88] rounded-2xl transition-all duration-300 cursor-pointer
+            ${difficulty ? 'shadow-xl -translate-y-2' : 'shadow-lg'}`}>
+            <p className={`mt-4 text-2xl font-bold uppercase tracking-wide transition-colors duration-300
+                ${difficulty ? 'text-[#e04368]' : 'text-[#feedff]'}`}>
+                {text}
+            </p>
+        </div>
+    );
+}
+
 export default function HomePage() {
-    const minigame = useGameChooser();
+    const {minigame, difficulty} = useGameChooser();
     const isCakeGame = minigame === "cakegame";
     return (
         <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 bg-[url('https://images2.alphacoders.com/136/thumb-1920-1364876.png')]">
@@ -45,7 +61,10 @@ export default function HomePage() {
                     <House game="cakegame" minigame={isCakeGame} />
                     <House game="memorygame" minigame={!isCakeGame}/>
                 </div>
-                
+                <div className="grid grid-cols-1 md:grid-cols-2 gaap-150 max-w-100 mx-auto">
+                    <Dificuldade difficulty={difficulty} text="Fácil"/>
+                    <Dificuldade difficulty={!difficulty} text="Difícil"/>
+                </div>
                 <p className="text-center mt-12 text-[#feedff] text-lg italic animate-pulse">
                     Select a game to start your baking adventure!
                 </p>

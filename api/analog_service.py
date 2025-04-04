@@ -5,7 +5,7 @@ sensors = {
     "state": "inicio",
     "minigame": "memorygame",
     "jogada": [False, False, False, False, False, False, False],
-    "dificuldade": 0,
+    "difficulty": False,
 }
 
 cake_states = ["inicio", "preparation", "show_play", "show_interval", "next_show", "initiate_play", "wait_play", 
@@ -56,7 +56,7 @@ def analog_loop():
             sensors["state"] = cake_states[convert_dec(sensors_temp[7:11])]
         else:
             sensors["state"] = genius_states[convert_dec(sensors_temp[7:11])]
-        sensors["dificuldade"] = convert_dec(sensors_temp[13])
+        sensors["difficulty"] = sensors_temp[13]
         print(sensors)
    
 
