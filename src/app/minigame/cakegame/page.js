@@ -54,20 +54,15 @@ function Cobertura({color, dark_color}) {
         
     }
     return (
-        <Canvas className="w-30 h-10" draw={draw} /> 
+        <Canvas className="w-30 h-10 rounded-lg" draw={draw} /> 
     );
 }
 
 function Massa({color}) {
-    const draw = (ctx, frameCount) => {
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-        ctx.fillStyle = color
-        ctx.beginPath()
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-        ctx.fill()
-    }
     return (
-        <Canvas className="w-30 h-10" draw={draw} />
+        // <Canvas className="w-30 h-10" draw={draw} />
+        <div className="w-30 h-10 rounded-lg" 
+        style={{ backgroundColor: color }}></div>
     );
 }
 
@@ -76,14 +71,17 @@ function Camada({camada, cobertura}) {
         "#ff194f", "#ffb400", "#00a6ed",
         "#00ff7f", "#632501", "#8f00ff"
       ];
-    const dark_colors = ["#961130", "#916701", "#004969",
-        "#007038", "#301200", "#3b0069"];
+    const dark_colors = ["#d41442", "#cc9000", "#0077b3",
+        "#00cc66", "#4a1c01", "#6b00bf"];
+
+    const more_dark_colors = ["#ad1035", "#a67300", "#005c8a",
+        "#00994d", "#311300", "#4d008c"];
     for (let i = 0; i < camada.length; i++) {
         if (camada[i] === true) {
             if (cobertura) {
                 return (
                     <div className="absolute">
-                        <Cobertura color={colors[i]} dark_color={dark_colors[i]} />
+                        <Cobertura color={dark_colors[i]} dark_color={more_dark_colors[i]} />
                     </div>
                 );
             } else {
@@ -121,7 +119,7 @@ export default function CakeGame() {
     const user_cake_class = "h-full absolute bottom-0 left-0 transition-all duration-2500 ease-in-out".concat(" ", possible_positions[jogada]);
 
     return (
-        <div className="h-screen flex flex-col bg-[url('../../src/cakegame-bg.png')] relative">
+        <div className="h-screen flex flex-col bg-cover bg-[url('../../src/cakegame-bg.jpg')] relative">
             {/* Game Content */}
             <div>
                 <Header title="Cake MiniGame" />
@@ -131,7 +129,7 @@ export default function CakeGame() {
             </div>
             <div className="h-1/4"></div>
             <div className="flex flex-grow">
-                <div className="w-1/8 flex items-end justify-center absolute bottom-78 left-89">
+                <div className="w-1/8 flex items-end justify-center absolute bottom-75 left-200">
                     <CakePreview title="Gabarito" cake={final_cake} />
                 </div>
                 <div className="relative w-full bottom-20 z-2">
