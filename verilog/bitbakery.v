@@ -140,7 +140,7 @@ jogo_desafio_memoria game0 (
     .clock          (clock),
     .reset          (reset),
     .jogar          (s_iniciar),
-    .dificuldade    (Dificuldade),
+    .dificuldade    (~Dificuldade),
     .botoes         (botoes),
     .estado         (s_estado_0),
     .jogadas        (s_jogada_0),
