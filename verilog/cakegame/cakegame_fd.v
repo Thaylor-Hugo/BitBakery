@@ -123,7 +123,7 @@ contador_m  #(.M(1000),.N(32)) show_counter (
     .meio       (half_show)
 );
 
-contador_m  #(.M(5000), .N(32)) timeout_counter (
+contador_m  #(.M(10000), .N(32)) timeout_counter (
     .clock      (clock),   
     .zera_as    (~enable_timeout_counter),
     .zera_s     (1'b0),
