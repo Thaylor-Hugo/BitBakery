@@ -26,6 +26,7 @@ module bitbakery (
 	 output [1:0] db_minigame,
 	 output [6:0] db_jogada,
 	 output db_iniciar,
+     output db_dificuldade,
 	 output db_clock
 );
 
@@ -56,6 +57,7 @@ assign db_minigame = minigame_out;
 assign db_iniciar = iniciar;
 assign db_jogada = jogada_out;
 assign estado_out = (Eatual == intervalo)? 4'b0001 : s_estado;
+assign db_dificuldade = Dificuldade;
 
 hexa7seg display_state (
 	.hexa (estado_out),
@@ -104,7 +106,7 @@ contador_m  #(.M(2000), .N(32)) contador_intervalo (
 // Lógica de saída
 always @* begin
     s_iniciar <= (Eatual == start_game)? 1'b1 : 1'b0;
-    Dificuldade <= (Eatual == preparacao)? dificuldade : Dificuldade;
+    Dificuldade <= (Eatual == preparacao || Eatual == inicial)? dificuldade : Dificuldade;
     MiniGame <= (Eatual == preparacao || Eatual == inicial)? minigame : MiniGame;
 end
 
