@@ -23,7 +23,6 @@ module unidade_controle (
     input botoesIgualMemoria,
     input fimE,
     input fimL,
-	 input chaveMemoria,
 	input meioL,
     input enderecoIgualLimite,
     input enderecoMenorLimite,
@@ -45,7 +44,8 @@ module unidade_controle (
     output reg fim_timeout,
     output reg [3:0] db_estado,
 	 output reg contaT,
-	 output  seletorMemoria,
+	 output reg seletorMemoria,
+     output reg reset_random,
 	 output  db_dificuldade
 );
 
@@ -70,12 +70,11 @@ module unidade_controle (
 
     // Variaveis de estado
     reg [3:0] Eatual, Eprox;
-	 reg Dificuldade, Memoria;
+	 reg Dificuldade;
 
     initial begin
         Eatual = inicial;
 		  Dificuldade = 1'b0;
-		  Memoria = 1'b0;
     end
 
     // Memoria de estado
@@ -140,6 +139,8 @@ module unidade_controle (
 		zeraM       <= (Eatual == foi_ultima_sequencia || Eatual == preparacao || Eatual == proxima_mostra || Eatual == proxima_sequencia) ? 1'b1 : 1'b0;
         contaM      <= (Eatual == intervalo_rodada || Eatual == mostra_jogada || Eatual == intervalo_mostra) ? 1'b1 : 1'b0;
         fim_timeout <= (Eatual == final_timeout) ? 1'b1 : 1'b0;
+        reset_random <= (Eatual == final_acertou || Eatual == final_errou || Eatual == final_timeout) ? 1'b1 : 1'b0;
+        seletorMemoria <= (Eatual == preparacao) ? 1'b1 : 1'b0;
         if (Eatual == espera_jogada || Eatual == registra_jogada || Eatual == proxima_jogada 
 		  || Eatual == compara_jogada || Eatual == foi_ultima_sequencia || Eatual == espera_jogada 
 		  || Eatual == intervalo_rodada) begin
@@ -152,7 +153,6 @@ module unidade_controle (
 
         if (Eatual == preparacao) begin 
 		    Dificuldade <= chaveDificuldade;
-			 Memoria <= chaveMemoria;
 		end
 
         // Saida de depuracao (estado)
@@ -178,6 +178,5 @@ module unidade_controle (
     end
 	
 	assign db_dificuldade = Dificuldade;
-	assign seletorMemoria = Memoria;
 
 endmodule

@@ -27,7 +27,7 @@ wire [3:0] s_botoes, s_memoria, s_contagem, s_estado, s_limite;
 wire [1:0] s_selMux;
 wire s_fimE, s_fimL, s_botoes_igual_memoria,s_meioL, s_dificuldade, s_zeraE, s_zeraL, s_contaE, s_contaL;
 wire s_zeraR, s_registraR, s_jogada, s_timeout, s_contaT, s_endereco_igual_limite, s_endereco_menor_limite;
-wire s_zeraM, s_contaM, s_meioM, s_fimM, s_sel_memoria;
+wire s_zeraM, s_contaM, s_meioM, s_fimM, s_sel_memoria, s_reset_random;
 wire [3:0] s_jogadas;
 
 wire s_ganhou, s_perdeu, s_fim_timeout;
@@ -65,8 +65,8 @@ unidade_controle controlUnit (
     .zeraM                  (s_zeraM),
     .contaM                 (s_contaM),
     .meioM                  (s_meioM),
-    .chaveMemoria     		(1'b0),
     .seletorMemoria			(s_sel_memoria),
+    .reset_random           (s_reset_random),
     .fimM                   (s_fimM)
 );
 
@@ -80,6 +80,7 @@ fluxo_dados fluxo_dados (
     .registraR              (s_registraR),
     .botoes                 (botoes[3:0]),
     .selecionaMemoria		(s_sel_memoria),
+    .reset_random           (s_reset_random),
     .contaT                 (s_contaT),
     .botoesIgualMemoria     (s_botoes_igual_memoria),
     .fimE                   (s_fimE),

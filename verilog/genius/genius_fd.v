@@ -22,6 +22,7 @@ module fluxo_dados (
     input contaM,
     input registraR,
 	 input selecionaMemoria,
+     input reset_random,
     input [3:0] botoes,
 	 input contaT,
     input [1:0] seletor,
@@ -46,6 +47,7 @@ module fluxo_dados (
     wire [3:0] s_endereco, s_dado, s_dado2, s_saida_memorias, s_botoes, s_limite, s_leds;  // sinal interno para interligacao dos componentes
     wire s_jogada;
     wire sinal = botoes[0] | botoes[1] | botoes[2] | botoes[3];
+    wire random_mem;
 
 
     // multiplexador 3x1
@@ -58,12 +60,19 @@ module fluxo_dados (
         .OUT     (s_leds)
 
     );
+
+    random #(.N(2)) random_memory (
+        .clock          (clock),
+        .reset          (reset_random),
+        .write_enable   (selecionaMemoria),
+        .address        (random_mem)
+    );
 	 
-	 mux2x1 mux_memorias (
+	mux2x1 mux_memorias (
 
         .D0      (s_dado),
         .D1      (s_dado2),
-        .SEL     (selecionaMemoria),
+        .SEL     (random_mem),
         .OUT     (s_saida_memorias)
     );
 
