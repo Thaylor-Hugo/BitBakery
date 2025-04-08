@@ -18,22 +18,22 @@ module sync_rom_16x4_mem2 (clock, address, data_out);
     always @ (posedge clock)
     begin
         case (address)
-            7'b0000000: data_out = 7'b0000001; //1
-            7'b0000001: data_out = 7'b0000100; //2
-            7'b0000010: data_out = 7'b0000010; //3
-            7'b0000011: data_out = 7'b0001000; //4
-            7'b0000100: data_out = 7'b0000001; //5
-            7'b0000101: data_out = 7'b0000100; //6
-            7'b0000110: data_out = 7'b0000010; //7
-            7'b0000111: data_out = 7'b0001000; //8
-            7'b0001000: data_out = 7'b0000001; //9
-            7'b0001001: data_out = 7'b0000001; //10
-            7'b0001010: data_out = 7'b0001000; //11
-            7'b0001011: data_out = 7'b0001000; //12
-            7'b0001100: data_out = 7'b0000010; //13
-            7'b0001101: data_out = 7'b0000100; //14
-            7'b0001110: data_out = 7'b0000100; //15
-            7'b0001111: data_out = 7'b0000001; //16
+            4'b0000: data_out = 7'b0010000; //1
+            4'b0001: data_out = 7'b0100000; //2
+            4'b0010: data_out = 7'b0100000; //3
+            4'b0011: data_out = 7'b0001000; //4
+            4'b0100: data_out = 7'b0000001; //5
+            4'b0101: data_out = 7'b0000010; //6
+            4'b0110: data_out = 7'b0000010; //7
+            4'b0111: data_out = 7'b0000100; //8
+            4'b1000: data_out = 7'b0100000; //9
+            4'b1001: data_out = 7'b0001000; //10
+            4'b1010: data_out = 7'b0000100; //11
+            4'b1011: data_out = 7'b0010000; //12
+            4'b1100: data_out = 7'b0000001; //13
+            4'b1101: data_out = 7'b0100000; //14
+            4'b1110: data_out = 7'b0010000; //15
+            4'b1111: data_out = 7'b0000100; //16
         endcase
     end
 endmodule
