@@ -1,13 +1,13 @@
 import Header from './basic';
 
-export default function GameOver({ pontuacao }) {
+export default function GameOver({ pontuacao, max_pontuacao }) {
     const title = "Fim de Jogo!";
-    const messagePontuacao = `Sua pontuação foi: ${pontuacao} pontos de 16.`;
+    const messagePontuacao = `Sua pontuação foi: ${pontuacao} pontos de ${max_pontuacao}.`;
     
     let message;
-    if (pontuacao <= 8) {
+    if (pontuacao <= max_pontuacao / 2) {
         message = "Você quase conseguiu! Tente novamente!";
-    } else if (pontuacao < 16) {
+    } else if (pontuacao < max_pontuacao) {
         message = "Parabéns! Você foi muito bem!";
     } else {
         message = "Incrível! Você arrasou, acertou tudo!";

@@ -14,8 +14,9 @@ export default function memorygame() {
     "#00ff7f", "#632501", "#8f00ff"
   ];
 
-  const { jogada, pontuacao, gameOver, aguardar } = useMemoryGame();
+  const { jogada, pontuacao, gameOver, aguardar, dificuldade } = useMemoryGame();
   let temp_jogada = jogada ? jogada.slice(0, colors.length) : [];
+  const max_pontuacao = (dificuldade === 0) ? 8 : 16;
 
   const renderData = colors.map((color, index) => (
       <Circle key={index + color} bgColor={temp_jogada[index] ? colors[index] : 'black'} />
@@ -33,7 +34,7 @@ export default function memorygame() {
         <Header title={"Jogo da memória"} className="space-grotesk-principal text-5xl text-center text-black"/>
       </div>
       <div>
-        <p id="titulo-memoria" className="font-sans text-4xl font-bold text-center text-white">{aguardar ? "Aguarde para jogar" : "Faça sua jogada"}</p>
+        <p id="titulo-memoria" className="font-sans text-4xl font-bold text-center" style={{ color: !aguardar ? "#28a745ff" : "#cc0000ff", WebkitTextStroke: "1px gray" }}>{aguardar ? "Aguarde para jogar" : "Faça sua jogada"}</p>
       </div>
       <div id="circles">
         <div className='circulos'>
@@ -41,7 +42,7 @@ export default function memorygame() {
         </div>
       </div>
       {gameOver && (
-            <GameOver pontuacao={pontuacao} />
+            <GameOver pontuacao={pontuacao} max_pontuacao={max_pontuacao} />
         )}
     </div>
   );

@@ -8,6 +8,7 @@ export function useMemoryGame() {
     const [aguardar, setAguardar] = useState(true);
     const [gameOver, setGameOver] = useState(false);
     const [estadoMudou, setEstadoMudou] = useState(false);
+    const [difficulty, setDifficulty] = useState("");
     const estados_finais = ["final_timeout", "final_acertou", "final_errou"];
     const estados_mostra = ["proxima_mostra", "mostra_jogada", "intervalo_mostra"];
 
@@ -17,6 +18,7 @@ export function useMemoryGame() {
                 const res = await fetch('http://localhost:5328/api/sensors');
                 const { sensors } = await res.json();
                 setJogada(sensors.jogada);
+                setDifficulty(sensors.difficulty);
 
                 if (sensors.state == "inicial" || sensors.state == "inicio") {
                     router.push('/');
@@ -42,6 +44,6 @@ export function useMemoryGame() {
         };
         const interval = setInterval(fetchSensors, 50);
         return () => clearInterval(interval);
-    }, [router, estadoMudou, gameOver, aguardar]);
-    return { jogada, pontuacao, gameOver, aguardar };
+    }, [router, estadoMudou, gameOver, aguardar, difficulty]);
+    return { jogada, pontuacao, gameOver, aguardar, difficulty };
 }

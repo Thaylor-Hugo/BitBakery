@@ -125,7 +125,7 @@ export default function CakeGame() {
                 <Header title="Cake MiniGame" />
             </div>
             <div>
-                <p className="font-sans text-4xl font-bold text-center text-white">{playing? "Faça o Bolo" : "Aguarde o Pedido"}</p>
+                <p className="font-sans text-4xl font-bold text-center text-shadow-lg stroke-0" style={{ color: playing ? "#28a745ff" : "#cc0000ff", WebkitTextStroke: "1px gray" }}>{playing ? "Faça o Bolo" : "Aguarde o Pedido"}</p>
             </div>
             <div className="h-1/4"></div>
             <div className="flex flex-grow">
@@ -142,7 +142,7 @@ export default function CakeGame() {
 
             {/* Game Over Overlay */}
             {gameover && (
-                <GameOver pontuacao={pontuacao} />
+                <GameOver pontuacao={pontuacao} max_pontuacao={16} />
             )}
         </div>
     );
