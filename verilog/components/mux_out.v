@@ -63,14 +63,14 @@ always @(*) begin
             leds_out = 3'b0;
             jogada_out = 7'b0;
             estado_out = estado_inicial;
-            pontuacao_out = 7'b0;
+            pontuacao_out = 3'b0;
             pronto_out = 1'b0;
         end
         default: begin
             leds_out = 3'b0;
             estado_out = 4'b0;
             jogada_out = 7'b0;
-            pontuacao_out = 7'b0;
+            pontuacao_out = 3'b0;
             pronto_out = 1'b0;
         end
     endcase

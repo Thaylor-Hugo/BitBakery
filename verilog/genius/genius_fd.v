@@ -35,7 +35,6 @@ module fluxo_dados (
     output endecoIgualLimite,
     output endecoMenorLimite,
     output jogada_feita,
-    output db_tem_jogada,
     output [3:0] db_limite,
     output [3:0] db_contagem,
     output [3:0] db_memoria,
@@ -185,7 +184,6 @@ module fluxo_dados (
     assign db_memoria = s_saida_memorias;
     assign db_jogada = s_botoes;
     assign jogada_feita = s_jogada;
-    assign db_tem_jogada = sinal;
     assign db_limite = s_limite;
     assign leds = s_leds;
 

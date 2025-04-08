@@ -89,7 +89,6 @@ fluxo_dados fluxo_dados (
     .endecoIgualLimite      (s_endereco_igual_limite),
     .endecoMenorLimite      (s_endereco_menor_limite),
     .jogada_feita           (s_jogada),
-    .db_tem_jogada          (db_tem_jogada),
     .db_limite              (s_limite),
     .db_contagem            (s_contagem),
     .db_memoria             (s_memoria),
