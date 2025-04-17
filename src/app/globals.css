@@ -1,1 +1,50 @@
 @import "tailwindcss";
+
+@keyframes fall {
+    0% {
+        top: var(--fall-start, -100px);
+    }
+    100% {
+        top: var(--fall-end, 0);
+    }
+}
+
+.fall-animation {
+    animation: fall 0.7s ease-in-out forwards;
+}
+
+#container {
+    height: 100vh;
+    background-size: cover;
+}
+
+.circulos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#circles {
+    padding: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    height: 80vh;
+}
+
+#titulo-memoria {
+    margin-top: 0;
+    margin-bottom: 30px;
+}
+
+.titulo-principal {
+    margin-bottom: 20px;
+}
+
+.space-grotesk-principal {
+    font-family: "Space Grotesk", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal;
+}
