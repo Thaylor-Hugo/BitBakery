@@ -10,3 +10,5 @@
 /api/WF_SDK/protocol/__pycache__/
 
 .vscode
+
+.tool-versions
