@@ -45,7 +45,7 @@ module fluxo_dados (
 );
     wire [3:0] s_endereco, s_limite;  // sinal interno para interligacao dos componentes
     wire s_jogada;
-    wire [6:0] s_dado, s_dado2, s_saida_memorias, s_botoes, s_leds 
+    wire [6:0] s_dado, s_dado2, s_saida_memorias, s_botoes, s_leds;
     wire sinal = botoes[0] | botoes[1] | botoes[2] | botoes[3];
     wire random_mem;
 
