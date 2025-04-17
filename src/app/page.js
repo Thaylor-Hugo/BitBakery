@@ -34,9 +34,6 @@ function House({ game, minigame }) {
 }
 
 function Dificuldade({ difficulty, text }) {
-    if (difficulty) {
-        console.log(text);
-    }
     return (
         <div className={`group relative flex flex-col items-center justify-center p-4
              m-4 bg-[#1f193c88] rounded-2xl transition-all duration-300 cursor-pointer

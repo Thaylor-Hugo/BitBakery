@@ -14,9 +14,9 @@ export default function memorygame() {
     "#00ff7f", "#632501", "#8f00ff"
   ];
 
-  const { jogada, pontuacao, gameOver, aguardar, dificuldade } = useMemoryGame();
+  const { jogada, pontuacao, gameOver, aguardar, difficulty } = useMemoryGame();
   let temp_jogada = jogada ? jogada.slice(0, colors.length) : [];
-  const max_pontuacao = (dificuldade === 0) ? 8 : 16;
+  let max_pontuacao = difficulty ? 8 : 16;
 
   const renderData = colors.map((color, index) => (
       <Circle key={index + color} bgColor={temp_jogada[index] ? colors[index] : 'black'} />

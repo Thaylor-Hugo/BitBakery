@@ -23,7 +23,7 @@ module fluxo_dados (
     input registraR,
 	 input selecionaMemoria,
      input reset_random,
-    input [3:0] botoes,
+    input [6:0] botoes,
 	 input contaT,
     input [1:0] seletor,
     output botoesIgualMemoria,
@@ -37,14 +37,15 @@ module fluxo_dados (
     output jogada_feita,
     output [3:0] db_limite,
     output [3:0] db_contagem,
-    output [3:0] db_memoria,
-    output [3:0] db_jogada,
-    output [3:0] leds,
+    output [6:0] db_memoria,
+    output [6:0] db_jogada,
+    output [6:0] leds,
 	output timeout
 
 );
-    wire [3:0] s_endereco, s_dado, s_dado2, s_saida_memorias, s_botoes, s_limite, s_leds;  // sinal interno para interligacao dos componentes
+    wire [3:0] s_endereco, s_limite;  // sinal interno para interligacao dos componentes
     wire s_jogada;
+    wire [6:0] s_dado, s_dado2, s_saida_memorias, s_botoes, s_leds 
     wire sinal = botoes[0] | botoes[1] | botoes[2] | botoes[3];
     wire random_mem;
 
@@ -156,12 +157,9 @@ module fluxo_dados (
     );
 
     // comparador_85
-    comparador_85 comparador (
+    comparador comparador (
         .A    (s_saida_memorias),
         .B    (s_botoes),
-        .ALBi (1'b0),
-        .AGBi (1'b0),
-        .AEBi (1'b1),
         .ALBo (    ),
         .AGBo (    ),
         .AEBo (botoesIgualMemoria)

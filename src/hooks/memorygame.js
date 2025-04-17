@@ -32,10 +32,8 @@ export function useMemoryGame() {
                     setEstadoMudou(false);
                     setAguardar(true);
                     setPontuacao(prevpontuacao => prevpontuacao + 1);
-                    console.log("Pontuação: ", pontuacao);
                 } else if (estados_finais.includes(sensors.state) && !gameOver) {
                     setPontuacao(prevpontuacao => prevpontuacao + (sensors.state == "final_acertou" ? 1 : 0));
-                    console.log("Pontuação: ", pontuacao);
                     setGameOver(true);
                 }
             } catch (error) {

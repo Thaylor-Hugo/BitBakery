@@ -55,7 +55,6 @@ export function useCakeGame() {
                         changed = true;
                     } else if(!sensors.jogada.every(val => val === false) && changed) {
                         changed = false;
-                        console.log("Gabarito: ", sensors.jogada);
                         setFinalCake( (prevfinalCake) => [...prevfinalCake, sensors.jogada] );
                     }
                 } else if (sensors.state == "wait_play" || sensors.state == "register_play" || sensors.state == "next_play" || sensors.state == "end_state") {

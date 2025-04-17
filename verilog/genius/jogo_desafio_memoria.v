@@ -23,17 +23,18 @@ module jogo_desafio_memoria (
     output pronto
 );
 
-wire [3:0] s_botoes, s_memoria, s_contagem, s_estado, s_limite;
+wire [3:0] s_contagem, s_estado, s_limite;
+wire [6:0] s_botoes, s_memoria;
 wire [1:0] s_selMux;
 wire s_fimE, s_fimL, s_botoes_igual_memoria,s_meioL, s_dificuldade, s_zeraE, s_zeraL, s_contaE, s_contaL;
 wire s_zeraR, s_registraR, s_jogada, s_timeout, s_contaT, s_endereco_igual_limite, s_endereco_menor_limite;
 wire s_zeraM, s_contaM, s_meioM, s_fimM, s_sel_memoria, s_reset_random;
-wire [3:0] s_jogadas;
+wire [6:0] s_jogadas;
 
 wire s_ganhou, s_perdeu, s_fim_timeout;
 assign pontuacao = 2'b0;
 assign estado = s_estado;
-assign jogadas = {3'b0, s_jogadas[3:0]};
+assign jogadas = s_jogadas;
 
 unidade_controle controlUnit (
     .clock                  (clock),
@@ -78,7 +79,7 @@ fluxo_dados fluxo_dados (
     .contaL                 (s_contaL),
     .zeraR                  (s_zeraR),
     .registraR              (s_registraR),
-    .botoes                 (botoes[3:0]),
+    .botoes                 (botoes),
     .selecionaMemoria		(s_sel_memoria),
     .reset_random           (s_reset_random),
     .contaT                 (s_contaT),
