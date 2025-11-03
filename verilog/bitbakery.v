@@ -18,16 +18,13 @@ module bitbakery (
     input dificuldade,
     input [1:0] minigame,
     input [6:0] botoes_in,
-    output [1:0] minigame_out,
-    output [3:0] estado_out,
-    output [6:0] jogada_out,
+    output saida_serial,
     output [2:0] pontuacao_out,
-	 output [6:0] db_estado,
-	 output [1:0] db_minigame,
-	 output [6:0] db_jogada,
-	 output db_iniciar,
-     output db_dificuldade,
-	 output db_clock
+    output [6:0] db_estado,
+    output [1:0] db_minigame,
+    output [6:0] db_jogada,
+    output db_iniciar,
+	output db_clock
 );
 
 parameter inicial = 3'b000;
@@ -47,15 +44,20 @@ wire s_pronto_0, s_pronto_1, s_pronto_2, s_pronto, fim_intervalo;
 wire [3:0] s_estado_0, s_estado_1, s_estado_2, s_estado_inicial, s_estado;
 wire [6:0] s_jogada_0, s_jogada_1, s_jogada_2;
 wire [2:0] s_pontuacao_0, s_pontuacao_1, s_pontuacao_2;
+wire [3:0] estado_out;
 
 reg [1:0] MiniGame; 
 reg [2:0] Eatual, Eprox;
 reg Dificuldade, s_iniciar;
 
+// Serial Communication Signals
+wire [7:0] s_dados_serial;
+wire s_fim_tx;
+wire [1:0] s_sel_pack;
+
 assign db_clock = clock;
-assign db_minigame = minigame_out;
+assign db_minigame = MiniGame;
 assign db_iniciar = iniciar;
-assign db_jogada = jogada_out;
 assign estado_out = (Eatual == intervalo)? 4'b0001 : s_estado;
 assign db_dificuldade = Dificuldade;
 
@@ -133,7 +135,7 @@ mux_out saidas (
     .pontuacao_2    (s_pontuacao_2),
     .estado_inicial (s_estado_inicial),
     .estado_out     (s_estado),
-    .jogada_out     (jogada_out),
+    .jogada_out     (db_jogada),
     .pronto_out     (s_pronto),
     .pontuacao_out  ()
 );
@@ -174,7 +176,39 @@ clothesgame game2 (
     .pronto         (s_pronto_2)
 );
 
+mux8x1 mux_serial (
+    .D0 ({2'b00, MiniGame, estado_out}),
+    .D1 ({2'b01, db_jogada[5:0]}),
+    .D2 ({2'b10, db_jogada[6], db_dificuldade, 4'b0000}),
+    .D3 (8'b11000000),
+    .SEL (s_sel_pack),
+    .OUT (s_dados_serial)
+);
+
+contador_m #(.M(4), .N(2)) contador_serial (
+    .clock      (clock),   
+    .zera_as    (),
+    .zera_s     (reset),
+    .conta	    (s_fim_tx),
+    .Q          (s_sel_pack),
+    .fim        (),
+    .meio       ()
+);
+
+tx_serial_8E1 tx_serial (
+    .clock           (clock),
+    .reset           (reset),
+    .partida         (1'b1),
+    .dados_ascii     (s_dados_serial), // 8 bits
+    .saida_serial    (saida_serial),
+    .pronto          (s_fim_tx),
+    .db_clock        ( ),
+    .db_tick         ( ),
+    .db_partida      ( ),
+    .db_saida_serial ( ),
+    .db_estado       ( )
+);
+
 assign s_estado_inicial = Eatual;
-assign minigame_out = MiniGame;
 
 endmodule
