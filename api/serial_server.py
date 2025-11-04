@@ -5,7 +5,7 @@ import threading
 
 # For mock sensors uncoment this line and coment the next one. Also change commented lines on main function
 # from sensors_mock import mock_loop, sensors
-from serial_server import loop, close_serial, sensors
+from serial_service import loop, close_serial, sensors
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS
