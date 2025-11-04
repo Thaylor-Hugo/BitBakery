@@ -50,11 +50,6 @@ reg [1:0] MiniGame;
 reg [2:0] Eatual, Eprox;
 reg Dificuldade, s_iniciar;
 
-// Serial Communication Signals
-wire [7:0] s_dados_serial;
-wire s_fim_tx;
-wire [1:0] s_sel_pack;
-
 assign db_clock = clock;
 assign db_minigame = MiniGame;
 assign db_iniciar = iniciar;
@@ -176,37 +171,14 @@ clothesgame game2 (
     .pronto         (s_pronto_2)
 );
 
-mux8x1 mux_serial (
-    .D0 ({2'b00, MiniGame, estado_out}),
-    .D1 ({2'b01, db_jogada[5:0]}),
-    .D2 ({2'b10, db_jogada[6], db_dificuldade, 4'b0000}),
-    .D3 (8'b11000000),
-    .SEL (s_sel_pack),
-    .OUT (s_dados_serial)
-);
-
-contador_m #(.M(4), .N(2)) contador_serial (
-    .clock      (clock),   
-    .zera_as    (),
-    .zera_s     (reset),
-    .conta	    (s_fim_tx),
-    .Q          (s_sel_pack),
-    .fim        (),
-    .meio       ()
-);
-
-tx_serial_8E1 tx_serial (
-    .clock           (clock),
-    .reset           (reset),
-    .partida         (1'b1),
-    .dados_ascii     (s_dados_serial), // 8 bits
-    .saida_serial    (saida_serial),
-    .pronto          (s_fim_tx),
-    .db_clock        ( ),
-    .db_tick         ( ),
-    .db_partida      ( ),
-    .db_saida_serial ( ),
-    .db_estado       ( )
+bitbakery_serial_tx serial_tx (
+    .clock          (clock        ),
+    .reset          (reset        ),
+    .D0             ({2'b00, MiniGame, estado_out}),
+    .D1             ({2'b01, db_jogada[5:0]}),
+    .D2             ({2'b10, db_jogada[6], db_dificuldade, 4'b0000}),
+    .D3             (8'b11000000),
+    .saida_serial   (saida_serial )
 );
 
 assign s_estado_inicial = Eatual;
