@@ -172,7 +172,7 @@ clothesgame game2 (
 );
 
 bitbakery_serial_tx serial_tx (
-    .clock          (clock        ),
+    .clock          (clock_in     ),  // Use 50MHz clock directly, not divided clock!
     .reset          (reset        ),
     .D0             ({2'b00, MiniGame, estado_out}),
     .D1             ({2'b01, db_jogada[5:0]}),
