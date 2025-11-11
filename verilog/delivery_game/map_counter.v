@@ -5,12 +5,21 @@ module map_counter (
     input reset,
     input count_map,
     input [1:0] velocity,
-    output move_map
+    output move_map,
+    output pwm
 );
 
 wire s_move_map_800, s_move_map_700, s_move_map_600, s_move_map_500, s_move_map_400, s_move_map_300, s_move_map_200;
 wire [1:0] s_base_velocity;
 wire s_max_velocity, s_increment_velocity;
+
+circuito_pwm velocimeter (
+    .clock (clock),
+    .reset (reset),
+    .largura (s_base_velocity + velocity),
+    .pwm (pwm),
+    .db_pwm ()
+);
 
 velocity_mux velocity_selector (
     .v0 (s_move_map_800),

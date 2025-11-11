@@ -29,8 +29,9 @@ module bitbakery (
     output db_iniciar,
 	output db_clock,
     output [3:0] db_player_position,
-    output [63:0] db_map_objective,
-    output [63:0] db_map_obstacle
+    // output [63:0] db_map_objective,
+    output [15:0] db_map_obstacle,
+    output db_serial
 );
 
 parameter inicial = 3'b000;
@@ -64,10 +65,10 @@ assign db_iniciar = iniciar;
 assign estado_out = (Eatual == intervalo)? 4'b0001 : s_estado;
 assign db_dificuldade = Dificuldade;
 
-assign db_map_objective = s_map_objective;
-assign db_map_obstacle = s_map_obstacle;
+// assign db_map_objective = s_map_objective[15:0];
+assign db_map_obstacle = s_map_obstacle[15:0];
 assign db_player_position = s_player_position;
-
+assign db_serial = saida_serial;
 
 hexa7seg display_state (
 	.hexa (estado_out),

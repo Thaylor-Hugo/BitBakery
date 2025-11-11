@@ -25,6 +25,8 @@ wire s_obstacle_generated, s_objective_generated;
 integer i;
 integer k;
 
+wire s_move_left, s_move_right;
+
 assign db_player_position = player_position;
 assign db_map_obstacle = s_map_obstacles_flat;
 assign db_map_objective = s_map_objectives_flat;
@@ -34,14 +36,27 @@ initial begin
     player_position <= 4'b1000; // Starting position
 end
 
+edge_detector move_left (
+    .clock (clock),
+    .reset (reset),
+    .sinal (botoes[0]),
+    .pulso (s_move_left)
+);
+edge_detector move_right (
+    .clock (clock),
+    .reset (reset),
+    .sinal (botoes[1]),
+    .pulso (s_move_right)
+);
+
 always @(posedge clock or posedge reset) begin
     if (reset) begin
         // Reset player position and map
         player_position <= 4'b1000;
     end else begin
         // Update player position based on button inputs
-        if (botoes[0] && player_position != 4'b1000) player_position <= player_position << 1; // Move left
-        else if (botoes[1] && player_position != 4'b0001) player_position <= player_position >> 1; // Move right
+        if (s_move_left && player_position != 4'b1000) player_position <= player_position << 1; // Move left
+        else if (s_move_right && player_position != 4'b0001) player_position <= player_position >> 1; // Move right
     end
 end
 
@@ -124,16 +139,17 @@ interface_hcsr04 ultrassonico (
 );
 
 // Map velocity counters
-assign s_velocity = (s_medida <= 12'h004) ? 2'b11 :
-                    (s_medida <= 12'h008) ? 2'b10 :
-                    (s_medida <= 12'h012) ? 2'b01 : 2'b00;
+assign s_velocity = (s_medida <= 12'h004) ? 2'b00 :
+                    (s_medida <= 12'h008) ? 2'b01 :
+                    (s_medida <= 12'h012) ? 2'b10 : 2'b11;
 
 map_counter map_counter_inst (
     .clock (clock),
     .reset (reset),
     .count_map (count_map),
     .velocity (s_velocity),
-    .move_map (s_move_map)
+    .move_map (s_move_map),
+    .pwm (pwm)
 );
 
 endmodule

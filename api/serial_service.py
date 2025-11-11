@@ -3,8 +3,10 @@ import time
 import serial
 
 # --- Configuration ---
-# !!! Replace 'COM3' with your device's port name
-PORT_NAME = 'COM3'
+# !!! Replace with your device's port name
+# Linux: /dev/ttyUSB0, /dev/ttyACM0, etc.
+# Windows: COM3, COM4, etc.
+PORT_NAME = '/dev/ttyUSB1'
 
 BAUD_RATE = 115200
 DATA_BITS = serial.EIGHTBITS
@@ -51,7 +53,7 @@ def loop():
     while True:
         # Read one byte of data
         data_byte = ser.read(1)
-        
+        print(f"Received byte: {data_byte}")
         # If data was received
         if data_byte:
             int_value = data_byte[0]
