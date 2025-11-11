@@ -7,7 +7,7 @@ module delivery_game_fd (
     input count_map,
     input get_velocity,
     output [2:0] pontuacao,
-    output reg game_over,
+    output game_over,
     output pwm,
     output trigger,
     output velocity_ready,
@@ -40,22 +40,14 @@ always @(posedge clock or posedge reset) begin
     if (reset) begin
         // Reset player position and map
         player_position <= 4'b1000;
-        for (i = 0; i < 16; i = i + 1) begin
-            map_obstacles[i] <= 4'b0000;
-            map_objectives[i] <= 4'b0000;
-        end
-        game_over <= 1'b0;
     end else begin
         // Update player position based on button inputs
         if (botoes[0] && player_position != 4'b1000) player_position <= player_position << 1; // Move left
         else if (botoes[1] && player_position != 4'b0001) player_position <= player_position >> 1; // Move right
-        
-        // Check for obstacles
-        if (map_obstacles[0] == player_position) begin
-            game_over <= 1'b1; // Game over if player hits an obstacle
-        end
     end
 end
+
+assign game_over = ((map_obstacles[0] & player_position) == 4'h0)? 1'b0 : 1'b1;
 
 contador_m #(
     .M(30_000), // Every 30s

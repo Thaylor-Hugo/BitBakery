@@ -71,26 +71,32 @@ task press_button;
 endtask
 
 // Task to move player to avoid obstacles
+// Player position is one-hot: 4'b1000=pos0, 4'b0100=pos1, 4'b0010=pos2, 4'b0001=pos3
+// Obstacle position is also one-hot encoded
 task avoid_obstacle;
     input [3:0] obstacle_pos;
     input [3:0] current_pos;
     begin
-        if (obstacle_pos[0] && current_pos == 4'd0) begin
+        // If obstacle at position 0 (bit 3) and player at position 0
+        if (obstacle_pos[3] && current_pos[3]) begin
             press_button(1); // Move right
         end
-        else if (obstacle_pos[1] && current_pos == 4'd1) begin
-            if (current_pos > 4'd0)
+        // If obstacle at position 1 (bit 2) and player at position 1
+        else if (obstacle_pos[2] && current_pos[2]) begin
+            if (current_pos != 4'b1000) // Not at leftmost
                 press_button(0); // Move left
             else
                 press_button(1); // Move right
         end
-        else if (obstacle_pos[2] && current_pos == 4'd2) begin
-            if (current_pos < 4'd3)
+        // If obstacle at position 2 (bit 1) and player at position 2
+        else if (obstacle_pos[1] && current_pos[1]) begin
+            if (current_pos != 4'b0001) // Not at rightmost
                 press_button(1); // Move right
             else
                 press_button(0); // Move left
         end
-        else if (obstacle_pos[3] && current_pos == 4'd3) begin
+        // If obstacle at position 3 (bit 0) and player at position 3
+        else if (obstacle_pos[0] && current_pos[0]) begin
             press_button(0); // Move left
         end
     end
@@ -121,8 +127,8 @@ initial begin
     $display("====================================");
     $display("Delivery Game Testbench");
     $display("====================================");
-    $display("Time(ms) | Dist(cm) | Estado | Pos | Obs | Obj | Score | Pronto");
-    $display("----------------------------------------------------------------");
+    $display("Time(ms) | Dist(cm) | Estado | Pos  | Obs | Obj | Score | Pronto");
+    $display("-----------------------------------------------------------------------");
     
     // Reset pulse
     @(negedge clock);
@@ -174,19 +180,31 @@ initial begin
         // Sometimes try to collect objectives every 200ms
         if (game_time % 200 == 0 && db_new_objective != 4'b0000 && ($random % 3 == 0)) begin
             // 33% chance to try to move to objective
-            if (db_new_objective[0] && db_player_position != 4'd0)
-                press_button(0);
-            else if (db_new_objective[1] && db_player_position != 4'd1)
-                press_button(db_player_position < 4'd1 ? 1 : 0);
-            else if (db_new_objective[2] && db_player_position != 4'd2)
-                press_button(db_player_position < 4'd2 ? 1 : 0);
-            else if (db_new_objective[3] && db_player_position != 4'd3)
-                press_button(1);
+            // Position 0 (bit 3)
+            if (db_new_objective[3] && !db_player_position[3])
+                press_button(0); // Move left towards position 0
+            // Position 1 (bit 2)
+            else if (db_new_objective[2] && !db_player_position[2]) begin
+                if (db_player_position[3]) // Currently at pos 0
+                    press_button(1); // Move right
+                else
+                    press_button(0); // Move left
+            end
+            // Position 2 (bit 1)
+            else if (db_new_objective[1] && !db_player_position[1]) begin
+                if (db_player_position[0]) // Currently at pos 3
+                    press_button(0); // Move left
+                else
+                    press_button(1); // Move right
+            end
+            // Position 3 (bit 0)
+            else if (db_new_objective[0] && !db_player_position[0])
+                press_button(1); // Move right towards position 3
         end
         
         // Display status every second
         if (game_time % 1000 == 0) begin
-            $display("%7d  |   %2d     |   %1h    | %1d   | %4b| %4b|   %1d   | %1b",
+            $display("%7d  |   %2d     |   %1h    | %4b| %4b| %4b|   %1d   | %1b",
                      game_time, distance, estado, db_player_position,
                      db_new_obstacle, db_new_objective, pontuacao, pronto);
         end
@@ -194,12 +212,12 @@ initial begin
     
     // Final status
     #(CLOCK_PERIOD * 10);
-    $display("----------------------------------------------------------------");
+    $display("-----------------------------------------------------------------------");
     $display("Game ended at %0d ms", game_time);
     $display("Final score: %0d", pontuacao);
     $display("Game over (pronto): %0b", pronto);
     $display("Final estado: %0h", estado);
-    $display("Final position: %0d", db_player_position);
+    $display("Final position: %4b", db_player_position);
     $display("====================================");
     
     $finish;
