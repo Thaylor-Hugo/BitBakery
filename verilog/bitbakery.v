@@ -186,7 +186,7 @@ delivery_game game3 (
     .db_player_position (s_player_position),
     .db_map_obstacle (s_map_obstacle),
     .db_map_objective (s_map_objective)
-)
+);
 
 bitbakery_serial_tx serial_tx (
     .clock          (clock_in     ),  // Use 50MHz clock directly, not divided clock!

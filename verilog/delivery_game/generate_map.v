@@ -6,8 +6,8 @@ module generate_map (
     input move_map,
     input sel_obstacle,     // 1 for obstacle, 0 for no obstacle
     input sel_objective,    // 1 for objective, 0 for no objective
-    output reg [63:0] map_obstacles_flat,
-    output reg [63:0] map_objectives_flat,
+    output [63:0] map_obstacles_flat,
+    output [63:0] map_objectives_flat,
     output reg obstacle_generated,  // Pulses when obstacle is inserted
     output reg objective_generated  // Pulses when objective is inserted
 );

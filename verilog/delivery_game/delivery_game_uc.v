@@ -3,7 +3,7 @@ module delivery_game_uc (
     input reset,
     input jogar,
     input game_over,
-    output velocity_ready,
+    input velocity_ready,
     output [3:0] estado,
     output reg reset_out,
     output reg pronto,
