@@ -12,8 +12,8 @@ module delivery_game (
     output pwm,
     output trigger,
     output [3:0] db_player_position,
-    output [3:0] db_new_obstacle,
-    output [3:0] db_new_objective
+    output [63:0] db_map_obstacle,
+    output [63:0] db_map_objective
 );
 
 wire s_reset, s_game_over, s_count_map, s_get_velocity, s_velocity_ready;
@@ -31,8 +31,8 @@ delivery_game_fd fd (
     .trigger (trigger),
     .velocity_ready (s_velocity_ready),
     .db_player_position (db_player_position),
-    .db_new_obstacle (db_new_obstacle),
-    .db_new_objective (db_new_objective)
+    .db_map_obstacle (db_map_obstacle),
+    .db_map_objective (db_map_objective)
 );
 
 delivery_game_uc uc (

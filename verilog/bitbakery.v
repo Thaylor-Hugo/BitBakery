@@ -18,13 +18,19 @@ module bitbakery (
     input dificuldade,
     input [1:0] minigame,
     input [6:0] botoes_in,
+    input echo,
     output saida_serial,
+    output pwm,
+    output trigger,
     output [2:0] pontuacao_out,
     output [6:0] db_estado,
     output [1:0] db_minigame,
     output [6:0] db_jogada,
     output db_iniciar,
-	output db_clock
+	output db_clock,
+    output [3:0] db_player_position,
+    output [63:0] db_map_objective,
+    output [63:0] db_map_obstacle
 );
 
 parameter inicial = 3'b000;
@@ -45,6 +51,8 @@ wire [3:0] s_estado_0, s_estado_1, s_estado_2, s_estado_inicial, s_estado;
 wire [6:0] s_jogada_0, s_jogada_1, s_jogada_2;
 wire [2:0] s_pontuacao_0, s_pontuacao_1, s_pontuacao_2;
 wire [3:0] estado_out;
+wire [3:0] s_player_position;
+wire [63:0] s_map_objective, s_map_obstacle;
 
 reg [1:0] MiniGame; 
 reg [2:0] Eatual, Eprox;
@@ -55,6 +63,11 @@ assign db_minigame = MiniGame;
 assign db_iniciar = iniciar;
 assign estado_out = (Eatual == intervalo)? 4'b0001 : s_estado;
 assign db_dificuldade = Dificuldade;
+
+assign db_map_objective = s_map_objective;
+assign db_map_obstacle = s_map_obstacle;
+assign db_player_position = s_player_position;
+
 
 hexa7seg display_state (
 	.hexa (estado_out),
@@ -80,7 +93,7 @@ end
 always @* begin
     case (Eatual)
         inicial: Eprox = iniciar ? preparacao : inicial;
-        preparacao: Eprox = (MiniGame != 2'b11 && MiniGame != 2'b10)? intervalo : preparacao;
+        preparacao: Eprox = (MiniGame != 2'b11)? intervalo : preparacao;
         intervalo: Eprox = fim_intervalo ? start_game : intervalo;
         start_game: Eprox = execucao;
         execucao: Eprox = s_pronto ? fim : execucao;
@@ -159,17 +172,21 @@ cakegame game1 (
     .pronto         (s_pronto_1)
 );
 
-clothesgame game2 (
-    .clock          (clock),
-    .reset          (reset),
-    .jogar          (s_iniciar),
-    .dificuldade    (Dificuldade),
-    .botoes         (botoes),
-    .estado         (s_estado_2),
-    .jogadas        (s_jogada_2),
-    .pontuacao      (s_pontuacao_2),
-    .pronto         (s_pronto_2)
-);
+delivery_game game3 (
+    .clock (clock),
+    .reset (reset),
+    .jogar (s_iniciar),
+    .botoes (botoes),
+    .echo (echo),
+    .estado (s_estado_2),
+    .pontuacao (s_pontuacao_2),
+    .pronto (s_pronto_2),
+    .pwm (pwm),
+    .trigger (trigger),
+    .db_player_position (s_player_position),
+    .db_map_obstacle (s_map_obstacle),
+    .db_map_objective (s_map_objective)
+)
 
 bitbakery_serial_tx serial_tx (
     .clock          (clock_in     ),  // Use 50MHz clock directly, not divided clock!

@@ -12,13 +12,11 @@ module delivery_game_fd (
     output trigger,
     output velocity_ready,
     output [3:0] db_player_position,
-    output [3:0] db_new_obstacle,
-    output [3:0] db_new_objective
+    output [63:0] db_map_obstacle,
+    output [63:0] db_map_objective
 );
 
 reg [3:0] player_position;
-reg [3:0] map_obstacles [0:15];
-reg [3:0] map_objectives [0:15];
 wire s_sel_obstacle, s_sel_objective, s_move_map, s_count_points;
 wire [11:0] s_medida;
 wire [1:0] s_velocity;
@@ -28,8 +26,8 @@ integer i;
 integer k;
 
 assign db_player_position = player_position;
-assign db_new_obstacle = map_obstacles[15];
-assign db_new_objective = map_objectives[15];
+assign db_map_obstacle = s_map_obstacles_flat;
+assign db_map_objective = s_map_objectives_flat;
 
 
 initial begin
@@ -47,7 +45,7 @@ always @(posedge clock or posedge reset) begin
     end
 end
 
-assign game_over = ((map_obstacles[0] & player_position) == 4'h0)? 1'b0 : 1'b1;
+assign game_over = ((s_map_obstacles_flat[3:0] & player_position) == 4'h0)? 1'b0 : 1'b1;
 
 contador_m #(
     .M(30_000), // Every 30s
@@ -100,14 +98,6 @@ contador_m #(
     .fim (s_sel_objective),
     .meio ()
 );
-
-// Unflatten maps from generate_map
-always @* begin
-    for (k = 0; k < 16; k = k + 1) begin
-        map_obstacles[k] = s_map_obstacles_flat[k*4 +: 4];
-        map_objectives[k] = s_map_objectives_flat[k*4 +: 4];
-    end
-end
 
 generate_map map_gen (
     .clock (clock),
