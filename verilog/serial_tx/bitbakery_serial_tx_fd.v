@@ -11,14 +11,14 @@ module bitbakery_serial_tx_fd (
     input [7:0] D0,
     input [7:0] D1,
     input [7:0] D2,
-    input [7:0] D3,
+    input [63:0] map_obstacles,
     input conta,
     output saida_serial,
     output fim_tx
 );
 
 wire [7:0] s_dados_serial;
-wire [1:0] s_sel_pack;
+wire [3:0] s_sel_pack;
 
 tx_serial_8E1 tx_serial (
     .clock           (clock),
@@ -34,16 +34,25 @@ tx_serial_8E1 tx_serial (
     .db_estado       ( )
 );
 
-mux8x1 mux_serial (
-    .D0 (D0),
-    .D1 (D1),
-    .D2 (D2),
-    .D3 (D3),
+mux13x1 mux_serial (
+    .D0 (8'hFF),
+    .D1 (D0),
+    .D2 (D1),
+    .D3 (D2),
+    .D4 (map_obstacles[7:0]),
+    .D5 (map_obstacles[15:8]),
+    .D6 (map_obstacles[23:16]),
+    .D7 (map_obstacles[31:24]),
+    .D8 (map_obstacles[39:32]),
+    .D9 (map_obstacles[47:40]),
+    .D10 (map_obstacles[55:48]),
+    .D11 (map_obstacles[63:56]),
+    .D12 (8'hFF),
     .SEL (s_sel_pack),
     .OUT (s_dados_serial)
 );
 
-contador_m #(.M(4), .N(2)) contador_serial (
+contador_m #(.M(13), .N(4)) contador_serial (
     .clock      (clock),   
     .zera_as    (),
     .zera_s     (reset),

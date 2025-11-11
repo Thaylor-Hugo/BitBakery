@@ -194,8 +194,8 @@ bitbakery_serial_tx serial_tx (
     .reset          (reset        ),
     .D0             ({2'b00, MiniGame, estado_out}),
     .D1             ({2'b01, db_jogada[5:0]}),
-    .D2             ({2'b10, db_jogada[6], db_dificuldade, 4'b0000}),
-    .D3             (8'b11000000),
+    .D2             ({2'b10, db_jogada[6], db_dificuldade, s_player_position}),
+    .map_obstacles  (s_map_obstacle),
     .saida_serial   (saida_serial )
 );
 

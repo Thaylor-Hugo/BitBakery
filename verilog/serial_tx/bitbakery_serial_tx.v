@@ -11,7 +11,7 @@ module bitbakery_serial_tx (
     input [7:0] D0,
     input [7:0] D1,
     input [7:0] D2,
-    input [7:0] D3,
+    input [63:0] map_obstacles,
     output saida_serial
 );
 
@@ -24,7 +24,7 @@ bitbakery_serial_tx_fd fd (
     .D0             (D0           ),
     .D1             (D1           ),
     .D2             (D2           ),
-    .D3             (D3           ),
+    .map_obstacles  (map_obstacles),
     .conta          (s_conta      ),
     .saida_serial   (saida_serial ),
     .fim_tx         (s_fim_tx     )
