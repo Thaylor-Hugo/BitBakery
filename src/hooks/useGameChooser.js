@@ -16,7 +16,7 @@ export function useGameChooser() {
                 setDifficulty(sensors.difficulty);
                 if (sensors.state == "inicio" || sensors.state == "inicial") {
                     router.push('/');
-                } else if (sensors.minigame == "cakegame" || sensors.minigame == "memorygame") {
+                } else if (sensors.minigame == "cakegame" || sensors.minigame == "memorygame" || sensors.minigame == "deliverygame") {
                     router.push('/minigame/' + minigame);
                 }
                 
