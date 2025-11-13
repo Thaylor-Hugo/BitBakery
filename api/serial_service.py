@@ -26,7 +26,7 @@ sensors = {
     "jogada": [False, False, False, False, False, False, False],
     "difficulty": False,
     "player_position": 0,
-    "map_obstacles": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]  # 16 obstacles
+    "map_obstacles": [[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False]]  # 16 obstacles
 }
 
 temp_sensors = copy.deepcopy(sensors)
@@ -96,8 +96,9 @@ def loop():
             package_count += 1
         elif package_count >= 4 and package_count <= 11:
             obstacle_index = 2 * (package_count - 4)
-            temp_sensors["map_obstacles"][obstacle_index] = (int_value) & 0xf
-            temp_sensors["map_obstacles"][obstacle_index + 1] = (int_value >> 4) & 0xf
+            for i in range(4):
+                temp_sensors["map_obstacles"][obstacle_index][i] = bool((int_value >> i) & 1)
+                temp_sensors["map_obstacles"][obstacle_index + 1][i] = bool((int_value >> (4 + i)) & 1)
             package_count += 1
         elif package_count == 12:
             package_count = 0
