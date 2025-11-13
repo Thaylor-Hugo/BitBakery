@@ -25,8 +25,8 @@ sensors = {
     "minigame": "memorygame",
     "jogada": [False, False, False, False, False, False, False],
     "difficulty": False,
-    "player_position": 0,
-    "map_obstacles": [[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False],[False, False, False, False]]  # 16 obstacles
+    "player_position": [False, False, False, True],
+    "map_obstacles": [[False, False, False, False] for _ in range(16)]  # 16 obstacles
 }
 
 temp_sensors = copy.deepcopy(sensors)
@@ -38,7 +38,8 @@ genius_states =["inicial", "preparacao", "proxima_mostra", "espera_jogada", "reg
                 "proxima_jogada", "foi_ultima_sequencia", "proxima_sequencia", "mostra_jogada", "intervalo_mostra", 
                 "inicia_sequencia", "intervalo_rodada", "final_timeout", "final_acertou", "final_errou"]
 
-delivery_states = ["idle", "preparation", "playing", "get_velocity", "game_over"]
+# second playing state is from "get_valocity", but since it is not used in the game logic, we can map it to "playing"
+delivery_states = ["idle", "preparation", "playing", "playing", "game_over"]
 
 minigames = ["memorygame", "cakegame", "deliverygame", "cakegame"]
 
@@ -92,7 +93,7 @@ def loop():
                 # 3: dificuldade (1 bit)
                 temp_sensors["difficulty"] = bool((int_value >> 4) & 1)
                 # 4-7: player position (4 bits)
-                temp_sensors["player_position"] = (int_value & 0b1111)
+                temp_sensors["player_position"] = [bool((int_value >> i) & 1) for i in range(4)]
             package_count += 1
         elif package_count >= 4 and package_count <= 11:
             obstacle_index = 2 * (package_count - 4)
