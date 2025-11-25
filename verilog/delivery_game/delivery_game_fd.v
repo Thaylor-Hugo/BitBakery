@@ -180,6 +180,7 @@ assign s_velocity = (s_medida <= 12'h006) ? 2'b11 :
 
 map_counter map_counter_inst (
     .clock (clock),
+    .clock_ultra (clock_ultra),
     .reset (reset),
     .count_map (count_map),
     .velocity (s_velocity),

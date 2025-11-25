@@ -2,6 +2,7 @@
 
 module map_counter (
     input clock,
+    input clock_ultra,
     input reset,
     input count_map,
     input [1:0] velocity,
@@ -24,7 +25,7 @@ circuito_pwm #(
     .largura_110(99_300),
     .largura_111(110_000)
 ) velocimeter (
-    .clock (clock),
+    .clock (clock_ultra),
     .reset (reset),
     .largura (s_base_velocity + velocity),
     .pwm (pwm),
