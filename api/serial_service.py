@@ -7,7 +7,7 @@ import copy
 # !!! Replace with your device's port name
 # Linux: /dev/ttyUSB0, /dev/ttyACM0, etc.
 # Windows: COM3, COM4, etc.
-PORT_NAME = '/dev/ttyUSB1'
+PORT_NAME = '/dev/ttyUSB0'
 
 BAUD_RATE = 115200
 DATA_BITS = serial.EIGHTBITS
@@ -29,8 +29,6 @@ sensors = {
     "map_obstacles": [[False, False, False, False] for _ in range(16)]  # 16 obstacles
 }
 
-temp_sensors = copy.deepcopy(sensors)
-
 cake_states = ["inicio", "preparation", "show_play", "show_interval", "next_show", "initiate_play", "wait_play", 
                 "register_play", "compare_play", "next_play", "start_show", "register_show", "end_state", "Erro", "Erro", "Erro"]
 
@@ -43,10 +41,10 @@ delivery_states = ["inicio", "preparation", "playing", "playing", "game_over"]
 
 minigames = ["memorygame", "cakegame", "deliverygame", "cakegame"]
 
-package_count = 0
-
 
 def loop():
+    global sensors  # Declare sensors as global
+    package_count = 0
     global ser  # Global serial object to be accessed in close_serial
     # Connect to the serial port with all parameters
     ser = serial.Serial(
@@ -66,47 +64,50 @@ def loop():
         if not data_byte:
             continue
         
-        int_value = data_byte[0]
         
+        int_value = data_byte[0]
         if package_count == 0:
             if int_value == 0xff:
-                temp_sensors = copy.deepcopy(sensors)
                 package_count += 1
-            
         elif package_count == 1 or package_count == 2 or package_count == 3:
             package_num = (int_value >> 6) & (0b11)
             if package_num == 0:
                 # -- Pacote 1 --
                 # 2-3: minigame (2 bits)
-                temp_sensors["minigame"] = minigames[(int_value >> 4) & 0b11]
+                sensors["minigame"] = minigames[(int_value >> 4) & 0b11]
                 # 4-7: state (4 bits)
-                temp_sensors["state"] = (cake_states if temp_sensors["minigame"] == "cakegame" else (genius_states if temp_sensors["minigame"] == "memorygame" else delivery_states))[(int_value & 0b1111)]
+                sensors["state"] = (cake_states if sensors["minigame"] == "cakegame" else (genius_states if sensors["minigame"] == "memorygame" else delivery_states))[(int_value & 0b1111)]
             elif package_num == 1:
+                # print(f"Processing package {package_count} with value {int_value:08b} ({int_value})")  # Debug
                 # -- Pacote 2 --
                 # 2-7: dados da jogada (6 bits)
-                for i in range(6):
-                    temp_sensors["jogada"][i] = bool((int_value >> (5 - i)) & 1)
+                for i in range(6, 0, -1):
+                    print(f"Bit {i} of jogada: {bool((int_value >> (i)) & 1)}")  # Debug
+                    sensors["jogada"][i] = bool((int_value >> (i)) & 1)
             elif package_num == 2:
                 # -- Pacote 3 --
                 # 2: dados da jogada (1 bit)
-                temp_sensors["jogada"][6] = bool((int_value >> 5) & 1)
+                sensors["jogada"][0] = bool((int_value >> 5) & 1)
                 # 3: dificuldade (1 bit)
-                temp_sensors["difficulty"] = bool((int_value >> 4) & 1)
+                sensors["difficulty"] = bool((int_value >> 4) & 1)
                 # 4-7: player position (4 bits)
-                temp_sensors["player_position"] = [bool((int_value >> i) & 1) for i in range(4)]
+                sensors["player_position"] = [bool((int_value >> i) & 1) for i in range(4)]
             package_count += 1
         elif package_count >= 4 and package_count <= 11:
             obstacle_index = 2 * (package_count - 4)
             for i in range(4):
-                temp_sensors["map_obstacles"][obstacle_index][i] = bool((int_value >> i) & 1)
-                temp_sensors["map_obstacles"][obstacle_index + 1][i] = bool((int_value >> (4 + i)) & 1)
+                sensors["map_obstacles"][obstacle_index][i] = bool((int_value >> i) & 1)
+                sensors["map_obstacles"][obstacle_index + 1][i] = bool((int_value >> (4 + i)) & 1)
             package_count += 1
         elif package_count == 12:
             package_count = 0
-            if int_value != 0xff:
+            if int_value != 0xfe:
+                # exit()
                 continue    # Invalid end byte, ignore
-            sensors = temp_sensors
-
+        se = f"""
+        {sensors['jogada']}
+        """
+        print(se)  # For debugging, print the sensors' state
 
 def close_serial():
     # Make sure to close the port when the script is done

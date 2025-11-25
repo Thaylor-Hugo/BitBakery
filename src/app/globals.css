@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @keyframes fall {
     0% {
@@ -9,8 +11,22 @@
     }
 }
 
+@keyframes scroll-down {
+    0% {
+        transform: translateY(-50%);
+    }
+    100% {
+        transform: translateY(0%);
+    }
+}
+
 .fall-animation {
     animation: fall 0.7s ease-in-out forwards;
+}
+
+.animate-scroll-down {
+    animation: scroll-down 3s linear infinite;
+    height: 200%;
 }
 
 #container {

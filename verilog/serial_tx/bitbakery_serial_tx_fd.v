@@ -47,7 +47,7 @@ mux13x1 mux_serial (
     .D9 (map_obstacles[47:40]),
     .D10 (map_obstacles[55:48]),
     .D11 (map_obstacles[63:56]),
-    .D12 (8'hFF),
+    .D12 (8'hFE),
     .SEL (s_sel_pack),
     .OUT (s_dados_serial)
 );

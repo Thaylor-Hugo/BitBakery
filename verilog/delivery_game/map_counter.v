@@ -13,7 +13,17 @@ wire s_move_map_800, s_move_map_700, s_move_map_600, s_move_map_500, s_move_map_
 wire [1:0] s_base_velocity;
 wire s_max_velocity, s_increment_velocity;
 
-circuito_pwm velocimeter (
+circuito_pwm #(
+    .conf_periodo(1_000_000),
+    .largura_000(35_000),
+    .largura_001(45_700),
+    .largura_010(56_450),
+    .largura_011(67_150),
+    .largura_100(77_850),
+    .largura_101(88_550),
+    .largura_110(99_300),
+    .largura_111(110_000)
+) velocimeter (
     .clock (clock),
     .reset (reset),
     .largura (s_base_velocity + velocity),

@@ -33,17 +33,20 @@ function Map({map, playerPosition}) {
 
 function LaneMarkings({numMarks, width}) {
     const marks = [];
-    for (let index = 0; index < numMarks; index++) {
+    // Double the marks so we can create infinite scroll effect
+    for (let index = 0; index < numMarks * 2; index++) {
         marks.push(
-            <div className='grow'>
+            <div key={index} className='flex-1'>
                 <div className="h-1/2 bg-white"></div>
                 <div className="h-1/2"></div>
             </div>
         )   
     }
     return (
-        <div className={`${width} h-full flex flex-col`}>
-            {marks}
+        <div className={`${width} h-full flex flex-col overflow-hidden relative`}>
+            <div className="absolute inset-0 flex flex-col animate-scroll-down">
+                {marks}
+            </div>
         </div>
     );
 }
@@ -91,8 +94,11 @@ function Player() {
 function Obstacle({bottomPercent}) {
     return (
         <div 
-            className={`absolute left-1/4 w-1/2 h-16 bg-red-500 rounded-lg flex items-center justify-center transition-all duration-300`}
-            style={{bottom: `${bottomPercent}%`}}
+            className={`absolute left-1/4 w-1/2 h-16 bg-red-500 rounded-lg flex items-center justify-center`}
+            style={{
+                bottom: `${bottomPercent}%`,
+                transition: 'bottom 0.5s ease-out'
+            }}
         >
             <span className="text-white text-2xl">🚧</span>
         </div>
@@ -115,9 +121,9 @@ export default function DeliveryGame() {
 
 
             {/* Game Over Screen */}
-            {/* {gameOver && (
+            {gameOver && (
                 <GameOver pontuacao={distance} max_pontuacao={500}/>
-            )} */}
+            )}
         </div>
     );
 }
