@@ -53,22 +53,43 @@ def loop():
         bytesize=DATA_BITS,
         parity=PARITY,
         stopbits=STOP_BITS,
-        timeout=None
+        timeout=1  # Add timeout to prevent blocking forever
     )
     
+    # Flush any stale data in the buffer
+    ser.reset_input_buffer()
+    ser.reset_output_buffer()
+    
     print(f"Listening on {ser.name} at {BAUD_RATE} baud (8E1)...")
+    
+    temp_sensors = copy.deepcopy(sensors)
+    last_byte_time = time.time()
+    PACKET_TIMEOUT = 2  # If no complete packet in 2 seconds, reset
 
     while True:
         # Read one byte of data
         data_byte = ser.read(1)
         if not data_byte:
+            # Check if we've been waiting too long in the middle of a packet
+            if package_count > 0 and (time.time() - last_byte_time) > PACKET_TIMEOUT:
+                print(f"  -> TIMEOUT: Incomplete packet (stuck at package {package_count}), resetting")
+                package_count = 0
+            # Timeout is normal - FPGA may not be sending continuously
+            # Don't spam the console, just continue waiting
             continue
         
-        
+        last_byte_time = time.time()
         int_value = data_byte[0]
+        print(f"Package {package_count}: Received 0x{int_value:02X} ({int_value:08b})")
+        
         if package_count == 0:
             if int_value == 0xff:
+                temp_sensors = copy.deepcopy(sensors)
                 package_count += 1
+                print("  -> Start byte detected")
+            else:
+                print(f"  -> Waiting for start byte (0xFF), got 0x{int_value:02X}")
+            
         elif package_count == 1 or package_count == 2 or package_count == 3:
             package_num = (int_value >> 6) & (0b11)
             if package_num == 0:
@@ -100,14 +121,17 @@ def loop():
                 sensors["map_obstacles"][obstacle_index + 1][i] = bool((int_value >> (4 + i)) & 1)
             package_count += 1
         elif package_count == 12:
+            if int_value == 0xfe:
+                print("  -> End byte detected (0xFE), updating sensors")
+                sensors = temp_sensors
+                package_count = 0
+            else:
+                print(f"  -> ERROR: Expected end byte (0xFE), got 0x{int_value:02X} - Resetting")
+                package_count = 0  # Reset and wait for next valid start byte
+        
+        else:
+            print(f"  -> ERROR: Invalid package_count {package_count} - Resetting")
             package_count = 0
-            if int_value != 0xfe:
-                # exit()
-                continue    # Invalid end byte, ignore
-        se = f"""
-        {sensors['jogada']}
-        """
-        print(se)  # For debugging, print the sensors' state
 
 def close_serial():
     # Make sure to close the port when the script is done

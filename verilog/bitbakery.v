@@ -21,6 +21,9 @@ module bitbakery (
     input echo,
     output saida_serial,
     output pwm,
+    output db_pwm,
+    output db_echo,
+    output db_trigger,
     output trigger,
     output [2:0] pontuacao_out,
     output [6:0] db_estado,
@@ -28,9 +31,13 @@ module bitbakery (
     output [6:0] db_jogada,
     output db_iniciar,
 	output db_clock,
-    output [3:0] db_player_position,
+    output db_dificuldade,
+    // output [3:0] db_player_position,
     // output [63:0] db_map_objective,
-    output [15:0] db_map_obstacle,
+    // output [15:0] db_map_obstacle,
+    output [6:0] cm0,
+    output [6:0] cm1,
+    output [6:0] db_botoes,
     output db_serial
 );
 
@@ -54,6 +61,7 @@ wire [2:0] s_pontuacao_0, s_pontuacao_1, s_pontuacao_2;
 wire [3:0] estado_out;
 wire [3:0] s_player_position;
 wire [63:0] s_map_objective, s_map_obstacle;
+wire [11:0] db_medida;
 
 reg [1:0] MiniGame; 
 reg [2:0] Eatual, Eprox;
@@ -64,10 +72,11 @@ assign db_minigame = MiniGame;
 assign db_iniciar = iniciar;
 assign estado_out = (Eatual == intervalo)? 4'b0001 : s_estado;
 assign db_dificuldade = Dificuldade;
+assign db_botoes = botoes_in;
 
 // assign db_map_objective = s_map_objective[15:0];
-assign db_map_obstacle = s_map_obstacle[15:0];
-assign db_player_position = s_player_position;
+// assign db_map_obstacle = s_map_obstacle[15:0];
+// assign db_player_position = s_player_position;
 assign db_serial = saida_serial;
 
 hexa7seg display_state (
@@ -75,6 +84,15 @@ hexa7seg display_state (
 	.display (db_estado)
 );
 
+hexa7seg display_cm0 (
+    .hexa (db_medida[3:0]),
+    .display (cm0)
+);
+
+hexa7seg display_cm1 (
+    .hexa (db_medida[7:4]),
+    .display (cm1)
+);
 
 initial begin
     MiniGame <= 2'b11;
@@ -149,6 +167,10 @@ mux_out saidas (
     .pontuacao_out  ()
 );
 
+// assign s_estado = s_estado_1;
+// assign db_jogada = s_jogada_1;
+// assign s_pronto = s_pronto_1;
+
 jogo_desafio_memoria game0 (
     .clock          (clock),
     .reset          (reset),
@@ -186,7 +208,8 @@ delivery_game game3 (
     .trigger (trigger),
     .db_player_position (s_player_position),
     .db_map_obstacle (s_map_obstacle),
-    .db_map_objective (s_map_objective)
+    .db_map_objective (s_map_objective),
+    .db_medida (db_medida)
 );
 
 bitbakery_serial_tx serial_tx (

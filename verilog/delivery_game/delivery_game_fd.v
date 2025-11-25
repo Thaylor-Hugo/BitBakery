@@ -13,7 +13,8 @@ module delivery_game_fd (
     output velocity_ready,
     output [3:0] db_player_position,
     output [63:0] db_map_obstacle,
-    output [63:0] db_map_objective
+    output [63:0] db_map_objective,
+    output [11:0] db_medida
 );
 
 reg [3:0] player_position;
@@ -30,7 +31,7 @@ wire s_move_left, s_move_right;
 assign db_player_position = player_position;
 assign db_map_obstacle = s_map_obstacles_flat;
 assign db_map_objective = s_map_objectives_flat;
-
+assign db_medida = s_medida;
 
 initial begin
     player_position <= 4'b1000; // Starting position
