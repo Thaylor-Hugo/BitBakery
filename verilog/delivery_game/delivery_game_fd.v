@@ -1,11 +1,15 @@
 
 module delivery_game_fd (
     input clock,
+    input clock_ultra,
     input reset,
     input [6:0] botoes,
     input echo,
     input count_map,
     input get_velocity,
+    input reset_delay,
+    input conta_delay,
+    output end_delay,
     output [2:0] pontuacao,
     output game_over,
     output pwm,
@@ -129,7 +133,7 @@ generate_map map_gen (
 
 // Circuito de interface com sensor
 interface_hcsr04 ultrassonico (
-    .clock    (clock),
+    .clock    (clock_ultra),
     .reset    (reset),
     .medir    (get_velocity),
     .echo     (echo),
@@ -139,10 +143,23 @@ interface_hcsr04 ultrassonico (
     .db_estado()
 );
 
+contador_m #(
+    .M(32),
+    .N(500)
+) velocity_delay (
+    .clock (clock),
+    .zera_as (1'b0),
+    .zera_s (reset_delay),
+    .conta (conta_delay),
+    .Q (),
+    .fim (end_delay),
+    .meio ()
+);
+
 // Map velocity counters
-assign s_velocity = (s_medida <= 12'h004) ? 2'b00 :
-                    (s_medida <= 12'h008) ? 2'b01 :
-                    (s_medida <= 12'h012) ? 2'b10 : 2'b11;
+assign s_velocity = (s_medida <= 12'h004) ? 2'b11 :
+                    (s_medida <= 12'h008) ? 2'b10 :
+                    (s_medida <= 12'h012) ? 2'b01 : 2'b00;
 
 map_counter map_counter_inst (
     .clock (clock),

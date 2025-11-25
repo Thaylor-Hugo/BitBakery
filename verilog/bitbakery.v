@@ -197,6 +197,7 @@ cakegame game1 (
 
 delivery_game game3 (
     .clock (clock),
+    .clock_ultra (clock_in),
     .reset (reset),
     .jogar (s_iniciar),
     .botoes (botoes),

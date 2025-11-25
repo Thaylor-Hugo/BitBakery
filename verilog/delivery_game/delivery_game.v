@@ -2,6 +2,7 @@
 
 module delivery_game (
     input clock,
+    input clock_ultra,
     input reset,
     input jogar,
     input [6:0] botoes,
@@ -17,10 +18,11 @@ module delivery_game (
     output [11:0] db_medida
 );
 
-wire s_reset, s_game_over, s_count_map, s_get_velocity, s_velocity_ready;
+wire s_reset, s_game_over, s_count_map, s_get_velocity, s_velocity_ready, s_end_delay, s_conta_delay, s_reset_delay;
 
 delivery_game_fd fd (
     .clock (clock),
+    .clock_ultra (clock_ultra),
     .reset (s_reset),
     .botoes(botoes),
     .echo (echo),
@@ -34,7 +36,10 @@ delivery_game_fd fd (
     .db_player_position (db_player_position),
     .db_map_obstacle (db_map_obstacle),
     .db_map_objective (db_map_objective),
-    .db_medida (db_medida)
+    .db_medida (db_medida),
+    .reset_delay (s_reset_delay),
+    .conta_delay (s_conta_delay),
+    .end_delay (s_end_delay)
 );
 
 delivery_game_uc uc (
@@ -47,7 +52,10 @@ delivery_game_uc uc (
     .reset_out (s_reset),
     .pronto (pronto),
     .count_map (s_count_map),
-    .get_velocity (s_get_velocity)
+    .get_velocity (s_get_velocity),
+    .reset_delay (s_reset_delay),
+    .conta_delay (s_conta_delay),
+    .end_delay (s_end_delay)
 );
 
 

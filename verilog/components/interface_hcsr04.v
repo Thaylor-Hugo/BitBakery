@@ -27,12 +27,20 @@ module interface_hcsr04 (
     wire        s_registra;
     wire        s_fim_medida;
     wire [11:0] s_medida;
+    wire        s_pulso;
+    
+    edge_detector iniciar_medicao (
+        .clock (clock),
+        .reset (reset),
+        .sinal (medir),
+        .pulso (s_pulso)
+    );
 
     // Unidade de controle
     interface_hcsr04_uc U1 (
         .clock     (clock       ),
         .reset     (reset       ),
-        .medir     (medir       ),
+        .medir     (s_pulso       ),
         .echo      (echo        ),
         .fim_medida(s_fim_medida),
         .zera      (s_zera      ),
