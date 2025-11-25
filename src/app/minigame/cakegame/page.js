@@ -54,14 +54,14 @@ function Cobertura({color, dark_color}) {
         
     }
     return (
-        <Canvas className="w-30 h-10 rounded-lg" draw={draw} /> 
+        <Canvas className="w-30 h-cake rounded-lg" draw={draw} /> 
     );
 }
 
 function Massa({color}) {
     return (
-        // <Canvas className="w-30 h-10" draw={draw} />
-        <div className="w-30 h-10 rounded-lg" 
+        // <Canvas className="w-30 h-cake" draw={draw} />
+        <div className="w-30 h-cake rounded-lg" 
         style={{ backgroundColor: color }}></div>
     );
 }

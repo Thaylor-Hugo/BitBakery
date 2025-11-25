@@ -2,6 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+    /* Custom width and height for cake components */
+    .w-30 {
+        width: 120px;
+    }
+    .h-cake {
+        height: 40px;
+    }
+    
+    /* Custom left positions for cake movement (30px increments) */
+    .left-5 { left: 5px; }
+    .left-35 { left: 35px; }
+    .left-65 { left: 65px; }
+    .left-95 { left: 95px; }
+    .left-125 { left: 125px; }
+    .left-155 { left: 155px; }
+    .left-185 { left: 185px; }
+    .left-215 { left: 215px; }
+    .left-245 { left: 245px; }
+    .left-275 { left: 275px; }
+    .left-305 { left: 305px; }
+    .left-335 { left: 335px; }
+    .left-365 { left: 365px; }
+    .left-395 { left: 395px; }
+    .left-425 { left: 425px; }
+    .left-455 { left: 455px; }
+    
+    /* Custom bottom positions */
+    .bottom-75 { bottom: 75px; }
+    .bottom-20 { bottom: 20px; }
+    
+    /* Custom left position */
+    .left-200 { left: 200px; }
+    
+    /* Custom width fractions */
+    .w-1\/8 { width: 12.5%; }
+    .h-1\/8 { height: 12.5%; }
+    
+    /* Custom transition duration */
+    .duration-2500 {
+        transition-duration: 2500ms;
+    }
+    
+    /* Custom z-index values */
+    .z-1 {
+        z-index: 1;
+    }
+    .z-2 {
+        z-index: 2;
+    }
+}
+
 @keyframes fall {
     0% {
         top: var(--fall-start, -100px);
