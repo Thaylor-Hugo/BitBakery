@@ -2,6 +2,7 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 import threading
+import logging
 
 # For mock sensors uncoment this line and coment the next one. Also change commented lines on main function
 # from sensors_mock import mock_loop, sensors
@@ -9,6 +10,10 @@ from serial_service import loop, close_serial, sensors
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS
+
+# Disable Flask's HTTP request logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 
 @app.route('/api/sensors')

@@ -7,7 +7,7 @@ import copy
 # !!! Replace with your device's port name
 # Linux: /dev/ttyUSB0, /dev/ttyACM0, etc.
 # Windows: COM3, COM4, etc.
-PORT_NAME = '/dev/ttyUSB0'
+PORT_NAME = '/dev/ttyUSB1'
 
 BAUD_RATE = 115200
 DATA_BITS = serial.EIGHTBITS
@@ -62,7 +62,6 @@ def loop():
     
     print(f"Listening on {ser.name} at {BAUD_RATE} baud (8E1)...")
     
-    temp_sensors = copy.deepcopy(sensors)
     last_byte_time = time.time()
     PACKET_TIMEOUT = 2  # If no complete packet in 2 seconds, reset
 
@@ -80,15 +79,15 @@ def loop():
         
         last_byte_time = time.time()
         int_value = data_byte[0]
-        print(f"Package {package_count}: Received 0x{int_value:02X} ({int_value:08b})")
+        # print(f"Package {package_count}: Received 0x{int_value:02X} ({int_value:08b})")
         
         if package_count == 0:
             if int_value == 0xff:
-                temp_sensors = copy.deepcopy(sensors)
                 package_count += 1
-                print("  -> Start byte detected")
+                # print("  -> Start byte detected")
             else:
-                print(f"  -> Waiting for start byte (0xFF), got 0x{int_value:02X}")
+                # print(f"  -> Waiting for start byte (0xFF), got 0x{int_value:02X}")
+                pass
             
         elif package_count == 1 or package_count == 2 or package_count == 3:
             package_num = (int_value >> 6) & (0b11)
@@ -102,13 +101,13 @@ def loop():
                 # print(f"Processing package {package_count} with value {int_value:08b} ({int_value})")  # Debug
                 # -- Pacote 2 --
                 # 2-7: dados da jogada (6 bits)
-                for i in range(6, 0, -1):
-                    print(f"Bit {i} of jogada: {bool((int_value >> (i)) & 1)}")  # Debug
+                for i in range(5, -1, -1):
+                    # print(f"Bit {i} of jogada: {bool((int_value >> (i)) & 1)}")  # Debug
                     sensors["jogada"][i] = bool((int_value >> (i)) & 1)
             elif package_num == 2:
                 # -- Pacote 3 --
                 # 2: dados da jogada (1 bit)
-                sensors["jogada"][0] = bool((int_value >> 5) & 1)
+                sensors["jogada"][6] = bool((int_value >> 5) & 1)
                 # 3: dificuldade (1 bit)
                 sensors["difficulty"] = bool((int_value >> 4) & 1)
                 # 4-7: player position (4 bits)
@@ -122,16 +121,24 @@ def loop():
             package_count += 1
         elif package_count == 12:
             if int_value == 0xfe:
-                print("  -> End byte detected (0xFE), updating sensors")
-                sensors = temp_sensors
+                # print("  -> End byte detected (0xFE), updating sensors")
                 package_count = 0
             else:
-                print(f"  -> ERROR: Expected end byte (0xFE), got 0x{int_value:02X} - Resetting")
+                # print(f"  -> ERROR: Expected end byte (0xFE), got 0x{int_value:02X} - Resetting")
                 package_count = 0  # Reset and wait for next valid start byte
         
         else:
-            print(f"  -> ERROR: Invalid package_count {package_count} - Resetting")
+            # print(f"  -> ERROR: Invalid package_count {package_count} - Resetting")
             package_count = 0
+        se = f'''
+        dificuldade: {sensors["difficulty"]}
+        state: {sensors["state"]}
+        minigame: {sensors["minigame"]}
+        jogada: {sensors["jogada"]}
+        '''
+        # mapa: {sensors["map_obstacles"]}
+        # player_position: {sensors["player_position"]}
+        print(se)
 
 def close_serial():
     # Make sure to close the port when the script is done
