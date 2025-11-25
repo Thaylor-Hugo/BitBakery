@@ -37,7 +37,7 @@ genius_states =["inicial", "preparacao", "proxima_mostra", "espera_jogada", "reg
                 "inicia_sequencia", "intervalo_rodada", "final_timeout", "final_acertou", "final_errou"]
 
 # second playing state is from "get_valocity", but since it is not used in the game logic, we can map it to "playing"
-delivery_states = ["inicio", "preparation", "playing", "playing", "playing", "game_over"]
+delivery_states = ["inicio", "preparation", "playing", "playing", "playing", "game_over", "playing"]
 
 minigames = ["memorygame", "cakegame", "deliverygame", "cakegame"]
 

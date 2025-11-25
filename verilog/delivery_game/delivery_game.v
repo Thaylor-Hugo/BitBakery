@@ -19,11 +19,13 @@ module delivery_game (
 );
 
 wire s_reset, s_game_over, s_count_map, s_get_velocity, s_velocity_ready, s_end_delay, s_conta_delay, s_reset_delay;
+wire s_reset_timeout, s_conta_timeout, s_velocity_timeout, s_reset_ultrasonico;
 
 delivery_game_fd fd (
     .clock (clock),
     .clock_ultra (clock_ultra),
     .reset (s_reset),
+    .reset_ultrasonico (s_reset_ultrasonico),
     .botoes(botoes),
     .echo (echo),
     .count_map (s_count_map),
@@ -39,7 +41,10 @@ delivery_game_fd fd (
     .db_medida (db_medida),
     .reset_delay (s_reset_delay),
     .conta_delay (s_conta_delay),
-    .end_delay (s_end_delay)
+    .end_delay (s_end_delay),
+    .reset_timeout (s_reset_timeout),
+    .conta_timeout (s_conta_timeout),
+    .velocity_timeout (s_velocity_timeout)
 );
 
 delivery_game_uc uc (
@@ -55,7 +60,11 @@ delivery_game_uc uc (
     .get_velocity (s_get_velocity),
     .reset_delay (s_reset_delay),
     .conta_delay (s_conta_delay),
-    .end_delay (s_end_delay)
+    .end_delay (s_end_delay),
+    .reset_timeout (s_reset_timeout),
+    .conta_timeout (s_conta_timeout),
+    .velocity_timeout (s_velocity_timeout),
+    .reset_ultrasonico (s_reset_ultrasonico)
 );
 
 
