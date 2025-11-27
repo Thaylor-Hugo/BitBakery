@@ -7,7 +7,7 @@ export function useDeliveryGame() {
     const router = useRouter();
     const [playerPosition, setPlayerPosition] = useState([false, false, false, true]);
     const [mapObstacles, setMapObstacles] = useState(
-        Array.from({length: 16}, () => Array(4).fill({active: false, id: null, color: null}))
+        Array.from({length: 128}, () => Array(4).fill({active: false, id: null, color: null}))
     );
     const [gameOver, setGameOver] = useState(false);
     const [playing, setPlaying] = useState(false);
@@ -21,7 +21,7 @@ export function useDeliveryGame() {
                 const { sensors } = await res.json();
                 
                 // Helper to reset map
-                const resetMap = () => Array.from({length: 16}, () => Array(4).fill({active: false, id: null, color: null}));
+                const resetMap = () => Array.from({length: 128}, () => Array(4).fill({active: false, id: null, color: null}));
 
                 // Return to home if game is reset
                 if (sensors.state === "inicio") {
@@ -49,7 +49,7 @@ export function useDeliveryGame() {
                         const newMap = [];
                         const claimedIds = new Set();
                         
-                        for(let r=0; r<16; r++) {
+                        for(let r=0; r<128; r++) {
                             newMap[r] = [];
                             for(let c=0; c<4; c++) {
                                 const active = newBools[r][c];
@@ -58,7 +58,7 @@ export function useDeliveryGame() {
                                 
                                 if (active) {
                                     // Check r+1 (moved down) first, then r (stayed)
-                                    const prevFromAbove = (r < 15) ? prevMap[r+1][c] : null;
+                                    const prevFromAbove = (r < 127) ? prevMap[r+1][c] : null;
                                     const prevSame = prevMap[r][c];
                                     
                                     if (prevFromAbove && prevFromAbove.active && prevFromAbove.id && !claimedIds.has(prevFromAbove.id)) {

@@ -9,7 +9,7 @@ sensors = {
     "jogada": [False, False, False, False, False, False, False],
     "difficulty": False,
     "player_position": [False, False, False, True],
-    "map_obstacles": [[False, False, False, False] for _ in range(16)]  # 16 obstacles
+    "map_obstacles": [[False, False, False, False] for _ in range(128)]  # 16 obstacles
 }
 
 cake_states = ["inicio", "preparation", "show_play", "show_interval", "next_show", "initiate_play", "wait_play", 
@@ -116,7 +116,7 @@ def delivery_game(edge_detected, jogando, time_counter, base_speed, base_speed_c
         sensors["state"] = "preparation"
         pygame.time.wait(1)
     elif sensors["state"] == "preparation":
-        sensors["map_obstacles"] = [[False, False, False, False] for _ in range(16)]
+        sensors["map_obstacles"] = [[False, False, False, False] for _ in range(128)]
         base_speed = 0
         base_speed_counter = 0
         time_counter = 0
@@ -146,7 +146,7 @@ def delivery_game(edge_detected, jogando, time_counter, base_speed, base_speed_c
             base_speed_counter = 0
         if time_counter >= get_timer(base_speed):
             obstacle_count += 1
-            if obstacle_count == 4:
+            if obstacle_count == 4*8:
                 set_obstacle = True
                 obstacle_count = 0
             else:
@@ -154,8 +154,9 @@ def delivery_game(edge_detected, jogando, time_counter, base_speed, base_speed_c
             move_map(set_obstacle)
             time_counter = 0
         for i in range(4):
-            if sensors["player_position"][i] and sensors["map_obstacles"][0][i]:
-                sensors["state"] = "game_over"
+            for j in range(24):
+                if sensors["player_position"][i] and sensors["map_obstacles"][j][i]:
+                    sensors["state"] = "game_over"
         pygame.time.wait(1)
         pass
     elif sensors["state"] == "game_over":
@@ -264,43 +265,43 @@ def cake_game(camada_counter, edge_detected, jogando):
 
 
 def get_timer(base_speed):
-    timer = 800  # Default timer
+    timer =  800 / 8  # Default timer
     if base_speed == 0:
         if inputs["velocidade"] == 0:
-            timer = 800
+            timer = 800 / 8
         elif inputs["velocidade"] == 1:
-            timer = 700
+            timer = 700 / 8
         elif inputs["velocidade"] == 2:
-            timer = 600
+            timer = 600 / 8
         elif inputs["velocidade"] == 3:
-            timer = 500
+            timer = 500 / 8
     elif base_speed == 1:
         if inputs["velocidade"] == 0:
-            timer = 700
+            timer = 700 / 8
         elif inputs["velocidade"] == 1:
-            timer = 600
+            timer = 600 / 8
         elif inputs["velocidade"] == 2:
-            timer = 500
+            timer = 500 / 8
         elif inputs["velocidade"] == 3:
-            timer = 400
+            timer = 400 / 8
     elif base_speed == 2:
         if inputs["velocidade"] == 0:
-            timer = 600
+            timer = 600 / 8
         elif inputs["velocidade"] == 1:
-            timer = 500
+            timer = 500 / 8
         elif inputs["velocidade"] == 2:
-            timer = 400
+            timer = 400 / 8
         elif inputs["velocidade"] == 3:
-            timer = 300
+            timer = 300 / 8
     elif base_speed == 3:
         if inputs["velocidade"] == 0:
-            timer = 500
+            timer = 500 / 8
         elif inputs["velocidade"] == 1:
-            timer = 400
+            timer = 400 / 8
         elif inputs["velocidade"] == 2:
-            timer = 300
+            timer = 300 / 8
         elif inputs["velocidade"] == 3:
-            timer = 200
+            timer = 200 / 8
     return timer
 
 
@@ -310,9 +311,9 @@ def move_map(set_obstacle=True):
     else:
         obstacles = 0
     new_obstacle = [bool((obstacles >> i) & 1) for i in range(4)]
-    for i in range(15):
+    for i in range(127):
         sensors["map_obstacles"][i] = sensors["map_obstacles"][i+1]
-    sensors["map_obstacles"][15] = new_obstacle   
+    sensors["map_obstacles"][127] = new_obstacle   
 
 
 def handle_pygame_events():

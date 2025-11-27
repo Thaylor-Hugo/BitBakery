@@ -150,10 +150,10 @@ function Lane({obstacles, isPlayer}) {
                 
                 if (!isActive) return null;
                 
-                // Calculate position from bottom, accounting for 16 sections
-                // Leave space at top so index 15 doesn't go off screen
-                // Use 85% of height for obstacles (index 15 at 85%)
-                const bottomPercent = (index / 15) * 85;
+                // Calculate position from bottom
+                // Index 0 is lowest. We want only top 1/3 visible (approx -8% bottom)
+                // Index 127 is highest (approx 92% bottom)
+                const bottomPercent = (index / 127) * 100 - 8;
                 const color = obstacle.color || "#FF0000"; // Default red if no color
                 
                 // Use ID for key if available to enable smooth transitions
@@ -164,7 +164,7 @@ function Lane({obstacles, isPlayer}) {
                         key={key} 
                         bottomPercent={bottomPercent}
                         color={color}
-                        zIndex={50 - index} // Higher index (further away) should be behind lower index (closer)
+                        zIndex={200 - index} // Higher index (further away) should be behind lower index (closer)
                     />
                 );
             })}
@@ -177,7 +177,7 @@ function Lane({obstacles, isPlayer}) {
 
 function Player() {
     return (
-        <div className='absolute bottom-5 left-1/4 w-1/2 h-24 flex items-center justify-center z-[60]'>
+        <div className='absolute bottom-5 left-1/4 w-1/2 h-24 flex items-center justify-center z-[250]'>
             {/* Render player */}
             <Truck />
         </div>
@@ -215,9 +215,9 @@ export default function DeliveryGame() {
 
 
             {/* Game Over Screen */}
-            {gameOver && (
+            {/* {gameOver && (
                 <GameOver pontuacao={distance} max_pontuacao={500}/>
-            )}
+            )} */}
         </div>
     );
 }
