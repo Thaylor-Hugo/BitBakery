@@ -51,27 +51,120 @@ function LaneMarkings({numMarks, width}) {
     );
 }
 
+function Car({ color }) {
+    return (
+        <svg viewBox="0 0 100 200" className="w-full h-full drop-shadow-lg">
+            {/* Wheels */}
+            <rect x="5" y="30" width="15" height="40" fill="#333" rx="5" />
+            <rect x="80" y="30" width="15" height="40" fill="#333" rx="5" />
+            <rect x="5" y="130" width="15" height="40" fill="#333" rx="5" />
+            <rect x="80" y="130" width="15" height="40" fill="#333" rx="5" />
+            
+            {/* Body Shadow */}
+            <path d="M 15 20 Q 50 0 85 20 L 85 180 Q 50 200 15 180 Z" fill="rgba(0,0,0,0.3)" transform="translate(2, 2)" />
+
+            {/* Main Body */}
+            <path d="M 15 20 Q 50 0 85 20 L 85 180 Q 50 200 15 180 Z" fill={color} stroke="#333" strokeWidth="1" />
+            
+            {/* Windshield */}
+            <path d="M 20 50 L 80 50 L 75 75 L 25 75 Z" fill="#87CEEB" stroke="#555" strokeWidth="1" />
+            
+            {/* Roof */}
+            <rect x="22" y="75" width="56" height="60" fill={color} filter="brightness(1.1)" rx="5" />
+            
+            {/* Rear Window */}
+            <path d="M 25 135 L 75 135 L 80 150 L 20 150 Z" fill="#87CEEB" stroke="#555" strokeWidth="1" />
+            
+            {/* Headlights */}
+            <circle cx="25" cy="15" r="5" fill="#FFFFE0" />
+            <circle cx="75" cy="15" r="5" fill="#FFFFE0" />
+            
+            {/* Taillights */}
+            <rect x="20" y="180" width="15" height="5" fill="#FF0000" />
+            <rect x="65" y="180" width="15" height="5" fill="#FF0000" />
+        </svg>
+    );
+}
+
+function Truck() {
+    return (
+        <svg viewBox="0 0 100 220" className="w-full h-full drop-shadow-lg">
+            {/* Wheels */}
+            <rect x="0" y="40" width="12" height="35" fill="#333" rx="4" />
+            <rect x="88" y="40" width="12" height="35" fill="#333" rx="4" />
+            <rect x="0" y="150" width="12" height="35" fill="#333" rx="4" />
+            <rect x="88" y="150" width="12" height="35" fill="#333" rx="4" />
+            
+            {/* Shadow */}
+            <rect x="15" y="15" width="70" height="190" rx="8" fill="rgba(0,0,0,0.3)" transform="translate(5, 5)" />
+
+            {/* Cab (Front) */}
+            <path d="M 15 40 Q 15 10 50 10 Q 85 10 85 40 L 85 70 L 15 70 Z" fill="#FF69B4" stroke="#C71585" strokeWidth="2" />
+            
+            {/* Windshield */}
+            <path d="M 20 45 Q 50 35 80 45 L 80 65 L 20 65 Z" fill="#87CEEB" stroke="#4682B4" strokeWidth="1" />
+
+            {/* Cargo Body (Back) */}
+            <rect x="12" y="70" width="76" height="130" rx="5" fill="#FFB6C1" stroke="#C71585" strokeWidth="2" />
+            
+            {/* Cake Group */}
+            <g transform="translate(50, 135)">
+                {/* Plate */}
+                <circle cx="0" cy="0" r="32" fill="#FFFFFF" stroke="#DDD" strokeWidth="1" opacity="0.9" />
+                
+                {/* Cake Base (Chocolate) */}
+                <circle cx="0" cy="0" r="28" fill="#8B4513" stroke="#5D4037" strokeWidth="1" />
+                
+                {/* Icing Layer */}
+                <circle cx="0" cy="0" r="24" fill="#FF69B4" />
+                
+                {/* Decorative Cream Dollops */}
+                <circle cx="0" cy="-20" r="4" fill="#FFF" />
+                <circle cx="14" cy="-14" r="4" fill="#FFF" />
+                <circle cx="20" cy="0" r="4" fill="#FFF" />
+                <circle cx="14" cy="14" r="4" fill="#FFF" />
+                <circle cx="0" cy="20" r="4" fill="#FFF" />
+                <circle cx="-14" cy="14" r="4" fill="#FFF" />
+                <circle cx="-20" cy="0" r="4" fill="#FFF" />
+                <circle cx="-14" cy="-14" r="4" fill="#FFF" />
+                
+                {/* Center Cherry */}
+                <circle cx="0" cy="0" r="6" fill="#FF0000" stroke="#8B0000" strokeWidth="1" />
+                <circle cx="-2" cy="-2" r="2" fill="#FFFFFF" opacity="0.6" />
+            </g>
+            
+            {/* Headlights */}
+            <circle cx="25" cy="15" r="5" fill="#FFFFE0" stroke="#DAA520" strokeWidth="1" />
+            <circle cx="75" cy="15" r="5" fill="#FFFFE0" stroke="#DAA520" strokeWidth="1" />
+        </svg>
+    );
+}
+
 function Lane({obstacles, isPlayer}) {
-    // Calculate position for each obstacle
-    // Index 0 is closest to bottom, index 15 is farthest
-    // We need to subtract obstacle height (h-16 = 4rem = 64px) from positioning
     return (
         <div className={`grow relative items-center`}>
             {/* Render obstacles */}
-            {obstacles.map((hasObstacle, index) => {
-                if (!hasObstacle) return null;
+            {obstacles.map((obstacle, index) => {
+                // Handle both boolean (legacy/init) and object structure
+                const isActive = obstacle.active !== undefined ? obstacle.active : obstacle;
+                
+                if (!isActive) return null;
                 
                 // Calculate position from bottom, accounting for 16 sections
                 // Leave space at top so index 15 doesn't go off screen
                 // Use 85% of height for obstacles (index 15 at 85%)
                 const bottomPercent = (index / 15) * 85;
-                console.log("index: ", index)
-                console.log("Percent: ", bottomPercent)
+                const color = obstacle.color || "#FF0000"; // Default red if no color
+                
+                // Use ID for key if available to enable smooth transitions
+                const key = obstacle.id || index;
 
                 return (
                     <Obstacle 
-                        key={index} 
+                        key={key} 
                         bottomPercent={bottomPercent}
+                        color={color}
+                        zIndex={50 - index} // Higher index (further away) should be behind lower index (closer)
                     />
                 );
             })}
@@ -84,23 +177,24 @@ function Lane({obstacles, isPlayer}) {
 
 function Player() {
     return (
-        <div className='absolute bottom-5 left-1/4 w-1/2 h-16 bg-blue-500 rounded-full flex items-center justify-center'>
+        <div className='absolute bottom-5 left-1/4 w-1/2 h-24 flex items-center justify-center z-[60]'>
             {/* Render player */}
-            <span className="text-white text-2xl">🚴</span>
+            <Truck />
         </div>
     )
 }
 
-function Obstacle({bottomPercent}) {
+function Obstacle({bottomPercent, color, zIndex}) {
     return (
         <div 
-            className={`absolute left-1/4 w-1/2 h-16 bg-red-500 rounded-lg flex items-center justify-center`}
+            className={`absolute left-1/4 w-1/2 h-24 flex items-center justify-center`}
             style={{
                 bottom: `${bottomPercent}%`,
-                transition: 'bottom 0.5s ease-out'
+                transition: 'bottom 0.5s ease-out',
+                zIndex: zIndex
             }}
         >
-            <span className="text-white text-2xl">🚧</span>
+            <Car color={color} />
         </div>
     );
 }
