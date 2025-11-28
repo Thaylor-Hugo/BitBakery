@@ -26,7 +26,7 @@ sensors = {
     "jogada": [False, False, False, False, False, False, False],
     "difficulty": False,
     "player_position": [False, False, False, True],
-    "map_obstacles": [[False, False, False, False] for _ in range(16)]  # 16 obstacles
+    "map_obstacles": [[False, False, False, False] for _ in range(128)]  # 128 rows for delivery game
 }
 
 cake_states = ["inicio", "preparation", "show_play", "show_interval", "next_show", "initiate_play", "wait_play", 
@@ -113,13 +113,15 @@ def loop():
                 # 4-7: player position (4 bits)
                 sensors["player_position"] = [bool((int_value >> i) & 1) for i in range(4)]
             package_count += 1
-        elif package_count >= 4 and package_count <= 11:
+        elif package_count >= 4 and package_count <= 67:
+            # 64 bytes of map data (packages 4-67)
+            # Each byte contains 2 rows of 4 bits each
             obstacle_index = 2 * (package_count - 4)
             for i in range(4):
                 sensors["map_obstacles"][obstacle_index][i] = bool((int_value >> i) & 1)
                 sensors["map_obstacles"][obstacle_index + 1][i] = bool((int_value >> (4 + i)) & 1)
             package_count += 1
-        elif package_count == 12:
+        elif package_count == 68:
             if int_value == 0xfe:
                 # print("  -> End byte detected (0xFE), updating sensors")
                 package_count = 0
