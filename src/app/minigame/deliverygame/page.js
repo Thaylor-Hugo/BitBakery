@@ -18,14 +18,17 @@ function Map({map, playerPosition}) {
     const playerLane = getPosition(playerPosition);
 
     return (
-        <div className=" h-full w-full flex flex-row bg-gray-500">
-            <Lane obstacles={laneObs[0]} isPlayer={playerLane == 0}/>
+        <div className=" h-full w-full flex flex-row bg-gray-500 relative">
+            <Lane obstacles={laneObs[0]} />
             <LaneMarkings numMarks={8} width="w-[5%]" />
-            <Lane obstacles={laneObs[1]} isPlayer={playerLane == 1}/>
+            <Lane obstacles={laneObs[1]} />
             <LaneMarkings numMarks={8} width="w-[5%]" />
-            <Lane obstacles={laneObs[2]} isPlayer={playerLane == 2}/>
+            <Lane obstacles={laneObs[2]} />
             <LaneMarkings numMarks={8} width="w-[5%]" />
-            <Lane obstacles={laneObs[3]} isPlayer={playerLane == 3}/>
+            <Lane obstacles={laneObs[3]} />
+            
+            {/* Player rendered outside lanes for smooth transition animation */}
+            <Player laneIndex={playerLane} />
         </div>
     )
 }
@@ -140,7 +143,7 @@ function Truck() {
     );
 }
 
-function Lane({obstacles, isPlayer}) {
+function Lane({obstacles}) {
     return (
         <div className={`grow relative items-center`}>
             {/* Render obstacles */}
@@ -168,17 +171,29 @@ function Lane({obstacles, isPlayer}) {
                     />
                 );
             })}
-            
-            {/* Render player */}
-            {isPlayer && <Player />}
         </div>
     );
 }
 
-function Player() {
+function Player({ laneIndex }) {
+    // Calculate horizontal position based on lane
+    // Each lane is ~21.25% wide (85% total / 4 lanes)
+    // Lane markings are 5% each (3 markings = 15%)
+    // Lane 0 starts at 0%, Lane 1 at 26.25%, Lane 2 at 52.5%, Lane 3 at 78.75%
+    const lanePositions = [0, 26.25, 52.5, 78.75];
+    const leftPercent = laneIndex >= 0 ? lanePositions[laneIndex] : 0;
+    
     return (
-        <div className='absolute bottom-5 left-1/4 w-1/2 h-24 flex items-center justify-center z-[250]'>
-            {/* Render player */}
+        <div 
+            className='absolute bottom-5 h-24 flex items-center justify-center z-[250]'
+            style={{
+                left: `${leftPercent}%`,
+                width: '21.25%',
+                paddingLeft: '5.3%',
+                paddingRight: '5.3%',
+                transition: 'left 0.5s ease-out'
+            }}
+        >
             <Truck />
         </div>
     )
