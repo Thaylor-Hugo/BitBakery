@@ -13,8 +13,8 @@ module delivery_game (
     output pwm,
     output trigger,
     output [3:0] db_player_position,
-    output [63:0] db_map_obstacle,
-    output [63:0] db_map_objective,
+    output [511:0] db_map_obstacle,
+    output [511:0] db_map_objective,
     output [11:0] db_medida
 );
 

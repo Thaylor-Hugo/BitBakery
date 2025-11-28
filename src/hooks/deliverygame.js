@@ -1,11 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+
+const CAR_COLOR = "#FF6B6B";  // Single color for all cars
         
 export function useDeliveryGame() {
     const router = useRouter();
     const [playerPosition, setPlayerPosition] = useState([false, false, false, true]);
-    const [mapObstacles, setMapObstacles] = useState(Array(16).fill([false, false, false, false]));
+    const [mapObstacles, setMapObstacles] = useState(
+        Array.from({length: 128}, () => Array(4).fill({active: false, id: null, color: null}))
+    );
+    const [mapObjectives, setMapObjectives] = useState(
+        Array.from({length: 128}, () => Array(4).fill({active: false, id: null}))
+    );
     const [gameOver, setGameOver] = useState(false);
+    const [deliveredCake, setDeliveredCake] = useState(false);
     const [playing, setPlaying] = useState(false);
     const [intervalo, setIntervalo] = useState(0);
     const [distance, setDistance] = useState(0);
@@ -16,47 +24,131 @@ export function useDeliveryGame() {
                 const res = await fetch('http://localhost:5328/api/sensors');
                 const { sensors } = await res.json();
                 
+                // Helper to reset map
+                const resetMap = () => Array.from({length: 128}, () => Array(4).fill({active: false, id: null, color: null}));
+                const resetObjectives = () => Array.from({length: 128}, () => Array(4).fill({active: false, id: null}));
+
                 // Return to home if game is reset
                 if (sensors.state === "inicio") {
-                    setPlayerPosition( (prevPlayerPosition) => [false, false, false, true]);
-                    setMapObstacles( (prevMap) => Array(16).fill([false, false, false, false]));
-                    setGameOver( (prevGameOver) => false);
-                    setPlaying( (prevPlaying) => false);
-                    setDistance( (prevDistance) => 0);
+                    setPlayerPosition((prev) => [false, false, false, true]);
+                    setMapObstacles((prev) => resetMap());
+                    setMapObjectives((prev) => resetObjectives());
+                    setGameOver((prev) => false);
+                    setDeliveredCake((prev) => false);
+                    setPlaying((prev) => false);
+                    setDistance((prev) => 0);
+                    setIntervalo((prev) => 0);
                     router.push('/');
                 }
 
-                // Update game state
-                if (sensors.state === "preparation") {
-                    setPlayerPosition([false, false, false, true]);
-                    setMapObstacles(Array(16).fill([false, false, false, false]));
-                    setGameOver(false);
-                    setDistance(0);
-                    setPlaying(false);
-                } else if (sensors.state === "playing") {
-                    setPlaying(true);
-                    setPlayerPosition( (prevPlayerPosition) => sensors.player_position);
-                    setMapObstacles( (prevMap) => sensors.map_obstacles);
+                // Handle game_over state - show game over screen after delay
+                if (sensors.state === "game_over" && !gameOver) {
+                    // Update player position to show crash position
+                    setPlayerPosition((prev) => sensors.player_position);
+                    
+                    // Check if player collided with an objective (cake) in first 24 rows
+                    // Use sensors.map_objectives directly since React state may be stale
+                    const playerLane = sensors.player_position.findIndex(val => val === true);
+                    if (playerLane >= 0) {
+                        for (let row = 0; row < 24; row++) {
+                            if (sensors.map_objectives && sensors.map_objectives[row] && sensors.map_objectives[row][playerLane]) {
+                                setDeliveredCake(true);
+                                break;
+                            }
+                        }
+                    }
+                    
+                    setIntervalo((prevIntervalo) => prevIntervalo + 1);
+                    if (intervalo > 10) {
+                        setIntervalo((prev) => 0);
+                        setGameOver((prev) => true);
+                        setPlaying((prev) => false);
+                    }
+                } else if (sensors.state !== "game_over" && gameOver) {
+                    // Reset all state when transitioning OUT of game_over to any other state
+                    setGameOver((prev) => false);
+                    setDeliveredCake((prev) => false);
+                    setPlaying((prev) => false);
+                    setPlayerPosition((prev) => [false, false, false, true]);
+                    setMapObstacles((prev) => resetMap());
+                    setMapObjectives((prev) => resetObjectives());
+                    setDistance((prev) => 0);
+                    setIntervalo((prev) => 0);
+                }
+
+                // Handle playing state
+                if (sensors.state === "playing") {
+                    setPlaying((prev) => true);
+                    setPlayerPosition((prev) => sensors.player_position);
+                    
+                    // Simplified obstacle tracking - just track active state
+                    setMapObstacles(prevMap => {
+                        const newBools = sensors.map_obstacles;
+                        const newMap = [];
+                        
+                        for(let r=0; r<128; r++) {
+                            newMap[r] = [];
+                            for(let c=0; c<4; c++) {
+                                const active = newBools[r][c];
+                                newMap[r][c] = { active, color: CAR_COLOR };
+                            }
+                        }
+                        return newMap;
+                    });
+                    
+                    // Track objectives (cakes to deliver)
+                    setMapObjectives(prevMap => {
+                        const newBools = sensors.map_objectives;
+                        const newMap = [];
+                        const claimedIds = new Set();
+                        
+                        const LOOK_AHEAD = 8;
+                        
+                        for(let r=0; r<128; r++) {
+                            newMap[r] = [];
+                            for(let c=0; c<4; c++) {
+                                const active = newBools[r][c];
+                                let id = null;
+                                
+                                if (active) {
+                                    let found = false;
+                                    
+                                    for (let offset = 1; offset <= LOOK_AHEAD && !found; offset++) {
+                                        const checkRow = r + offset;
+                                        if (checkRow < 128) {
+                                            const prevFromAbove = prevMap[checkRow][c];
+                                            if (prevFromAbove && prevFromAbove.active && prevFromAbove.id && !claimedIds.has(prevFromAbove.id)) {
+                                                id = prevFromAbove.id;
+                                                claimedIds.add(id);
+                                                found = true;
+                                            }
+                                        }
+                                    }
+                                    
+                                    if (!found) {
+                                        const prevSame = prevMap[r][c];
+                                        if (prevSame && prevSame.active && prevSame.id && !claimedIds.has(prevSame.id)) {
+                                            id = prevSame.id;
+                                            claimedIds.add(id);
+                                            found = true;
+                                        }
+                                    }
+                                    
+                                    if (!found) {
+                                        id = Math.random();
+                                    }
+                                }
+                                newMap[r][c] = { active, id };
+                            }
+                        }
+                        return newMap;
+                    });
                     
                     // Calculate distance traveled (count map movements)
                     const hasObstacle = sensors.map_obstacles.some(row => row.some(val => val));
                     if (hasObstacle) {
                         setDistance(prev => prev + 1);
                     }
-                } else if (sensors.state == "game_over" && !gameOver) {
-                    setIntervalo( prevIntervalo => prevIntervalo + 1);
-                    if (intervalo > 10) {
-                        setGameOver( (prevGameOver) => true);
-                        setPlaying( (prevPlaying) => false);
-                        setIntervalo( (prevIntervalo) => 0);
-                    }
-                } else if (sensors.state != "game_over" && gameOver) {
-                    setGameOver( (prevGameOver) => true);
-                    setPlayerPosition( (prevPlayerPosition) => [false, false, false, true]);
-                    setMapObstacles( (prevMap) => Array(16).fill([false, false, false, false]));
-                    setGameOver( (prevGameOver) => false);
-                    setPlaying( (prevPlaying) => false);
-                    setDistance( (prevDistance) => 0);
                 }
 
             } catch (error) {
@@ -66,7 +158,7 @@ export function useDeliveryGame() {
         
         const interval = setInterval(fetchSensors, 50);
         return () => clearInterval(interval);
-    }, [router, playerPosition, mapObstacles, gameOver, playing, distance, intervalo]);
+    }, [router, playerPosition, mapObstacles, mapObjectives, gameOver, deliveredCake, playing, distance, intervalo]);
     
-    return { playerPosition, mapObstacles, gameOver, playing, distance };
+    return { playerPosition, mapObstacles, mapObjectives, gameOver, deliveredCake, playing, distance };
 }

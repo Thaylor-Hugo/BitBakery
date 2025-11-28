@@ -20,16 +20,17 @@ module delivery_game_fd (
     output trigger,
     output velocity_ready,
     output [3:0] db_player_position,
-    output [63:0] db_map_obstacle,
-    output [63:0] db_map_objective,
+    output [511:0] db_map_obstacle,
+    output [511:0] db_map_objective,
     output [11:0] db_medida
 );
 
 reg [3:0] player_position;
-wire s_sel_obstacle, s_sel_objective, s_move_map, s_count_points;
+wire s_sel_obstacle, s_move_map, s_count_points;
+wire s_sel_objective;  // Assigned from objective pending latch
 wire [11:0] s_medida;
 wire [1:0] s_velocity;
-wire [63:0] s_map_obstacles_flat, s_map_objectives_flat;
+wire [511:0] s_map_obstacles_flat, s_map_objectives_flat;
 wire s_obstacle_generated, s_objective_generated;
 integer i;
 integer k;
@@ -48,13 +49,13 @@ end
 edge_detector move_left (
     .clock (clock),
     .reset (reset),
-    .sinal (botoes[0]),
+    .sinal (botoes[5]),
     .pulso (s_move_left)
 );
 edge_detector move_right (
     .clock (clock),
     .reset (reset),
-    .sinal (botoes[1]),
+    .sinal (botoes[4]),
     .pulso (s_move_right)
 );
 
@@ -69,10 +70,23 @@ always @(posedge clock or posedge reset) begin
     end
 end
 
-assign game_over = ((s_map_obstacles_flat[3:0] & player_position) == 4'h0)? 1'b0 : 1'b1;
+// Collision detection: check if player overlaps with any obstacle in first 24 rows (0-23)
+wire [23:0] collision_checks;
+wire [23:0] end_checks;
+genvar c;
+generate
+    for (c = 0; c < 24; c = c + 1) begin : collision_gen
+        assign collision_checks[c] = |(s_map_obstacles_flat[c*4 +: 4] & player_position);
+        assign end_checks[c] = |(s_map_objectives_flat[c*4 +: 4] & player_position);
+    end
+endgenerate
 
+assign game_over = |collision_checks | |end_checks; // Game over if any collision or end detected
+
+// Points counter - now counts map moves (8x more frequent, so multiply threshold by 8)
+// At ~100ms per move, 2400 moves = ~240 seconds gameplay per point
 contador_m #(
-    .M(30_000), // Every 30s
+    .M(240_000), // Every 30s equivalent (30_000 * 8 moves)
     .N(32)
 ) pontuacao_counter (
     .clock (clock),
@@ -97,9 +111,10 @@ contador_max #(
     .meio ()
 );
 
+// Obstacle placement every 24 moves (was 3, now 3*8=24 to maintain same visual frequency)
 contador_m #(
-    .M(3),
-    .N(2)
+    .M(40),
+    .N(6)
 ) place_obstacle_counter (
     .clock (clock),
     .zera_as (1'b0),
@@ -110,25 +125,43 @@ contador_m #(
     .meio ()
 );
 
+// Objective placement every 20 seconds
+// Uses a flag that stays high until consumed by move_map
+reg s_objective_pending;
+wire s_objective_trigger;
+
 contador_m #(
-    .M(6),
-    .N(3)
+    .M(90_000),
+    .N(32)
 ) place_objective_counter (
     .clock (clock),
     .zera_as (1'b0),
     .zera_s (reset),
-    .conta (s_move_map),
+    .conta (count_map),
     .Q (),
-    .fim (s_sel_objective),
+    .fim (s_objective_trigger),
     .meio ()
 );
+
+// Latch the objective trigger until it's consumed by a move_map
+always @(posedge clock or posedge reset) begin
+    if (reset) begin
+        s_objective_pending <= 1'b0;
+    end else if (s_objective_trigger) begin
+        s_objective_pending <= 1'b1;
+    end else if (s_move_map && s_objective_pending) begin
+        s_objective_pending <= 1'b0;
+    end
+end
+
+assign s_sel_objective = s_objective_pending;
 
 generate_map map_gen (
     .clock (clock),
     .reset (reset),
     .move_map (s_move_map),
     .sel_obstacle (s_sel_obstacle),
-    .sel_objective (1'b0 /*s_sel_objective*/),
+    .sel_objective (s_sel_objective),
     .map_obstacles_flat (s_map_obstacles_flat),
     .map_objectives_flat (s_map_objectives_flat),
     .obstacle_generated (s_obstacle_generated),

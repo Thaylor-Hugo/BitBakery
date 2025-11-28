@@ -27,7 +27,7 @@ circuito_pwm #(
 ) velocimeter (
     .clock (clock_ultra),
     .reset (reset),
-    .largura (s_base_velocity + velocity),
+    .largura ({1'b0, s_base_velocity} + {1'b0, velocity}),
     .pwm (pwm),
     .db_pwm ()
 );
@@ -46,7 +46,7 @@ velocity_mux velocity_selector (
 );
 
 contador_m #(
-    .M(30_000), // 30 seconds at 1kHz
+    .M(20_000), // 20 seconds at 1kHz
     .N(16)
 ) increment_velocity_counter (
     .clock (clock),
@@ -71,8 +71,9 @@ contador_max #(
     .meio ()
 );
 
+// Timers divided by 8 to move map 8x faster (128 rows vs 16 rows = same visual speed)
 contador_m #(
-    .M(800), // 0.8 seconds at 1kHz
+    .M(75), // 0.1 seconds at 1kHz (was 800ms / 8)
     .N(16)
 ) map_timer_800 (
     .clock (clock),
@@ -85,7 +86,7 @@ contador_m #(
 );
 
 contador_m #(
-    .M(700), // 0.7 seconds at 1kHz
+    .M(62), // ~0.087 seconds at 1kHz (was 700ms / 8)
     .N(16)
 ) map_timer_700 (
     .clock (clock),
@@ -98,7 +99,7 @@ contador_m #(
 );
 
 contador_m #(
-    .M(600), // 0.6 seconds at 1kHz
+    .M(50), // 0.075 seconds at 1kHz (was 600ms / 8)
     .N(16)
 ) map_timer_600 (
     .clock (clock),
@@ -111,7 +112,7 @@ contador_m #(
 );
 
 contador_m #(
-    .M(500), // 0.5 seconds at 1kHz
+    .M(37), // ~0.062 seconds at 1kHz (was 500ms / 8)
     .N(16)
 ) map_timer_500 (
     .clock (clock),
@@ -124,7 +125,7 @@ contador_m #(
 );
 
 contador_m #(
-    .M(400), // 0.4 seconds at 1kHz
+    .M(25), // 0.05 seconds at 1kHz (was 400ms / 8)
     .N(16)
 ) map_timer_400 (
     .clock (clock),
@@ -137,7 +138,7 @@ contador_m #(
 );
 
 contador_m #(
-    .M(300), // 0.3 seconds at 1kHz
+    .M(18), // ~0.037 seconds at 1kHz (was 300ms / 8)
     .N(16)
 ) map_timer_300 (
     .clock (clock),
@@ -150,7 +151,7 @@ contador_m #(
 );
 
 contador_m #(
-    .M(200), // 0.2 seconds at 1kHz
+    .M(12), // 0.025 seconds at 1kHz (was 200ms / 8)
     .N(16)
 ) map_timer_200 (
     .clock (clock),

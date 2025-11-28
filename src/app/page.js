@@ -52,7 +52,7 @@ export default function HomePage() {
     const {minigame, difficulty} = useGameChooser();
     return (
         <div className="min-h-screen from-blue-50 to-purple-50 bg-[url('https://images2.alphacoders.com/136/thumb-1920-1364876.png')]">
-            <Header title="BitBakery" className="py-6 bg-white shadow-md" />
+            <Header title="BitBakery" className="py-6" />
             
             <div className="container mx-auto px-4 py-12">
                 <div className="flex flex-row justify-center items-start gap-6 max-w-6xl mx-auto">

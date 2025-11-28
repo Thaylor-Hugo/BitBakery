@@ -9,7 +9,8 @@ sensors = {
     "jogada": [False, False, False, False, False, False, False],
     "difficulty": False,
     "player_position": [False, False, False, True],
-    "map_obstacles": [[False, False, False, False] for _ in range(16)]  # 16 obstacles
+    "map_obstacles": [[False, False, False, False] for _ in range(128)],  # 128 rows
+    "map_objectives": [[False, False, False, False] for _ in range(128)]  # 128 rows
 }
 
 cake_states = ["inicio", "preparation", "show_play", "show_interval", "next_show", "initiate_play", "wait_play", 
@@ -90,6 +91,7 @@ def bitbakery():
     base_speed = 0
     base_speed_counter = 0
     obstacle_count = 0
+    objective_count = 0
     while True:
         initial_time = pygame.time.get_ticks()
         if inputs["jogar"]:
@@ -106,21 +108,23 @@ def bitbakery():
             if sensors["minigame"] == "cakegame":
                 camada_counter, edge_detected, jogando = cake_game(camada_counter, edge_detected, jogando)
             elif sensors["minigame"] == "deliverygame":
-                edge_detected, jogando, time_counter, base_speed, base_speed_counter, obstacle_count = delivery_game(edge_detected, jogando, time_counter, base_speed, base_speed_counter, obstacle_count)
+                edge_detected, jogando, time_counter, base_speed, base_speed_counter, obstacle_count, objective_count = delivery_game(edge_detected, jogando, time_counter, base_speed, base_speed_counter, obstacle_count, objective_count)
             elif sensors["minigame"] == "memorygame":
                 jogando = False  # Implement memory game logic here
 
 
-def delivery_game(edge_detected, jogando, time_counter, base_speed, base_speed_counter, obstacle_count):
+def delivery_game(edge_detected, jogando, time_counter, base_speed, base_speed_counter, obstacle_count, objective_count):
     if sensors["state"] == "inicio":
         sensors["state"] = "preparation"
         pygame.time.wait(1)
     elif sensors["state"] == "preparation":
-        sensors["map_obstacles"] = [[False, False, False, False] for _ in range(16)]
+        sensors["map_obstacles"] = [[False, False, False, False] for _ in range(128)]
+        sensors["map_objectives"] = [[False, False, False, False] for _ in range(128)]
         base_speed = 0
         base_speed_counter = 0
         time_counter = 0
         obstacle_count = 0
+        objective_count = 0
         sensors["player_position"] = [False, False, False, True]
         sensors["state"] = "playing"
         pygame.time.wait(1)
@@ -142,20 +146,33 @@ def delivery_game(edge_detected, jogando, time_counter, base_speed, base_speed_c
         time_counter += 1
         base_speed_counter += 1
         if base_speed_counter >= 30000:
-            base_speed = max(3, base_speed + 1)
+            base_speed = min(3, base_speed + 1)
             base_speed_counter = 0
         if time_counter >= get_timer(base_speed):
             obstacle_count += 1
-            if obstacle_count == 4:
+            objective_count += 1
+            # Obstacles every 40 map moves (was 4*8=32, using 40 to match Verilog)
+            if obstacle_count >= 40:
                 set_obstacle = True
                 obstacle_count = 0
             else:
                 set_obstacle = False
-            move_map(set_obstacle)
+            # Objectives every 90 seconds (~90000ms / timer_ms moves)
+            # At ~100ms per move, 90s = 900 moves
+            if objective_count >= 900:
+                set_objective = True
+                objective_count = 0
+            else:
+                set_objective = False
+            move_map(set_obstacle, set_objective)
             time_counter = 0
+        # Check collision with obstacles or objectives in first 24 rows
         for i in range(4):
-            if sensors["player_position"][i] and sensors["map_obstacles"][0][i]:
-                sensors["state"] = "game_over"
+            for j in range(24):
+                if sensors["player_position"][i] and sensors["map_obstacles"][j][i]:
+                    sensors["state"] = "game_over"
+                if sensors["player_position"][i] and sensors["map_objectives"][j][i]:
+                    sensors["state"] = "game_over"  # End game (win condition)
         pygame.time.wait(1)
         pass
     elif sensors["state"] == "game_over":
@@ -182,7 +199,7 @@ def delivery_game(edge_detected, jogando, time_counter, base_speed, base_speed_c
     {sensors["player_position"]}
     -------------------------------------"""
     print(map_obs)
-    return edge_detected, jogando, time_counter, base_speed, base_speed_counter, obstacle_count
+    return edge_detected, jogando, time_counter, base_speed, base_speed_counter, obstacle_count, objective_count
 
 
 def cake_game(camada_counter, edge_detected, jogando):
@@ -264,55 +281,67 @@ def cake_game(camada_counter, edge_detected, jogando):
 
 
 def get_timer(base_speed):
-    timer = 800  # Default timer
+    timer =  800 / 8  # Default timer
     if base_speed == 0:
         if inputs["velocidade"] == 0:
-            timer = 800
+            timer = 800 / 8
         elif inputs["velocidade"] == 1:
-            timer = 700
+            timer = 700 / 8
         elif inputs["velocidade"] == 2:
-            timer = 600
+            timer = 600 / 8
         elif inputs["velocidade"] == 3:
-            timer = 500
+            timer = 500 / 8
     elif base_speed == 1:
         if inputs["velocidade"] == 0:
-            timer = 700
+            timer = 700 / 8
         elif inputs["velocidade"] == 1:
-            timer = 600
+            timer = 600 / 8
         elif inputs["velocidade"] == 2:
-            timer = 500
+            timer = 500 / 8
         elif inputs["velocidade"] == 3:
-            timer = 400
+            timer = 400 / 8
     elif base_speed == 2:
         if inputs["velocidade"] == 0:
-            timer = 600
+            timer = 600 / 8
         elif inputs["velocidade"] == 1:
-            timer = 500
+            timer = 500 / 8
         elif inputs["velocidade"] == 2:
-            timer = 400
+            timer = 400 / 8
         elif inputs["velocidade"] == 3:
-            timer = 300
+            timer = 300 / 8
     elif base_speed == 3:
         if inputs["velocidade"] == 0:
-            timer = 500
+            timer = 500 / 8
         elif inputs["velocidade"] == 1:
-            timer = 400
+            timer = 400 / 8
         elif inputs["velocidade"] == 2:
-            timer = 300
+            timer = 300 / 8
         elif inputs["velocidade"] == 3:
-            timer = 200
+            timer = 200 / 8
     return timer
 
 
-def move_map(set_obstacle=True):
+def move_map(set_obstacle=True, set_objective=False):
+    # Generate obstacle (random lane, not all lanes)
     if set_obstacle:
-        obstacles = random.randint(1, 14)
+        obstacles = random.randint(1, 14)  # At least 1 obstacle, at most 3 lanes
     else:
         obstacles = 0
     new_obstacle = [bool((obstacles >> i) & 1) for i in range(4)]
-    for i in range(15):
+    
+    # Generate objective (single random lane)
+    if set_objective:
+        lane = random.randint(0, 3)
+        new_objective = [i == lane for i in range(4)]
+    else:
+        new_objective = [False, False, False, False]
+    
+    # Shift maps down
+    for i in range(127):
         sensors["map_obstacles"][i] = sensors["map_obstacles"][i+1]
-    sensors["map_obstacles"][15] = new_obstacle   
+        sensors["map_objectives"][i] = sensors["map_objectives"][i+1]
+    sensors["map_obstacles"][127] = new_obstacle
+    sensors["map_objectives"][127] = new_objective   
 
 
 def handle_pygame_events():

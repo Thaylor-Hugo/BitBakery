@@ -60,7 +60,7 @@ wire [6:0] s_jogada_0, s_jogada_1, s_jogada_2;
 wire [2:0] s_pontuacao_0, s_pontuacao_1, s_pontuacao_2;
 wire [3:0] estado_out;
 wire [3:0] s_player_position;
-wire [63:0] s_map_objective, s_map_obstacle;
+wire [511:0] s_map_objective, s_map_obstacle;
 wire [11:0] db_medida;
 
 reg [1:0] MiniGame; 
@@ -220,6 +220,7 @@ bitbakery_serial_tx serial_tx (
     .D1             ({2'b01, db_jogada[5:0]}),
     .D2             ({2'b10, 1'b0, db_dificuldade, s_player_position}),
     .map_obstacles  (s_map_obstacle),
+    .map_objectives (s_map_objective),
     .saida_serial   (saida_serial )
 );
 
