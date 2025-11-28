@@ -64,6 +64,9 @@ export function useDeliveryGame() {
                         const newMap = [];
                         const claimedIds = new Set();
                         
+                        // How many rows to look above for tracking (handles fast movement)
+                        const LOOK_AHEAD = 8;
+                        
                         for(let r=0; r<128; r++) {
                             newMap[r] = [];
                             for(let c=0; c<4; c++) {
@@ -72,19 +75,35 @@ export function useDeliveryGame() {
                                 let color = null;
                                 
                                 if (active) {
-                                    // Check r+1 (moved down) first, then r (stayed)
-                                    const prevFromAbove = (r < 127) ? prevMap[r+1][c] : null;
-                                    const prevSame = prevMap[r][c];
+                                    let found = false;
                                     
-                                    if (prevFromAbove && prevFromAbove.active && prevFromAbove.id && !claimedIds.has(prevFromAbove.id)) {
-                                        id = prevFromAbove.id;
-                                        color = prevFromAbove.color;
-                                        claimedIds.add(id);
-                                    } else if (prevSame && prevSame.active && prevSame.id && !claimedIds.has(prevSame.id)) {
-                                        id = prevSame.id;
-                                        color = prevSame.color;
-                                        claimedIds.add(id);
-                                    } else {
+                                    // Look up to LOOK_AHEAD rows above to find the obstacle that moved here
+                                    for (let offset = 1; offset <= LOOK_AHEAD && !found; offset++) {
+                                        const checkRow = r + offset;
+                                        if (checkRow < 128) {
+                                            const prevFromAbove = prevMap[checkRow][c];
+                                            if (prevFromAbove && prevFromAbove.active && prevFromAbove.id && !claimedIds.has(prevFromAbove.id)) {
+                                                id = prevFromAbove.id;
+                                                color = prevFromAbove.color;
+                                                claimedIds.add(id);
+                                                found = true;
+                                            }
+                                        }
+                                    }
+                                    
+                                    // Also check if it stayed in place
+                                    if (!found) {
+                                        const prevSame = prevMap[r][c];
+                                        if (prevSame && prevSame.active && prevSame.id && !claimedIds.has(prevSame.id)) {
+                                            id = prevSame.id;
+                                            color = prevSame.color;
+                                            claimedIds.add(id);
+                                            found = true;
+                                        }
+                                    }
+                                    
+                                    // New obstacle - assign random color
+                                    if (!found) {
                                         id = Math.random();
                                         color = COLORS[Math.floor(Math.random() * COLORS.length)];
                                     }
