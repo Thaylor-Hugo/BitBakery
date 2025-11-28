@@ -5,7 +5,7 @@ import Header from '../../../components/basic';
 import GameOver from '../../../components/GameOver';
 
 
-function VillageBackground() {
+function VillageBackground({ paused }) {
     // Reusable building block component rendered inline
     const BuildingBlock = ({ y }) => (
         <g transform={`translate(0, ${y})`}>
@@ -76,7 +76,7 @@ function VillageBackground() {
 
     return (
         <div className="w-full h-full overflow-hidden relative">
-        <svg viewBox="0 0 400 800" className="w-full h-[200%] animate-village-scroll" preserveAspectRatio="xMidYMid slice">
+        <svg viewBox="0 0 400 800" className={`w-full h-[200%] ${paused ? '' : 'animate-village-scroll'}`} preserveAspectRatio="xMidYMid slice">
             <defs>
                 {/* No sky gradient needed for top-down view */}
             </defs>
@@ -183,7 +183,7 @@ function VillageBackground() {
 }
 
 
-function Map({map, playerPosition}) {
+function Map({map, playerPosition, paused}) {
     // Calculate which lane each obstacle and player is in
     const getPosition = (boolArray) => boolArray.findIndex(val => val === true);
     const laneObs = [[], [], [], []];
@@ -198,11 +198,11 @@ function Map({map, playerPosition}) {
     return (
         <div className=" h-full w-full flex flex-row bg-gray-500 relative">
             <Lane obstacles={laneObs[0]} />
-            <LaneMarkings numMarks={8} width="w-[5%]" />
+            <LaneMarkings numMarks={8} width="w-[5%]" paused={paused} />
             <Lane obstacles={laneObs[1]} />
-            <LaneMarkings numMarks={8} width="w-[5%]" />
+            <LaneMarkings numMarks={8} width="w-[5%]" paused={paused} />
             <Lane obstacles={laneObs[2]} />
-            <LaneMarkings numMarks={8} width="w-[5%]" />
+            <LaneMarkings numMarks={8} width="w-[5%]" paused={paused} />
             <Lane obstacles={laneObs[3]} />
             
             {/* Player rendered outside lanes for smooth transition animation */}
@@ -212,7 +212,7 @@ function Map({map, playerPosition}) {
 }
 
 
-function LaneMarkings({numMarks, width}) {
+function LaneMarkings({numMarks, width, paused}) {
     const marks = [];
     // Double the marks so we can create infinite scroll effect
     for (let index = 0; index < numMarks * 2; index++) {
@@ -225,7 +225,7 @@ function LaneMarkings({numMarks, width}) {
     }
     return (
         <div className={`${width} h-full flex flex-col overflow-hidden relative`}>
-            <div className="absolute inset-0 flex flex-col animate-scroll-down">
+            <div className={`absolute inset-0 flex flex-col ${paused ? '' : 'animate-scroll-down'}`}>
                 {marks}
             </div>
         </div>
@@ -399,7 +399,7 @@ export default function DeliveryGame() {
         <div className="w-screen h-screen flex flex-row items-stretch relative overflow-hidden">
             {/* Left Village Background */}
             <div className="w-1/4 h-full flex-shrink-0">
-                <VillageBackground />
+                <VillageBackground paused={gameOver} />
             </div>
             
             {/* Game Content - Center */}
@@ -409,13 +409,13 @@ export default function DeliveryGame() {
                 </div>
                 {/* Game map */}
                 <div className="flex-1 relative -mx-1">
-                    <Map map={mapObstacles} playerPosition={playerPosition}/>
+                    <Map map={mapObstacles} playerPosition={playerPosition} paused={gameOver}/>
                 </div>
             </div>
             
             {/* Right Village Background (mirrored) */}
             <div className="w-1/4 h-full flex-shrink-0" style={{ transform: 'scaleX(-1)' }}>
-                <VillageBackground />
+                <VillageBackground paused={gameOver} />
             </div>
 
             {/* Game Over Screen */}

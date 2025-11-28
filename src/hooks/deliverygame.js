@@ -25,24 +25,39 @@ export function useDeliveryGame() {
 
                 // Return to home if game is reset
                 if (sensors.state === "inicio") {
-                    setPlayerPosition([false, false, false, true]);
-                    setMapObstacles(resetMap());
-                    setGameOver(false);
-                    setPlaying(false);
-                    setDistance(0);
+                    setPlayerPosition((prev) => [false, false, false, true]);
+                    setMapObstacles((prev) => resetMap());
+                    setGameOver((prev) => false);
+                    setPlaying((prev) => false);
+                    setDistance((prev) => 0);
+                    setIntervalo((prev) => 0);
                     router.push('/');
                 }
 
-                // Update game state
-                if (sensors.state === "preparation") {
-                    setPlayerPosition([false, false, false, true]);
-                    setMapObstacles(resetMap());
-                    setGameOver(false);
-                    setDistance(0);
-                    setPlaying(false);
-                } else if (sensors.state === "playing") {
-                    setPlaying(true);
-                    setPlayerPosition(sensors.player_position);
+                // Handle game_over state - show game over screen after delay
+                if (sensors.state === "game_over" && !gameOver) {
+                    // Update player position to show crash position
+                    setPlayerPosition((prev) => sensors.player_position);
+                    setIntervalo((prevIntervalo) => prevIntervalo + 1);
+                    if (intervalo > 10) {
+                        setIntervalo((prev) => 0);
+                        setGameOver((prev) => true);
+                        setPlaying((prev) => false);
+                    }
+                } else if (sensors.state !== "game_over" && gameOver) {
+                    // Reset all state when transitioning OUT of game_over to any other state
+                    setGameOver((prev) => false);
+                    setPlaying((prev) => false);
+                    setPlayerPosition((prev) => [false, false, false, true]);
+                    setMapObstacles((prev) => resetMap());
+                    setDistance((prev) => 0);
+                    setIntervalo((prev) => 0);
+                }
+
+                // Handle playing state
+                if (sensors.state === "playing") {
+                    setPlaying((prev) => true);
+                    setPlayerPosition((prev) => sensors.player_position);
                     
                     setMapObstacles(prevMap => {
                         const newBools = sensors.map_obstacles;
@@ -85,24 +100,6 @@ export function useDeliveryGame() {
                     if (hasObstacle) {
                         setDistance(prev => prev + 1);
                     }
-                } else if (sensors.state === "game_over") {
-                    // Update player position even during game_over so we see the crash position
-                    setPlayerPosition(sensors.player_position);
-                    
-                    if (!gameOver) {
-                        setIntervalo(prevIntervalo => prevIntervalo + 1);
-                        if (intervalo > 10) {
-                            setGameOver(true);
-                            setPlaying(false);
-                            setIntervalo(0);
-                        }
-                    }
-                } else if (sensors.state != "game_over" && gameOver) {
-                    setGameOver(false);
-                    setPlayerPosition([false, false, false, true]);
-                    setMapObstacles(resetMap());
-                    setPlaying(false);
-                    setDistance(0);
                 }
 
             } catch (error) {
