@@ -48,13 +48,13 @@ end
 edge_detector move_left (
     .clock (clock),
     .reset (reset),
-    .sinal (botoes[0]),
+    .sinal (botoes[1]),
     .pulso (s_move_left)
 );
 edge_detector move_right (
     .clock (clock),
     .reset (reset),
-    .sinal (botoes[1]),
+    .sinal (botoes[0]),
     .pulso (s_move_right)
 );
 
