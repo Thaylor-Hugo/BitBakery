@@ -1,25 +1,31 @@
 'use client'
 
 import Head from 'next/head';
-import Circle from '../../../components/Circle';
+import FlourBag from '../../../components/FlourBag';
+import MilkBottle from '../../../components/MilkBottle';
+import Eggs from '../../../components/Eggs';
+import Butter from '../../../components/Butter';
+import CocoaPowder from '../../../components/CocoaPowder';
+import Strawberry from '../../../components/Strawberry';
 import '../../globals.css';
 import { useMemoryGame } from '../../../hooks/memorygame';
 import GameOver from '../../../components/GameOver';
 import Header from "../../../components/basic";
 
 export default function memorygame() {
-
-  const colors = [
-    "#ff194f", "#ffb400", "#00a6ed",
-    "#00ff7f", "#632501", "#8f00ff"
-  ];
+  console.log("Memory Game Loaded - Version with Strawberry");
+  const items = [Strawberry, Butter, MilkBottle, Eggs, CocoaPowder,  FlourBag ];
 
   const { jogada, pontuacao, gameOver, aguardar, difficulty } = useMemoryGame();
-  let temp_jogada = jogada ? jogada.slice(0, colors.length) : [];
+  let temp_jogada = jogada ? jogada.slice(0, items.length) : [];
   let max_pontuacao = difficulty ? 8 : 16;
 
-  const renderData = colors.map((color, index) => (
-      <Circle key={index + color} bgColor={temp_jogada[index] ? colors[index] : 'black'} />
+  const renderData = items.map((ItemComponent, index) => (
+      <ItemComponent 
+        key={index} 
+        isActive={!!temp_jogada[index]} 
+        style={{ width: 150, height: 150, margin: 20 }} 
+      />
   ));
 
   return (
