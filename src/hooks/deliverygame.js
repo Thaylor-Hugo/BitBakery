@@ -85,12 +85,17 @@ export function useDeliveryGame() {
                     if (hasObstacle) {
                         setDistance(prev => prev + 1);
                     }
-                } else if (sensors.state == "game_over" && !gameOver) {
-                    setIntervalo( prevIntervalo => prevIntervalo + 1);
-                    if (intervalo > 10) {
-                        setGameOver(true);
-                        setPlaying(false);
-                        setIntervalo(0);
+                } else if (sensors.state === "game_over") {
+                    // Update player position even during game_over so we see the crash position
+                    setPlayerPosition(sensors.player_position);
+                    
+                    if (!gameOver) {
+                        setIntervalo(prevIntervalo => prevIntervalo + 1);
+                        if (intervalo > 10) {
+                            setGameOver(true);
+                            setPlaying(false);
+                            setIntervalo(0);
+                        }
                     }
                 } else if (sensors.state != "game_over" && gameOver) {
                     setGameOver(false);
