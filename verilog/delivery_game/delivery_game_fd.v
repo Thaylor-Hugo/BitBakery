@@ -71,14 +71,16 @@ end
 
 // Collision detection: check if player overlaps with any obstacle in first 24 rows (0-23)
 wire [23:0] collision_checks;
+wire [23:0] end_checks;
 genvar c;
 generate
     for (c = 0; c < 24; c = c + 1) begin : collision_gen
         assign collision_checks[c] = |(s_map_obstacles_flat[c*4 +: 4] & player_position);
+        assign end_checks[c] = |(s_map_objectives_flat[c*4 +: 4] & player_position);
     end
 endgenerate
 
-assign game_over = |collision_checks; // Game over if any collision detected
+assign game_over = |collision_checks | |end_checks; // Game over if any collision or end detected
 
 // Points counter - now counts map moves (8x more frequent, so multiply threshold by 8)
 // At ~100ms per move, 2400 moves = ~240 seconds gameplay per point
@@ -122,15 +124,15 @@ contador_m #(
     .meio ()
 );
 
-// Objective placement every 48 moves (was 6, now 6*8=48)
+// Objective placement every 90 seconds
 contador_m #(
-    .M(48),
-    .N(6)
+    .M(90_000),
+    .N(32)
 ) place_objective_counter (
     .clock (clock),
     .zera_as (1'b0),
     .zera_s (reset),
-    .conta (s_move_map),
+    .conta (count_map),
     .Q (),
     .fim (s_sel_objective),
     .meio ()
@@ -141,7 +143,7 @@ generate_map map_gen (
     .reset (reset),
     .move_map (s_move_map),
     .sel_obstacle (s_sel_obstacle),
-    .sel_objective (1'b0 /*s_sel_objective*/),
+    .sel_objective (s_sel_objective),
     .map_obstacles_flat (s_map_obstacles_flat),
     .map_objectives_flat (s_map_objectives_flat),
     .obstacle_generated (s_obstacle_generated),
