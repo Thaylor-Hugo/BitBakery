@@ -405,7 +405,7 @@ export default function DeliveryGame() {
             {/* Game Content - Center */}
             <div className="w-1/2 h-full flex flex-col flex-shrink-0">
                 <div>
-                    <Header title="Delivery Game" />
+                    <Header title="Delivery Game" className="bg-gradient-to-r from-pink-500 via-pink-400 to-pink-500 shadow-lg" />
                 </div>
                 {/* Game map */}
                 <div className="flex-1 relative -mx-1">
