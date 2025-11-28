@@ -77,7 +77,7 @@
 }
 
 .animate-scroll-down {
-    animation: scroll-down 3s linear infinite;
+    animation: scroll-down 5s linear infinite;
     height: 200%;
 }
 
