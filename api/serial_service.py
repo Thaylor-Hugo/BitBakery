@@ -149,7 +149,7 @@ def loop():
         '''
         # mapa: {sensors["map_obstacles"]}
         # player_position: {sensors["player_position"]}
-        print(se)
+        # print(se)
 
 def close_serial():
     # Make sure to close the port when the script is done

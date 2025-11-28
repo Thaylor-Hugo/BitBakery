@@ -26,7 +26,8 @@ module delivery_game_fd (
 );
 
 reg [3:0] player_position;
-wire s_sel_obstacle, s_sel_objective, s_move_map, s_count_points;
+wire s_sel_obstacle, s_move_map, s_count_points;
+wire s_sel_objective;  // Assigned from objective pending latch
 wire [11:0] s_medida;
 wire [1:0] s_velocity;
 wire [511:0] s_map_obstacles_flat, s_map_objectives_flat;
@@ -48,13 +49,13 @@ end
 edge_detector move_left (
     .clock (clock),
     .reset (reset),
-    .sinal (botoes[1]),
+    .sinal (botoes[5]),
     .pulso (s_move_left)
 );
 edge_detector move_right (
     .clock (clock),
     .reset (reset),
-    .sinal (botoes[0]),
+    .sinal (botoes[4]),
     .pulso (s_move_right)
 );
 
@@ -124,7 +125,11 @@ contador_m #(
     .meio ()
 );
 
-// Objective placement every 90 seconds
+// Objective placement every 20 seconds
+// Uses a flag that stays high until consumed by move_map
+reg s_objective_pending;
+wire s_objective_trigger;
+
 contador_m #(
     .M(90_000),
     .N(32)
@@ -134,9 +139,22 @@ contador_m #(
     .zera_s (reset),
     .conta (count_map),
     .Q (),
-    .fim (s_sel_objective),
+    .fim (s_objective_trigger),
     .meio ()
 );
+
+// Latch the objective trigger until it's consumed by a move_map
+always @(posedge clock or posedge reset) begin
+    if (reset) begin
+        s_objective_pending <= 1'b0;
+    end else if (s_objective_trigger) begin
+        s_objective_pending <= 1'b1;
+    end else if (s_move_map && s_objective_pending) begin
+        s_objective_pending <= 1'b0;
+    end
+end
+
+assign s_sel_objective = s_objective_pending;
 
 generate_map map_gen (
     .clock (clock),
