@@ -110,8 +110,8 @@ contador_max #(
 
 // Obstacle placement every 24 moves (was 3, now 3*8=24 to maintain same visual frequency)
 contador_m #(
-    .M(24),
-    .N(5)
+    .M(40),
+    .N(6)
 ) place_obstacle_counter (
     .clock (clock),
     .zera_as (1'b0),
