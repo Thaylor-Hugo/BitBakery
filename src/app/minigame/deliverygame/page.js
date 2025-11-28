@@ -477,7 +477,7 @@ function Objective({bottomPercent, zIndex}) {
 }
 
 export default function DeliveryGame() {
-    const { playerPosition, mapObstacles, mapObjectives, gameOver, playing, distance } = useDeliveryGame();
+    const { playerPosition, mapObstacles, mapObjectives, gameOver, deliveredCake, playing, distance } = useDeliveryGame();
 
     return (
         <div className="w-screen h-screen flex flex-row items-stretch relative overflow-hidden">
@@ -502,8 +502,24 @@ export default function DeliveryGame() {
                 <VillageBackground paused={gameOver} />
             </div>
 
-            {/* Game Over Screen */}
-            {gameOver && (
+            {/* Cake Delivery Video */}
+            {gameOver && deliveredCake && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[500]">
+                    <div className="bg-gray-800 rounded-xl p-4 max-w-4xl w-full mx-4 shadow-2xl">
+                        <h2 className="text-3xl font-bold text-center text-pink-400 mb-4">🎂 Cake Delivered! 🎂</h2>
+                        <video 
+                            src="/delivering_cake.mp4" 
+                            autoPlay 
+                            className="w-full rounded-lg"
+                            onEnded={(e) => e.target.play()}
+                        />
+                        <p className="text-xl text-center text-white mt-4">Distance traveled: {distance}</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Game Over Screen (crash) */}
+            {gameOver && !deliveredCake && (
                 <GameOver pontuacao={distance} max_pontuacao={500}/>
             )}
         </div>

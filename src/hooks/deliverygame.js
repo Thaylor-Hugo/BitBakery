@@ -13,6 +13,7 @@ export function useDeliveryGame() {
         Array.from({length: 128}, () => Array(4).fill({active: false, id: null}))
     );
     const [gameOver, setGameOver] = useState(false);
+    const [deliveredCake, setDeliveredCake] = useState(false);
     const [playing, setPlaying] = useState(false);
     const [intervalo, setIntervalo] = useState(0);
     const [distance, setDistance] = useState(0);
@@ -33,6 +34,7 @@ export function useDeliveryGame() {
                     setMapObstacles((prev) => resetMap());
                     setMapObjectives((prev) => resetObjectives());
                     setGameOver((prev) => false);
+                    setDeliveredCake((prev) => false);
                     setPlaying((prev) => false);
                     setDistance((prev) => 0);
                     setIntervalo((prev) => 0);
@@ -43,6 +45,19 @@ export function useDeliveryGame() {
                 if (sensors.state === "game_over" && !gameOver) {
                     // Update player position to show crash position
                     setPlayerPosition((prev) => sensors.player_position);
+                    
+                    // Check if player collided with an objective (cake) in first 24 rows
+                    // Use sensors.map_objectives directly since React state may be stale
+                    const playerLane = sensors.player_position.findIndex(val => val === true);
+                    if (playerLane >= 0) {
+                        for (let row = 0; row < 24; row++) {
+                            if (sensors.map_objectives && sensors.map_objectives[row] && sensors.map_objectives[row][playerLane]) {
+                                setDeliveredCake(true);
+                                break;
+                            }
+                        }
+                    }
+                    
                     setIntervalo((prevIntervalo) => prevIntervalo + 1);
                     if (intervalo > 10) {
                         setIntervalo((prev) => 0);
@@ -52,6 +67,7 @@ export function useDeliveryGame() {
                 } else if (sensors.state !== "game_over" && gameOver) {
                     // Reset all state when transitioning OUT of game_over to any other state
                     setGameOver((prev) => false);
+                    setDeliveredCake((prev) => false);
                     setPlaying((prev) => false);
                     setPlayerPosition((prev) => [false, false, false, true]);
                     setMapObstacles((prev) => resetMap());
@@ -182,7 +198,7 @@ export function useDeliveryGame() {
         
         const interval = setInterval(fetchSensors, 50);
         return () => clearInterval(interval);
-    }, [router, playerPosition, mapObstacles, mapObjectives, gameOver, playing, distance, intervalo]);
+    }, [router, playerPosition, mapObstacles, mapObjectives, gameOver, deliveredCake, playing, distance, intervalo]);
     
-    return { playerPosition, mapObstacles, mapObjectives, gameOver, playing, distance };
+    return { playerPosition, mapObstacles, mapObjectives, gameOver, deliveredCake, playing, distance };
 }
