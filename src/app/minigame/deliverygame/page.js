@@ -183,27 +183,32 @@ function VillageBackground({ paused }) {
 }
 
 
-function Map({map, playerPosition, paused}) {
+function Map({map, objectives, playerPosition, paused}) {
     // Calculate which lane each obstacle and player is in
     const getPosition = (boolArray) => boolArray.findIndex(val => val === true);
     const laneObs = [[], [], [], []];
+    const laneObj = [[], [], [], []];
     for (let index = 0; index < map.length; index++) {
         laneObs[0].push(map[index][0]);
         laneObs[1].push(map[index][1]);
         laneObs[2].push(map[index][2]);
         laneObs[3].push(map[index][3]);
+        laneObj[0].push(objectives[index][0]);
+        laneObj[1].push(objectives[index][1]);
+        laneObj[2].push(objectives[index][2]);
+        laneObj[3].push(objectives[index][3]);
     }
     const playerLane = getPosition(playerPosition);
 
     return (
         <div className=" h-full w-full flex flex-row bg-gray-500 relative">
-            <Lane obstacles={laneObs[0]} />
+            <Lane obstacles={laneObs[0]} objectives={laneObj[0]} />
             <LaneMarkings numMarks={8} width="w-[5%]" paused={paused} />
-            <Lane obstacles={laneObs[1]} />
+            <Lane obstacles={laneObs[1]} objectives={laneObj[1]} />
             <LaneMarkings numMarks={8} width="w-[5%]" paused={paused} />
-            <Lane obstacles={laneObs[2]} />
+            <Lane obstacles={laneObs[2]} objectives={laneObj[2]} />
             <LaneMarkings numMarks={8} width="w-[5%]" paused={paused} />
-            <Lane obstacles={laneObs[3]} />
+            <Lane obstacles={laneObs[3]} objectives={laneObj[3]} />
             
             {/* Player rendered outside lanes for smooth transition animation */}
             <Player laneIndex={playerLane} />
@@ -321,10 +326,56 @@ function Truck() {
     );
 }
 
-function Lane({obstacles}) {
+function Cake() {
+    return (
+        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg">
+            {/* Shadow */}
+            <ellipse cx="52" cy="90" rx="40" ry="8" fill="rgba(0,0,0,0.2)" />
+            
+            {/* Plate */}
+            <ellipse cx="50" cy="85" rx="45" ry="10" fill="#FFFFFF" stroke="#DDD" strokeWidth="2" />
+            
+            {/* Cake Base Layer (Chocolate) */}
+            <ellipse cx="50" cy="70" rx="38" ry="8" fill="#5D4037" />
+            <rect x="12" y="55" width="76" height="15" fill="#8B4513" />
+            <ellipse cx="50" cy="55" rx="38" ry="8" fill="#A0522D" />
+            
+            {/* Cake Middle Layer (Pink Icing) */}
+            <ellipse cx="50" cy="50" rx="35" ry="7" fill="#C71585" />
+            <rect x="15" y="38" width="70" height="12" fill="#FF69B4" />
+            <ellipse cx="50" cy="38" rx="35" ry="7" fill="#FFB6C1" />
+            
+            {/* Cake Top Layer (Cream) */}
+            <ellipse cx="50" cy="33" rx="30" ry="6" fill="#E6E6FA" />
+            <rect x="20" y="24" width="60" height="9" fill="#FFF8DC" />
+            <ellipse cx="50" cy="24" rx="30" ry="6" fill="#FFFAF0" />
+            
+            {/* Frosting drips */}
+            <path d="M 25 38 Q 23 48 25 55" stroke="#FF69B4" strokeWidth="4" fill="none" strokeLinecap="round" />
+            <path d="M 40 38 Q 38 52 40 60" stroke="#FF69B4" strokeWidth="4" fill="none" strokeLinecap="round" />
+            <path d="M 60 38 Q 62 50 60 58" stroke="#FF69B4" strokeWidth="4" fill="none" strokeLinecap="round" />
+            <path d="M 75 38 Q 77 46 75 52" stroke="#FF69B4" strokeWidth="4" fill="none" strokeLinecap="round" />
+            
+            {/* Decorative cream dollops on top */}
+            <circle cx="30" cy="22" r="5" fill="#FFF" stroke="#FFE4E1" strokeWidth="1" />
+            <circle cx="50" cy="20" r="5" fill="#FFF" stroke="#FFE4E1" strokeWidth="1" />
+            <circle cx="70" cy="22" r="5" fill="#FFF" stroke="#FFE4E1" strokeWidth="1" />
+            
+            {/* Cherry on top */}
+            <circle cx="50" cy="12" r="8" fill="#FF0000" stroke="#8B0000" strokeWidth="1" />
+            <circle cx="47" cy="9" r="3" fill="#FFFFFF" opacity="0.6" />
+            
+            {/* Cherry stem */}
+            <path d="M 50 4 Q 55 -2 60 0" stroke="#228B22" strokeWidth="2" fill="none" strokeLinecap="round" />
+            <ellipse cx="61" cy="0" rx="3" ry="2" fill="#32CD32" />
+        </svg>
+    );
+}
+
+function Lane({obstacles, objectives}) {
     return (
         <div className={`grow relative items-center`}>
-            {/* Render obstacles */}
+            {/* Render obstacles (cars) */}
             {obstacles.map((obstacle, index) => {
                 // Handle both boolean (legacy/init) and object structure
                 const isActive = obstacle.active !== undefined ? obstacle.active : obstacle;
@@ -338,7 +389,7 @@ function Lane({obstacles}) {
                 const color = obstacle.color || "#FF0000"; // Default red if no color
                 
                 // Use ID for key if available to enable smooth transitions
-                const key = obstacle.id || index;
+                const key = obstacle.id || `obs-${index}`;
 
                 return (
                     <Obstacle 
@@ -346,6 +397,24 @@ function Lane({obstacles}) {
                         bottomPercent={bottomPercent}
                         color={color}
                         zIndex={200 - index} // Higher index (further away) should be behind lower index (closer)
+                    />
+                );
+            })}
+            
+            {/* Render objectives (cakes) */}
+            {objectives.map((objective, index) => {
+                const isActive = objective.active !== undefined ? objective.active : objective;
+                
+                if (!isActive) return null;
+                
+                const bottomPercent = (index / 127) * 100 - 8;
+                const key = objective.id || `obj-${index}`;
+
+                return (
+                    <Objective 
+                        key={key} 
+                        bottomPercent={bottomPercent}
+                        zIndex={200 - index}
                     />
                 );
             })}
@@ -392,8 +461,23 @@ function Obstacle({bottomPercent, color, zIndex}) {
     );
 }
 
+function Objective({bottomPercent, zIndex}) {
+    return (
+        <div 
+            className={`absolute left-1/4 w-1/2 h-20 flex items-center justify-center`}
+            style={{
+                bottom: `${bottomPercent}%`,
+                transition: 'bottom 0.5s ease-out',
+                zIndex: zIndex
+            }}
+        >
+            <Cake />
+        </div>
+    );
+}
+
 export default function DeliveryGame() {
-    const { playerPosition, mapObstacles, gameOver, playing, distance } = useDeliveryGame();
+    const { playerPosition, mapObstacles, mapObjectives, gameOver, playing, distance } = useDeliveryGame();
 
     return (
         <div className="w-screen h-screen flex flex-row items-stretch relative overflow-hidden">
@@ -409,7 +493,7 @@ export default function DeliveryGame() {
                 </div>
                 {/* Game map */}
                 <div className="flex-1 relative -mx-1">
-                    <Map map={mapObstacles} playerPosition={playerPosition} paused={gameOver}/>
+                    <Map map={mapObstacles} objectives={mapObjectives} playerPosition={playerPosition} paused={gameOver}/>
                 </div>
             </div>
             

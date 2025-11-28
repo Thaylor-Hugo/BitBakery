@@ -9,6 +9,9 @@ export function useDeliveryGame() {
     const [mapObstacles, setMapObstacles] = useState(
         Array.from({length: 128}, () => Array(4).fill({active: false, id: null, color: null}))
     );
+    const [mapObjectives, setMapObjectives] = useState(
+        Array.from({length: 128}, () => Array(4).fill({active: false, id: null}))
+    );
     const [gameOver, setGameOver] = useState(false);
     const [playing, setPlaying] = useState(false);
     const [intervalo, setIntervalo] = useState(0);
@@ -22,11 +25,13 @@ export function useDeliveryGame() {
                 
                 // Helper to reset map
                 const resetMap = () => Array.from({length: 128}, () => Array(4).fill({active: false, id: null, color: null}));
+                const resetObjectives = () => Array.from({length: 128}, () => Array(4).fill({active: false, id: null}));
 
                 // Return to home if game is reset
                 if (sensors.state === "inicio") {
                     setPlayerPosition((prev) => [false, false, false, true]);
                     setMapObstacles((prev) => resetMap());
+                    setMapObjectives((prev) => resetObjectives());
                     setGameOver((prev) => false);
                     setPlaying((prev) => false);
                     setDistance((prev) => 0);
@@ -50,6 +55,7 @@ export function useDeliveryGame() {
                     setPlaying((prev) => false);
                     setPlayerPosition((prev) => [false, false, false, true]);
                     setMapObstacles((prev) => resetMap());
+                    setMapObjectives((prev) => resetObjectives());
                     setDistance((prev) => 0);
                     setIntervalo((prev) => 0);
                 }
@@ -114,6 +120,54 @@ export function useDeliveryGame() {
                         return newMap;
                     });
                     
+                    // Track objectives (cakes to deliver)
+                    setMapObjectives(prevMap => {
+                        const newBools = sensors.map_objectives;
+                        const newMap = [];
+                        const claimedIds = new Set();
+                        
+                        const LOOK_AHEAD = 8;
+                        
+                        for(let r=0; r<128; r++) {
+                            newMap[r] = [];
+                            for(let c=0; c<4; c++) {
+                                const active = newBools[r][c];
+                                let id = null;
+                                
+                                if (active) {
+                                    let found = false;
+                                    
+                                    for (let offset = 1; offset <= LOOK_AHEAD && !found; offset++) {
+                                        const checkRow = r + offset;
+                                        if (checkRow < 128) {
+                                            const prevFromAbove = prevMap[checkRow][c];
+                                            if (prevFromAbove && prevFromAbove.active && prevFromAbove.id && !claimedIds.has(prevFromAbove.id)) {
+                                                id = prevFromAbove.id;
+                                                claimedIds.add(id);
+                                                found = true;
+                                            }
+                                        }
+                                    }
+                                    
+                                    if (!found) {
+                                        const prevSame = prevMap[r][c];
+                                        if (prevSame && prevSame.active && prevSame.id && !claimedIds.has(prevSame.id)) {
+                                            id = prevSame.id;
+                                            claimedIds.add(id);
+                                            found = true;
+                                        }
+                                    }
+                                    
+                                    if (!found) {
+                                        id = Math.random();
+                                    }
+                                }
+                                newMap[r][c] = { active, id };
+                            }
+                        }
+                        return newMap;
+                    });
+                    
                     // Calculate distance traveled (count map movements)
                     const hasObstacle = sensors.map_obstacles.some(row => row.some(val => val));
                     if (hasObstacle) {
@@ -128,7 +182,7 @@ export function useDeliveryGame() {
         
         const interval = setInterval(fetchSensors, 50);
         return () => clearInterval(interval);
-    }, [router, playerPosition, mapObstacles, gameOver, playing, distance, intervalo]);
+    }, [router, playerPosition, mapObstacles, mapObjectives, gameOver, playing, distance, intervalo]);
     
-    return { playerPosition, mapObstacles, gameOver, playing, distance };
+    return { playerPosition, mapObstacles, mapObjectives, gameOver, playing, distance };
 }
