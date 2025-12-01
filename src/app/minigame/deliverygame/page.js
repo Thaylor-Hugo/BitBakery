@@ -509,9 +509,11 @@ export default function DeliveryGame() {
                         <h2 className="text-3xl font-bold text-center text-pink-400 mb-4">🎂 Cake Delivered! 🎂</h2>
                         <video 
                             src="/delivering_cake.mp4" 
-                            autoPlay 
+                            autoPlay
+                            muted
+                            playsInline
+                            loop
                             className="w-full rounded-lg"
-                            onEnded={(e) => e.target.play()}
                         />
                         <p className="text-xl text-center text-white mt-4">Distance traveled: {distance}</p>
                     </div>

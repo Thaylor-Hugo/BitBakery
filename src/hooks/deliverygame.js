@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const CAR_COLOR = "#FF6B6B";  // Single color for all cars
+const COLORS = ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", "#FFA500", "#800080"];
         
 export function useDeliveryGame() {
     const router = useRouter();
@@ -81,16 +81,56 @@ export function useDeliveryGame() {
                     setPlaying((prev) => true);
                     setPlayerPosition((prev) => sensors.player_position);
                     
-                    // Simplified obstacle tracking - just track active state
                     setMapObstacles(prevMap => {
                         const newBools = sensors.map_obstacles;
                         const newMap = [];
+                        const claimedIds = new Set();
+                        
+                        // How many rows to look above for tracking (handles fast movement)
+                        const LOOK_AHEAD = 8;
                         
                         for(let r=0; r<128; r++) {
                             newMap[r] = [];
                             for(let c=0; c<4; c++) {
                                 const active = newBools[r][c];
-                                newMap[r][c] = { active, color: CAR_COLOR };
+                                let id = null;
+                                let color = null;
+                                
+                                if (active) {
+                                    let found = false;
+                                    
+                                    // Look up to LOOK_AHEAD rows above to find the obstacle that moved here
+                                    for (let offset = 1; offset <= LOOK_AHEAD && !found; offset++) {
+                                        const checkRow = r + offset;
+                                        if (checkRow < 128) {
+                                            const prevFromAbove = prevMap[checkRow][c];
+                                            if (prevFromAbove && prevFromAbove.active && prevFromAbove.id && !claimedIds.has(prevFromAbove.id)) {
+                                                id = prevFromAbove.id;
+                                                color = prevFromAbove.color;
+                                                claimedIds.add(id);
+                                                found = true;
+                                            }
+                                        }
+                                    }
+                                    
+                                    // Also check if it stayed in place
+                                    if (!found) {
+                                        const prevSame = prevMap[r][c];
+                                        if (prevSame && prevSame.active && prevSame.id && !claimedIds.has(prevSame.id)) {
+                                            id = prevSame.id;
+                                            color = prevSame.color;
+                                            claimedIds.add(id);
+                                            found = true;
+                                        }
+                                    }
+                                    
+                                    // New obstacle - assign random color
+                                    if (!found) {
+                                        id = Math.random();
+                                        color = COLORS[Math.floor(Math.random() * COLORS.length)];
+                                    }
+                                }
+                                newMap[r][c] = { active, id, color };
                             }
                         }
                         return newMap;
