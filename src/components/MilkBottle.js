@@ -1,12 +1,12 @@
-export default function MilkBottle({ isActive = true, style, ...props }) {
+export default function MilkBottle({ isActive = true, style, width = 100, height = 100, ...props }) {
   return (
     <svg
-      width="100"
-      height="100"
+      width={width}
+      height={height}
       viewBox="0 0 100 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      style={{ ...style, filter: isActive ? 'none' : 'grayscale(100%) brightness(0.2)' }}
+      style={{ ...style, filter: isActive ? (style?.filter || 'none') : 'grayscale(100%) brightness(0.2)' }}
       {...props}
     >
       <rect x="35" y="40" width="30" height="50" rx="5" fill="#FFFFFF" stroke="#333" strokeWidth="2"/>
