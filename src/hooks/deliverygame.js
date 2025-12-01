@@ -87,7 +87,7 @@ export function useDeliveryGame() {
                         const claimedIds = new Set();
                         
                         // How many rows to look above for tracking (handles fast movement)
-                        const LOOK_AHEAD = 8;
+                        const LOOK_AHEAD = 24;
                         
                         for(let r=0; r<128; r++) {
                             newMap[r] = [];

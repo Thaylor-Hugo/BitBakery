@@ -7,7 +7,7 @@ import copy
 # !!! Replace with your device's port name
 # Linux: /dev/ttyUSB0, /dev/ttyACM0, etc.
 # Windows: COM3, COM4, etc.
-PORT_NAME = '/dev/ttyUSB0'
+PORT_NAME = '/dev/ttyUSB1'
 
 BAUD_RATE = 115200
 DATA_BITS = serial.EIGHTBITS
@@ -40,7 +40,7 @@ genius_states =["inicial", "preparacao", "proxima_mostra", "espera_jogada", "reg
 # second playing state is from "get_valocity", but since it is not used in the game logic, we can map it to "playing"
 delivery_states = ["inicio", "preparation", "playing", "playing", "playing", "game_over", "playing"]
 
-minigames = ["memorygame", "cakegame", "deliverygame", "cakegame"]
+minigames = ["memorygame", "cakegame", "deliverygame", "invalid_game"]
 
 
 def loop():
@@ -97,7 +97,8 @@ def loop():
                 # 2-3: minigame (2 bits)
                 sensors["minigame"] = minigames[(int_value >> 4) & 0b11]
                 # 4-7: state (4 bits)
-                sensors["state"] = (cake_states if sensors["minigame"] == "cakegame" else (genius_states if sensors["minigame"] == "memorygame" else delivery_states))[(int_value & 0b1111)]
+                if sensors["minigame"] != "invalid_game":
+                    sensors["state"] = (cake_states if sensors["minigame"] == "cakegame" else (genius_states if sensors["minigame"] == "memorygame" else delivery_states))[(int_value & 0b1111)]
             elif package_num == 1:
                 # print(f"Processing package {package_count} with value {int_value:08b} ({int_value})")  # Debug
                 # -- Pacote 2 --

@@ -112,7 +112,7 @@ end
 always @* begin
     case (Eatual)
         inicial: Eprox = iniciar ? preparacao : inicial;
-        preparacao: Eprox = (MiniGame != 2'b11)? intervalo : preparacao;
+        preparacao: Eprox = (MiniGame != 2'b11)? intervalo : inicial;
         intervalo: Eprox = fim_intervalo ? start_game : intervalo;
         start_game: Eprox = execucao;
         execucao: Eprox = s_pronto ? fim : execucao;
@@ -200,6 +200,7 @@ delivery_game game3 (
     .clock_ultra (clock_in),
     .reset (reset),
     .jogar (s_iniciar),
+    .dificuldade (Dificuldade),
     .botoes (botoes),
     .echo (echo),
     .estado (s_estado_2),

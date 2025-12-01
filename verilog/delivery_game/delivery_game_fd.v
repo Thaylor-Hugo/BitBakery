@@ -5,6 +5,7 @@ module delivery_game_fd (
     input reset,
     input reset_ultrasonico,
     input [6:0] botoes,
+    input dificuldade,
     input echo,
     input count_map,
     input get_velocity,
@@ -128,7 +129,7 @@ contador_m #(
 // Objective placement every 20 seconds
 // Uses a flag that stays high until consumed by move_map
 reg s_objective_pending;
-wire s_objective_trigger;
+wire s_objective_trigger, s_objective_trigger2, s_objective_trigger_chosen;
 
 contador_m #(
     .M(90_000),
@@ -143,11 +144,33 @@ contador_m #(
     .meio ()
 );
 
+contador_m #(
+    .M(45_000),
+    .N(32)
+) place_objective_counter2 (
+    .clock (clock),
+    .zera_as (1'b0),
+    .zera_s (reset),
+    .conta (count_map),
+    .Q (),
+    .fim (s_objective_trigger2),
+    .meio ()
+);
+
+mux2x1 #(
+    .N(1)
+) objective_trigger_mux (
+    .SEL (dificuldade),
+    .D0 (s_objective_trigger),
+    .D1 (s_objective_trigger2),
+    .OUT (s_objective_trigger_chosen)
+);
+
 // Latch the objective trigger until it's consumed by a move_map
 always @(posedge clock or posedge reset) begin
     if (reset) begin
         s_objective_pending <= 1'b0;
-    end else if (s_objective_trigger) begin
+    end else if (s_objective_trigger_chosen) begin
         s_objective_pending <= 1'b1;
     end else if (s_move_map && s_objective_pending) begin
         s_objective_pending <= 1'b0;
