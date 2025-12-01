@@ -1,12 +1,12 @@
-export default function Eggs({ isActive = true, style, ...props }) {
+export default function Eggs({ isActive = true, style, width = 100, height = 100, ...props }) {
   return (
     <svg
-      width="100"
-      height="100"
+      width={width}
+      height={height}
       viewBox="0 0 100 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      style={{ ...style, filter: isActive ? 'none' : 'grayscale(100%) brightness(0.2)' }}
+      style={{ ...style, filter: isActive ? (style?.filter || 'none') : 'grayscale(100%) brightness(0.2)' }}
       {...props}
     >
       {/* Back row eggs */}

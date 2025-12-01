@@ -110,7 +110,7 @@ def bitbakery():
             elif sensors["minigame"] == "deliverygame":
                 edge_detected, jogando, time_counter, base_speed, base_speed_counter, obstacle_count, objective_count = delivery_game(edge_detected, jogando, time_counter, base_speed, base_speed_counter, obstacle_count, objective_count)
             elif sensors["minigame"] == "memorygame":
-                jogando = False  # Implement memory game logic here
+                camada_counter, edge_detected, jogando = cake_game(camada_counter, edge_detected, jogando)
 
 
 def delivery_game(edge_detected, jogando, time_counter, base_speed, base_speed_counter, obstacle_count, objective_count):

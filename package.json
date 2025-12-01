@@ -4,7 +4,7 @@
     "next-dev": "next dev",
     "next-start": "next start",
     "api-server": "python api/serial_server.py",
-    "start": "concurrently \"npm run next-start\" \"npm run api-server\"",
+    "start": "npm run build && concurrently \"npm run next-start\" \"npm run api-server\"",
     "dev": "concurrently \"npm run next-dev\" \"npm run api-server\""
   },
   "dependencies": {
