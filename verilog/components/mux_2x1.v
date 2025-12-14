@@ -15,18 +15,20 @@
  *------------------------------------------------------------------------
  */
 
-module mux2x1 (
-    input [6:0] D0,
-    input [6:0] D1,
+module mux2x1 #(
+    parameter N = 7
+) (
+    input [N-1:0] D0,
+    input [N-1:0] D1,
     input SEL,
-    output reg [6:0] OUT
+    output reg [N-1:0] OUT
 );
 
 always @(*) begin
     case (SEL)
         1'b0:    OUT = D0;
         1'b1:    OUT = D1;
-        default: OUT = 4'b0; // saida em 1
+        default: OUT = {N{1'b0}};
     endcase
 end
 

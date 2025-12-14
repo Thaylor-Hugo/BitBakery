@@ -11,3 +11,5 @@
 .vscode
 
 .tool-versions
+
+venv/

@@ -2,6 +2,7 @@
 // BitBakery Serial Transmitter - 8E1 Format
 // ---------------------------------------------------------------------
 // Description : Data Flow module for Transmitter of BitBakery game using 8E1 serial format
+//               Transmits 133 bytes: 1 start (0xFF) + 3 data + 64 obstacle bytes + 64 objective bytes + 1 end (0xFE)
 // ---------------------------------------------------------------------
 
 module bitbakery_serial_tx_fd (
@@ -11,14 +12,15 @@ module bitbakery_serial_tx_fd (
     input [7:0] D0,
     input [7:0] D1,
     input [7:0] D2,
-    input [7:0] D3,
+    input [511:0] map_obstacles,
+    input [511:0] map_objectives,
     input conta,
     output saida_serial,
     output fim_tx
 );
 
 wire [7:0] s_dados_serial;
-wire [1:0] s_sel_pack;
+wire [7:0] s_sel_pack;
 
 tx_serial_8E1 tx_serial (
     .clock           (clock),
@@ -34,16 +36,19 @@ tx_serial_8E1 tx_serial (
     .db_estado       ( )
 );
 
-mux8x1 mux_serial (
-    .D0 (D0),
-    .D1 (D1),
-    .D2 (D2),
-    .D3 (D3),
-    .SEL (s_sel_pack),
-    .OUT (s_dados_serial)
+mux133x1 mux_serial (
+    .start_byte     (8'hFF),
+    .D0             (D0),
+    .D1             (D1),
+    .D2             (D2),
+    .map_obstacles  (map_obstacles),
+    .map_objectives (map_objectives),
+    .end_byte       (8'hFE),
+    .SEL            (s_sel_pack),
+    .OUT            (s_dados_serial)
 );
 
-contador_m #(.M(4), .N(2)) contador_serial (
+contador_m #(.M(133), .N(8)) contador_serial (
     .clock      (clock),   
     .zera_as    (),
     .zera_s     (reset),

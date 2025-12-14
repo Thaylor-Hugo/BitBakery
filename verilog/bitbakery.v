@@ -18,13 +18,27 @@ module bitbakery (
     input dificuldade,
     input [1:0] minigame,
     input [6:0] botoes_in,
+    input echo,
     output saida_serial,
+    output pwm,
+    output db_pwm,
+    output db_echo,
+    output db_trigger,
+    output trigger,
     output [2:0] pontuacao_out,
     output [6:0] db_estado,
     output [1:0] db_minigame,
     output [6:0] db_jogada,
     output db_iniciar,
-	output db_clock
+	output db_clock,
+    output db_dificuldade,
+    // output [3:0] db_player_position,
+    // output [63:0] db_map_objective,
+    // output [15:0] db_map_obstacle,
+    output [6:0] cm0,
+    output [6:0] cm1,
+    output [6:0] db_botoes,
+    output db_serial
 );
 
 parameter inicial = 3'b000;
@@ -45,6 +59,9 @@ wire [3:0] s_estado_0, s_estado_1, s_estado_2, s_estado_inicial, s_estado;
 wire [6:0] s_jogada_0, s_jogada_1, s_jogada_2;
 wire [2:0] s_pontuacao_0, s_pontuacao_1, s_pontuacao_2;
 wire [3:0] estado_out;
+wire [3:0] s_player_position;
+wire [511:0] s_map_objective, s_map_obstacle;
+wire [11:0] db_medida;
 
 reg [1:0] MiniGame; 
 reg [2:0] Eatual, Eprox;
@@ -55,12 +72,27 @@ assign db_minigame = MiniGame;
 assign db_iniciar = iniciar;
 assign estado_out = (Eatual == intervalo)? 4'b0001 : s_estado;
 assign db_dificuldade = Dificuldade;
+assign db_botoes = botoes_in;
+
+// assign db_map_objective = s_map_objective[15:0];
+// assign db_map_obstacle = s_map_obstacle[15:0];
+// assign db_player_position = s_player_position;
+assign db_serial = saida_serial;
 
 hexa7seg display_state (
 	.hexa (estado_out),
 	.display (db_estado)
 );
 
+hexa7seg display_cm0 (
+    .hexa (db_medida[3:0]),
+    .display (cm0)
+);
+
+hexa7seg display_cm1 (
+    .hexa (db_medida[7:4]),
+    .display (cm1)
+);
 
 initial begin
     MiniGame <= 2'b11;
@@ -80,7 +112,7 @@ end
 always @* begin
     case (Eatual)
         inicial: Eprox = iniciar ? preparacao : inicial;
-        preparacao: Eprox = (MiniGame != 2'b11 && MiniGame != 2'b10)? intervalo : preparacao;
+        preparacao: Eprox = (MiniGame != 2'b11)? intervalo : inicial;
         intervalo: Eprox = fim_intervalo ? start_game : intervalo;
         start_game: Eprox = execucao;
         execucao: Eprox = s_pronto ? fim : execucao;
@@ -135,6 +167,10 @@ mux_out saidas (
     .pontuacao_out  ()
 );
 
+// assign s_estado = s_estado_1;
+// assign db_jogada = s_jogada_1;
+// assign s_pronto = s_pronto_1;
+
 jogo_desafio_memoria game0 (
     .clock          (clock),
     .reset          (reset),
@@ -159,16 +195,23 @@ cakegame game1 (
     .pronto         (s_pronto_1)
 );
 
-clothesgame game2 (
-    .clock          (clock),
-    .reset          (reset),
-    .jogar          (s_iniciar),
-    .dificuldade    (Dificuldade),
-    .botoes         (botoes),
-    .estado         (s_estado_2),
-    .jogadas        (s_jogada_2),
-    .pontuacao      (s_pontuacao_2),
-    .pronto         (s_pronto_2)
+delivery_game game3 (
+    .clock (clock),
+    .clock_ultra (clock_in),
+    .reset (reset),
+    .jogar (s_iniciar),
+    .dificuldade (Dificuldade),
+    .botoes (botoes),
+    .echo (echo),
+    .estado (s_estado_2),
+    .pontuacao (s_pontuacao_2),
+    .pronto (s_pronto_2),
+    .pwm (pwm),
+    .trigger (trigger),
+    .db_player_position (s_player_position),
+    .db_map_obstacle (s_map_obstacle),
+    .db_map_objective (s_map_objective),
+    .db_medida (db_medida)
 );
 
 bitbakery_serial_tx serial_tx (
@@ -176,8 +219,9 @@ bitbakery_serial_tx serial_tx (
     .reset          (reset        ),
     .D0             ({2'b00, MiniGame, estado_out}),
     .D1             ({2'b01, db_jogada[5:0]}),
-    .D2             ({2'b10, db_jogada[6], db_dificuldade, 4'b0000}),
-    .D3             (8'b11000000),
+    .D2             ({2'b10, 1'b0, db_dificuldade, s_player_position}),
+    .map_obstacles  (s_map_obstacle),
+    .map_objectives (s_map_objective),
     .saida_serial   (saida_serial )
 );
 

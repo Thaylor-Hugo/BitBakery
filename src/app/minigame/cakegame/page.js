@@ -54,14 +54,14 @@ function Cobertura({color, dark_color}) {
         
     }
     return (
-        <Canvas className="w-30 h-10 rounded-lg" draw={draw} /> 
+        <Canvas className="w-30 h-cake rounded-lg" draw={draw} /> 
     );
 }
 
 function Massa({color}) {
     return (
-        // <Canvas className="w-30 h-10" draw={draw} />
-        <div className="w-30 h-10 rounded-lg" 
+        // <Canvas className="w-30 h-cake" draw={draw} />
+        <div className="w-30 h-cake rounded-lg" 
         style={{ backgroundColor: color }}></div>
     );
 }
@@ -80,7 +80,7 @@ function Camada({camada, cobertura}) {
         if (camada[i] === true) {
             if (cobertura) {
                 return (
-                    <div className="absolute">
+                    <div className="absolute left-1/2 -translate-x-1/2">
                         <Cobertura color={dark_colors[i]} dark_color={more_dark_colors[i]} />
                     </div>
                 );
@@ -95,14 +95,13 @@ function Camada({camada, cobertura}) {
 
 function CakePreview( {title, cake} ) {
     return (
-        <div id="cake_div" className="relative h-full flex flex-col-reverse">
+        <div id="cake_div" className="flex flex-col-reverse items-center">
             {cake.slice().map((row, rowIndex) => {
                 let camada_class = (rowIndex) % 2 !== 0 ? "relative z-2" : "relative z-1";
                 let fall_start = "";
-                var clientHeight = document.getElementById('cake_div').clientHeight;
                 if (rowIndex === cake.length - 1) {
                     camada_class += " fall-animation";
-                    fall_start = "-" + (clientHeight - (rowIndex*20)) + "px";
+                    fall_start = "-300px";
                 }
                 return <div key={rowIndex} className={camada_class} style={{"--fall-start": fall_start}}>
                     <Camada camada={row} cobertura={(rowIndex) % 2 !== 0} />
@@ -115,11 +114,12 @@ function CakePreview( {title, cake} ) {
 export default function CakeGame() {
     const {final_cake, user_cake, jogada, gameover, pontuacao, playing} = useCakeGame();
 
-    const possible_positions = ["left-5", "left-35", "left-65", "left-95", "left-125", "left-155", "left-185", "left-215", "left-245", "left-275", "left-305", "left-335", "left-365", "left-395", "left-425", "left-455"];
-    const user_cake_class = "h-full absolute bottom-0 left-0 transition-all duration-2500 ease-in-out".concat(" ", possible_positions[jogada]);
+    // Percentage-based positions for full screen movement
+    const possible_positions = ["left-pos-0", "left-pos-1", "left-pos-2", "left-pos-3", "left-pos-4", "left-pos-5", "left-pos-6", "left-pos-7", "left-pos-8", "left-pos-9", "left-pos-10", "left-pos-11", "left-pos-12", "left-pos-13", "left-pos-14", "left-pos-15"];
+    const user_cake_class = "absolute transition-all duration-2500 ease-in-out".concat(" ", possible_positions[jogada]);
 
     return (
-        <div className="h-screen flex flex-col bg-cover bg-[url('../../src/cakegame-bg.jpg')] relative">
+        <div className="h-screen flex flex-col bg-cover bg-center bg-[url('../../src/cakegame-bg.jpg')] relative">
             {/* Game Content */}
             <div>
                 <Header title="Cake MiniGame" />
@@ -127,18 +127,18 @@ export default function CakeGame() {
             <div>
                 <p className="font-sans text-4xl font-bold text-center text-shadow-lg stroke-0" style={{ color: playing ? "#28a745ff" : "#cc0000ff", WebkitTextStroke: "1px gray" }}>{playing ? "Faça o Bolo" : "Aguarde o Pedido"}</p>
             </div>
-            <div className="h-1/4"></div>
-            <div className="flex flex-grow">
-                <div className="w-1/8 flex items-end justify-center absolute bottom-75 left-200">
-                    <CakePreview title="Gabarito" cake={final_cake} />
-                </div>
-                <div className="relative w-full bottom-20 z-2">
-                    <div className={user_cake_class}>
-                        <CakePreview title="Entrada Usuario" cake={user_cake} />
-                    </div>
+            
+            {/* Cake Preview (Gabarito) - positioned on the empty plate in the middle */}
+            <div className="absolute bottom-[40%] left-[48%] transform -translate-x-1/2 z-10">
+                <CakePreview title="Gabarito" cake={final_cake} />
+            </div>
+            
+            {/* User Cake - moves across the entire screen on the conveyor belt */}
+            <div className="absolute bottom-[28%] left-0 right-0 z-20">
+                <div className={user_cake_class + " bottom-0"}>
+                    <CakePreview title="Entrada Usuario" cake={user_cake} />
                 </div>
             </div>
-            <div className="h-1/8"></div>
 
             {/* Game Over Overlay */}
             {gameover && (

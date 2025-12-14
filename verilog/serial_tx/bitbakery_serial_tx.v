@@ -2,7 +2,7 @@
 // BitBakery Serial Transmitter - 8E1 Format
 // ---------------------------------------------------------------------
 // Description : Transmitter module for BitBakery game using 8E1 serial format
-// Trasnmitter sends 4 packets of data indefinitely
+// Trasnmitter sends 133 packets of data indefinitely
 // ---------------------------------------------------------------------
 
 module bitbakery_serial_tx (
@@ -11,7 +11,8 @@ module bitbakery_serial_tx (
     input [7:0] D0,
     input [7:0] D1,
     input [7:0] D2,
-    input [7:0] D3,
+    input [511:0] map_obstacles,
+    input [511:0] map_objectives,
     output saida_serial
 );
 
@@ -24,7 +25,8 @@ bitbakery_serial_tx_fd fd (
     .D0             (D0           ),
     .D1             (D1           ),
     .D2             (D2           ),
-    .D3             (D3           ),
+    .map_obstacles  (map_obstacles),
+    .map_objectives (map_objectives),
     .conta          (s_conta      ),
     .saida_serial   (saida_serial ),
     .fim_tx         (s_fim_tx     )
