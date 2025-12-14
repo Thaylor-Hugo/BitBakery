@@ -6,9 +6,10 @@
 
 # pycache
 /api/__pycache__/
-/api/WF_SDK/__pycache__/
-/api/WF_SDK/protocol/__pycache__/
+/api/venv/
 
 .vscode
 
 .tool-versions
+
+venv/
